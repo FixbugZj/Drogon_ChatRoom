@@ -6,13 +6,6 @@
 using namespace drogon;
 
 
-struct User
-{
-  std::string username;
-  std::string password;
-  std::string state;
-  std::string nickname;
-};
 
 
 class userlogin : public drogon::HttpController<userlogin>

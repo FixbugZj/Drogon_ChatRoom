@@ -2,6 +2,8 @@
 #include <drogon/orm/Mapper.h>
 #include <drogon/orm/Exception.h>
 #include <stdexcept>
+#include "Users.h"
+#include <common/Response.h>
 
 using namespace orm;
 using namespace drogon_model::db;
@@ -28,29 +30,21 @@ void userlogin::dologin(const HttpRequestPtr& req,
 std::function<void (const HttpResponsePtr &)> &&callback,
 drogon_model::db::Users user) const
 {
-    auto clientDb=app().getDbClient();
-    Mapper<Users> mapper(clientDb);
+    auto jsonBody = req->getJsonObject();
 
-    auto userInDb = 
-            mapper.findOne({Users::Cols::_username,user.getValueOfUsername()});
+    if(!jsonBody){
 
-    
-    if(userInDb.getValueOfPassword() != user.getValueOfPassword())
-    {
-        throw std::runtime_error("密码错误");
     }
-    
+
+    std::string username = req->getParameter("username");
+    std::string password = req->getParameter("password");
+
+    common::Response res = User().login(username,password);
+
 
     auto resp = HttpResponse::newHttpResponse();
     resp->setStatusCode(k200OK);
     callback(resp);
-
-    //userInDb.setState("online");
-    userInDb.setUpdateTime(trantor::Date::now());
-    mapper.update(userInDb);
-
-    auto session = req->session();
-    session->insert("userinfo",userInDb);
 }
 
 
