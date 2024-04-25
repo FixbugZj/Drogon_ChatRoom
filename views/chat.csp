@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chatpage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            overflow: hidden;
+        }
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 300px;
+            background-color: #ededed;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .chat-area {
+            flex: 1;
+            background-color: #fff;
+            overflow-y: scroll;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .chat-box {
+            max-height: 500px; /* 固定聊天框高度 */
+            overflow-y: auto;
+        }
+        .group {
+            margin-bottom: 20px;
+        }
+        .group h2 {
+            margin-bottom: 10px;
+            cursor: pointer; /* 添加指针以指示可点击 */
+        }
+        .group ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: none; /* 默认隐藏 */
+        }
+        .group ul.active {
+            display: block; /* 当活动时显示 */
+        }
+        .group ul li {
+            padding: 5px 0;
+            border-bottom: 1px solid #ccc;
+            cursor: pointer;
+        }
+        .group ul li:last-child {
+            border-bottom: none;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .message.sent {
+            background-color: #DCF8C6;
+            align-self: flex-end;
+        }
+        .message.received {
+            background-color: #E0E0E0;
+            align-self: flex-start;
+        }
+        .message-content {
+            word-wrap: break-word;
+        }
+        .input-box {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #f5f5f5;
+            position: sticky;
+            bottom: 0;
+            z-index: 1;
+        }
+        .input-box input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        .input-box button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .input-box button:hover {
+            background-color: #45A049;
+        }
+        .search-box {
+            padding: 20px;
+            background-color: #ededed;
+            box-sizing: border-box;
+        }
+        .search-box input[type="text"] {
+            width: calc(100% - 60px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .search-box button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .search-box button:hover {
+            background-color: #45A049;
+        }
+    </style>
+</head>
+<body>
+ <%c++
+    auto nickname = @@.get<std::string>("nickname");
+    if(nickname.empty()){
+    %>
+    <%c++ } else { %>
+    <h1>欢迎您，[[nickname]]</h1>
+    <%c++ } %>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="search-box">
+                <input type="text" placeholder="搜索好友或群组...">
+                <button>搜索</button>
+            </div>
+            <div class="group">
+                <h2 onclick="toggleGroup('contacts')">联系人</h2>
+                <ul id="contacts" class="active">
+                    <li>好友1</li>
+                    <li>好友2</li>
+                    <li>好友3</li>
+                    <li>好友4</li>
+                    <li>好友5</li>
+                    <!-- 可以根据需要添加更多好友 -->
+                </ul>
+            </div>
+            <div class="group">
+                <h2 onclick="toggleGroup('groups')">群组</h2>
+                <ul id="groups">
+                    <li>群组1</li>
+                    <li>群组2</li>
+                    <li>群组3</li>
+                    <!-- 可以根据需要添加更多群组 -->
+                </ul>
+            </div>
+        </div>
+        <div class="chat-area">
+            <div class="chat-box" id="chatBox">
+                <!-- 聊天消息将动态加载到此处 -->
+            </div>
+            <div class="input-box">
+                <input type="text" id="messageInput" placeholder="输入消息...">
+                <button onclick="sendMessage()">发送</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleGroup(groupId) {
+            var group = document.getElementById(groupId);
+            group.classList.toggle('active');
+        }
+
+        function sendMessage() {
+            var messageInput = document.getElementById('messageInput');
+            var messageContent = messageInput.value.trim();
+            if (messageContent !== '') {
+                var message = {
+                    type: 'text',
+                    content: messageContent,
+                    timestamp: new Date().toISOString()
+                };
+                displayMessage(message, 'sent');
+                messageInput.value = '';
+                // 模拟接收方发送消息的延迟
+                setTimeout(receiveMessage, 1000);
+            }
+        }
+
+        function receiveMessage() {
+            var message = {
+                type: 'text',
+                content: '收到你的消息了！',
+                timestamp: new Date().toISOString()
+            };
+            displayMessage(message, 'received');
+        }
+
+        function displayMessage(message, messageType) {
+            var chatBox = document.getElementById('chatBox');
+            var messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', messageType);
+            var messageContentDiv = document.createElement('div');
+            messageContentDiv.classList.add('message-content');
+            messageContentDiv.textContent = message.content;
+            messageDiv.appendChild(messageContentDiv);
+            chatBox.appendChild(messageDiv);
+            // 滚动到最底部
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
+</body>
+
+</html>

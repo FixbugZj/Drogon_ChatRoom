@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+
+        .login-container h2 {
+            text-align: center;
+        }
+
+        .login-container form {
+            margin-top: 20px;
+        }
+
+        .login-container form input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .login-container form button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            border: none;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .login-container form button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <h2>Login</h2>
+        <form id="login-form" method="post">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit" onclick="login()">Login</button>
+        </form>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var form = document.getElementById("login-form");
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();
+                const form = event.target;
+                const data = {};
+                for (let i = 0; i < form.elements.length; i++) {
+                    const element = form.elements[i];
+                    if (element.name) {
+                        data[element.name] = element.value;
+                    }
+
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/192.168.205.134:8000/login'); // 替换为您的服务器端接口地址
+                    stHeader('Content-T xhr.setRequeype', 'application/json');
+                    xhr.send(JSON.stringify(data));
+                    xhr.onload = function () {
+                        if (xhr.status === 200) {
+                            alert('Login successful');
+                            location.href = '/user/chat';
+                        } else {
+                            const response = JSON.parse(xhr.responseText);
+                            alert(response.error);
+                        }
+                    };
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

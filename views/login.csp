@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            /* display: flex;
+            justify-content: center;
+            align-items: center; */
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+        }
+        body>h2{
+            width: 300px;
+            position: absolute;
+            top: 10%;
+            left: 75%;
+            transform: translate(-50%, -50%);
+            font-size: 35px;
+        }
+        .login-container {
+            position: absolute;
+            top: 50%;
+            left: 75%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            height: 400px;
+        }
+
+        .login-container h2 {
+            text-align: center;
+        }
+
+        .login-container form {
+            margin-top: 20px;
+        }
+
+        .login-container form input {
+            outline-color: #7acc35;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 12px;
+            box-sizing: border-box;
+            height: 40px;
+        }
+
+        .login-container form button {
+            margin-top: 50px;
+            width: 100%;
+            padding: 10px;
+            background-color: #7acc35;
+            height: 40px;
+            border: none;
+            color: #fff;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+
+        .login-container form button:hover {
+            background-color: #87d149;
+        }
+
+        .userNameText {
+            color: rgb(166, 166, 166);
+            font-size: 13px;
+            margin-top: 20px;
+            margin-bottom: 12px;
+        }
+        .loginText{
+            cursor:pointer;
+            font-size: 20px;
+            font-weight: 800;
+            color: rgba(0, 0, 0, 0.416);
+        }
+        .registText{
+            cursor:pointer;
+            position: absolute;
+            left: 25%;
+            top: 0;
+            font-size: 20px;
+            font-weight: 800;
+            color: rgba(0, 0, 0, 0.416);
+        }
+        .textColor{
+            color: rgba(0, 0, 0, 1);
+        }
+        #button{
+            font-size: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <h2>欢迎来到于森乐园</h2>
+    <div class="login-container">
+        <div style="position: relative;margin-bottom: 35px;margin-top: 15px;">
+            <div id="toLogin" class="loginText textColor">登录账号</div>
+            <div id="toRegist" class="registText">注册账号</div>
+        </div>
+        <!-- <h2>Login</h2> -->
+        <form id="login-form" method="post">
+            <div class="userNameText">账号</div>
+            <input type="text" name="username" placeholder="请输入账号">
+            <div class="userNameText">密码</div>
+            <input type="password" name="password" placeholder="请输入密码">
+            <button id="button" type="submit">登录</button>
+        </form>
+    </div>
+    <script>
+        let loginStatu = 'ture';
+        let toRegist = document.getElementById('toRegist');
+        let toLogin = document.getElementById('toLogin');
+        let button = document.getElementById('button');
+        let text = button.textContent
+        toLogin.onclick = function(event) {
+            loginStatu = 'true';
+            if(toLogin.classList[1]) return;
+            toLogin.classList.add('textColor');
+            toRegist.classList.remove('textColor');
+            var newText = document.createTextNode("登录");
+            button.innerHTML = ""; // 清空按钮内容
+            button.appendChild(newText); // 添加新文本节点
+        };
+        toRegist.onclick = () =>{
+            loginStatu = 'false';
+            if(toRegist.classList[1]) return;
+            toRegist.classList.add('textColor');
+            toLogin.classList.remove('textColor');
+            var newText = document.createTextNode("注册");
+            button.innerHTML = ""; // 清空按钮内容
+            button.appendChild(newText); // 添加新文本节点
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+            var form = document.getElementById("login-form");
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();
+                const form = event.target;
+                const data = {};
+                for (let i = 0; i < form.elements.length - 1; i++) {
+                    const element = form.elements[i];
+                    if (element.name) {
+                        data[element.name] = element.value;
+                    }
+                }
+                // console.log(data);
+                if(loginStatu == 'true')
+                {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', 'http://192.168.205.134:8000/login'); // 替换为您的服务器端接口地址
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.send(JSON.stringify(data));
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        alert('Login successful');
+                        location.href = '/user/chat';
+                    } else {
+                        const response = JSON.parse(xhr.responseText);
+                        alert(response.error);
+                    }
+                    };
+                }else{
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', 'http://192.168.205.134:8000/register'); // 替换为您的服务器端接口地址
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.send(JSON.stringify(data));
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        alert('registe successful');
+                    } else {
+                        const response = JSON.parse(xhr.responseText);
+                        alert(response.error);
+                    }
+                    };
+                }
+                
+            });
+        });
+    </script>
+</body>
+
+</html>
