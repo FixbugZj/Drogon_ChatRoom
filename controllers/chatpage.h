@@ -22,21 +22,20 @@ class chatpage : public drogon::HttpController<chatpage>
     // ADD_METHOD_TO(chatpage::your_method_name, "/absolute/path/{1}/{2}/list", Get); // path is /absolute/path/{arg1}/{arg2}/list
     ADD_METHOD_TO(chatpage::getchatPage,"/user/chat",Get);
 
-    ADD_METHOD_TO(chatpage::getchat,"/chat",Get);
-
-    ADD_METHOD_TO(chatpage::addfriend,"/user/addfriend",Post);
-    ADD_METHOD_TO(chatpage::addgroup,"/user/addgroup",Post);
+    ADD_METHOD_TO(chatpage::addfriend,"/user/chat/addfriend",Post);
+    ADD_METHOD_TO(chatpage::addgroup,"/user/chat/addgroup",Post);
     METHOD_LIST_END
 
-    void getchat(const HttpRequestPtr& req, 
-    std::function<void (const HttpResponsePtr &)> &&callback) const;
+    
 
     void getchatPage(const HttpRequestPtr& req, 
     std::function<void (const HttpResponsePtr &)> &&callback) const;
 
+
     void addfriend(const HttpRequestPtr& req, 
     std::function<void (const HttpResponsePtr &)> &&callback) const;
     
+
     void addgroup(const HttpRequestPtr& req, 
     std::function<void (const HttpResponsePtr &)> &&callback) const;
 

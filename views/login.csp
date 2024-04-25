@@ -107,7 +107,7 @@
 <body>
 
 
-    <h2>欢迎来到于森乐园</h2>
+    <h2>请登录</h2>
     <div class="login-container">
         <div style="position: relative;margin-bottom: 35px;margin-top: 15px;">
             <div id="toLogin" class="loginText textColor">登录账号</div>
@@ -123,11 +123,12 @@
         </form>
     </div>
     <script>
-        let loginStatu = 'ture';
+        let loginStatu = 'true';
         let toRegist = document.getElementById('toRegist');
         let toLogin = document.getElementById('toLogin');
         let button = document.getElementById('button');
-        let text = button.textContent
+        let text = button.textContent;
+
         toLogin.onclick = function(event) {
             loginStatu = 'true';
             if(toLogin.classList[1]) return;
@@ -158,7 +159,7 @@
                         data[element.name] = element.value;
                     }
                 }
-                // console.log(data);
+                console.log(loginStatu);
                 if(loginStatu == 'true')
                 {
                 const xhr = new XMLHttpRequest();

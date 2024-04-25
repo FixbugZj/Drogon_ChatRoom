@@ -32,8 +32,17 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
 
     auto clientPtr = app().getDbClient();
 
-    
-    
+    auto value1 = req->getParameter("username");
+    auto Result = clientPtr->execSqlSync("select username from users where username = ? ",value1);
+    if(Result.empty())
+    {
+        throw std::runtime_error("该用户不存在,请从新输入");
+        
+    }
+    else
+    {
+        //clientPtr->execSqlSync("")
+    }
 
 
 
@@ -60,10 +69,3 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
 
 
 
-void chatpage::getchat(const HttpRequestPtr& req, 
-    std::function<void (const HttpResponsePtr &)> &&callback) const
-{
-    auto resp = HttpResponse::newHttpViewResponse("test");
-    resp->setStatusCode(k200OK);
-    callback(resp);
-}

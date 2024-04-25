@@ -172,54 +172,63 @@
             </div>
             <div class="input-box">
                 <input type="text" id="messageInput" placeholder="输入消息...">
-                <button onclick="sendMessage()">发送</button>
+                <button class="sendButten" onclick="sendMessage()">发送</button>
             </div>
         </div>
     </div>
 
     <script>
-        function toggleGroup(groupId) {
-            var group = document.getElementById(groupId);
-            group.classList.toggle('active');
-        }
+    function sendMessage(){
+        const messageValue = document.getElementById('messageInput').value
+        const socket = new WebSocket("ws://192.168.205.134:8000/chat");
+        socket.onopen = ()=>{
+             console.log("WebSocket opened");
+        };
+      
 
-        function sendMessage() {
-            var messageInput = document.getElementById('messageInput');
-            var messageContent = messageInput.value.trim();
-            if (messageContent !== '') {
-                var message = {
-                    type: 'text',
-                    content: messageContent,
-                    timestamp: new Date().toISOString()
-                };
-                displayMessage(message, 'sent');
-                messageInput.value = '';
-                // 模拟接收方发送消息的延迟
-                setTimeout(receiveMessage, 1000);
-            }
-        }
+         socket.onclose = function(event) {
+            console.log("WebSocket closed");
+        };
 
-        function receiveMessage() {
-            var message = {
-                type: 'text',
-                content: '收到你的消息了！',
-                timestamp: new Date().toISOString()
-            };
-            displayMessage(message, 'received');
-        }
+        socket.onerror = function(event) {
+            console.error("WebSocket error:", event);
+        };
+        socket.send(messageValue);
+       document.getElementById('messageInput').value = ''
+    }
+        /* const socket = new WebSocket("ws://192.168.205.134:8000/chat");
+       
+        socket.onopen = function(event) {
+            console.log("WebSocket opened");
+            
+        };
 
-        function displayMessage(message, messageType) {
-            var chatBox = document.getElementById('chatBox');
-            var messageDiv = document.createElement('div');
-            messageDiv.classList.add('message', messageType);
-            var messageContentDiv = document.createElement('div');
-            messageContentDiv.classList.add('message-content');
-            messageContentDiv.textContent = message.content;
-            messageDiv.appendChild(messageContentDiv);
-            chatBox.appendChild(messageDiv);
-            // 滚动到最底部
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
+        socket.onmessage = function(event) {
+            const messagesDiv = document.getElementById("messages");
+            const message = document.createElement("div");
+            message.textContent = event.data;
+            messagesDiv.appendChild(message);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        };
+
+        socket.onclose = function(event) {
+            console.log("WebSocket closed");
+        };
+
+        socket.onerror = function(event) {
+            console.error("WebSocket error:", event);
+        };
+
+        document.getElementById("input").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                const input = document.getElementById("input");
+                const message = input.value;
+                socket.send(message);
+                input.value = "";
+            } */
+      
+
+
     </script>
 </body>
 

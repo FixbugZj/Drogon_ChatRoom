@@ -32,7 +32,7 @@
     
     <script>
         // 创建 WebSocket 连接
-        const socket = new WebSocket("ws://192.168.205.134/websocket"); // 你的 WebSocket 服务器地址
+        const socket = new WebSocket("ws://192.168.205.134:8000/websocket"); // 你的 WebSocket 服务器地址
 
         // 当连接打开时执行
         socket.onopen = function(event) {
