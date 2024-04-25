@@ -14,7 +14,8 @@ void userlogin::loginPage(const HttpRequestPtr& req,
    // data.insert("nickname",std::string("于森"));
     auto session = req->session();
     auto userinfo = session->get<drogon_model::db::Users>("userinfo");
-
+    
+    auto sessionID = req->session().get()->sessionId();
     HttpViewData data;
     data.insert("nickname",userinfo.getValueOfNickname());
 
