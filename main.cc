@@ -22,7 +22,7 @@ int main() {
             if(typeid(e)==typeid(orm::UnexpectedRows))
             {
                 
-                json["error"] = "用户名错误。main";
+                json["error"] = "未知错误";
                 
             }
 

@@ -1,60 +1,66 @@
-#include "User.h"
-#include <common/Response.h>
+//#include <common/Response.h>
 #include <models/Users.h>
+#include <drogon/orm/Exception.h>
 #include <drogon/drogon.h>
+#include "UserModel.h"
 
+using namespace drogon;
 using namespace drogon::orm;
-using model_User = drogon_model::db::Users;
+using namespace drogon_model::db;
 
-common::Response 
-    service::User::login(std::string &account,
+
+
+void service::UserModel::login(std::string &username,
                         std::string &password) 
 {
-    auto clientDb=app().getDbClient();
+    auto clientDb=drogon::app().getDbClient();
     Mapper<Users> mapper(clientDb);
 
     auto userInDb = 
-            mapper.findOne({Users::Cols::_username,user.getValueOfUsername()});
+            mapper.findOne({Users::Cols::_username,username});
     
     
-    if(userInDb.getValueOfPassword() != user.getValueOfPassword())
+    if(userInDb.getValueOfPassword() != password)
     {
         throw std::runtime_error("密码错误");
     }
-    Criteria criteria("account",CompareOperator::EQ,account);
-    std::vector<model_User> userList =mp.findAll();
-    std::cout << userList.size() << "rows!" << std::endl;
+
+}
 
 
-    if (!cliPtr){
-    return common::Response(300,"ok");
+
+void service::UserModel::registdo(std::string &username,std::string &password,std::string nickname)
+{
+    auto clientPtr = drogon::app().getDbClient();
+    auto res = clientPtr->execSqlSync("select username from users where username = ?",username);
+
+    try{
+        if(res.empty())
+        {
+            clientPtr->execSqlSync("INSERT INTO users(username,password,nickname) VALUES (?,?,?)",
+                        username,password,nickname);
+    
+            throw std::runtime_error("注册成功");
+            //return common::Response(200,"注册成功");
+        }
+        else
+        {
+        throw std::runtime_error("用户名冲突");
+        //return common::Response(300,"用户名冲突");
+
+        }
+    }
+    catch(const DrogonDbException& e){
+        throw std::runtime_error("注册失败,用户名冲突");
+        // LOG_ERROR<<"用户名冲突";.3
+        //return common::Response(300,"用户名冲突");
     }
 
-    return common::Response(200,"ok");
-}
-
-
-common::Response 
-    register(std::string &account,
-            std::string &password,
-            std::string nickname)
-{
-
 
 }
 
-/*
 
 
-    auto userInDb = 
-            mapper.findOne({Users::Cols::_username,user.getValueOfUsername()});
 
-    
-   
-    
 
-    auto resp = HttpResponse::newHttpResponse();
-    resp->setStatusCode(k200OK);
-    callback(resp);
 
-*/

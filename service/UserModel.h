@@ -1,23 +1,39 @@
-#include <common/Response.h>
-#include "User.h"
+//#include <common/Response.h>
+#pragma once
 
-using namespace common;
 
-namespace service {
 
-class UserModel {
-    public:
-    common::Response login(std::string &account, std::string &password);
+namespace service{
 
-    common::Response register(std::string &account,std::string &password,std::string nickname);
+class UserModel 
+{
+public:
 
-    bool updateState(User& user);
+    void login(std::string &username, std::string &password);
+
+    void registdo(std::string &username,std::string &password,std::string nickname);
+
+    bool updateState();
 
     void resetState();
 
-    User query(int id);
-    
+
 };
 
-}  // namespace service
+
+
+class FriendModel
+{
+public:
+
+
+
+};
+
+}
+
+
+
+
+
 
