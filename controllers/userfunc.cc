@@ -35,19 +35,26 @@ User user) const
     if(!jsonBody){
         LOG_INFO<<"接收失败";
     }
+    //LOG_ERROR<<*jsonBody;
     
 
-    
-    std::string username = req->getParameter("username");
-    std::string password = req->getParameter("password");
+    std::string username = (*jsonBody)["username"].asString();//"yusen";//req->getParameter("username");
+    std::string password = (*jsonBody)["password"].asString(); //"123456";//req->getParameter("password");
+
+    LOG_INFO<<username;
+    LOG_INFO<<password;
 
     
     service::UserModel().login(username,password);
 
 
+    auto session=req->session();
+    //session.insert();
+
     auto resp = HttpResponse::newHttpResponse();
     resp->setStatusCode(k200OK);
     callback(resp);
+
 }
 
 
