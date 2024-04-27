@@ -24,6 +24,9 @@ class chatpage : public drogon::HttpController<chatpage>
 
     ADD_METHOD_TO(chatpage::addfriend,"/user/chat/addfriend",Post);
     ADD_METHOD_TO(chatpage::addgroup,"/user/chat/addgroup",Post);
+    ADD_METHOD_TO(chatpage::oneChat,"/user/chat/oneChat",Post);
+
+    
     METHOD_LIST_END
 
     
@@ -37,6 +40,9 @@ class chatpage : public drogon::HttpController<chatpage>
     
 
     void addgroup(const HttpRequestPtr& req, 
+    std::function<void (const HttpResponsePtr &)> &&callback) const;
+
+    void oneChat(const HttpRequestPtr& req, 
     std::function<void (const HttpResponsePtr &)> &&callback) const;
 
     // your declaration of processing function maybe like this:

@@ -1,18 +1,20 @@
 #pragma once
 #include <drogon/HttpController.h>
+#include <drogon/WebSocketController.h>
 #include "../service/UserModel.h"
 #include <models/Users.h>
-
-
+#include <unordered_map>
 using namespace drogon;
 
 
 struct User
 {
+    int id;
     std::string username;
     std::string password;
     std::string state;
     std::string nickename;
+
 };
 
 
@@ -40,7 +42,10 @@ class userfunc : public drogon::HttpController<userfunc>
     void doregister(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback) const; //drogon_model::db::Users
     //void logout(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback)const;
 
-
+private:
+    //存储用户连接
+    mutable std::unordered_map<int, std::shared_ptr<WebSocketConnection>> _userConnMap;
+    
 };
 
 

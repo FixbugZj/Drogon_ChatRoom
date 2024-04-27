@@ -3,6 +3,7 @@
 #include <drogon/orm/Exception.h>
 #include <stdexcept>
 #include "../service/UserModel.h"
+#include <drogon/orm/Result.h>
 
 using namespace orm;
 //using namespace drogon_model::db;
@@ -43,10 +44,32 @@ User user) const
 
     LOG_INFO<<username;
     LOG_INFO<<password;
+    
+    
+    try
+    {   
+        int userid;
+        
+        service::UserModel().login(username,password);
+        auto clientDb=drogon::app().getDbClient();
+        auto res = clientDb->execSqlSync("select id from users where username = ?",username);
+        for(auto row:res)
+        {
+            int id = row["id"].as<int>();
+            LOG_ERROR<<id;
+        }
+        
+        WebSocketConnectionPtr conn;
+        
+        _userConnMap.insert(std::make_pair(userid, conn));
+
+
+    }catch(const std::exception& e)
+    {
+        throw std::runtime_error("登陆失败");
+    }
 
     
-    service::UserModel().login(username,password);
-
 
     auto session=req->session();
     //session.insert();
@@ -71,9 +94,9 @@ std::function<void (const HttpResponsePtr &)> &&callback
         LOG_INFO<<"接收失败";
     }
     
-    std::string username = req->getParameter("username");
-    std::string password = req->getParameter("password");
-    std::string nickname = req->getParameter("nickename");
+    std::string username = (*JsonBody)["username"].asString();
+    std::string password = (*JsonBody)["password"].asString();
+    std::string nickname = (*JsonBody)["nickname"].asString();
     service::UserModel().registdo(username,password,nickname);
     
     

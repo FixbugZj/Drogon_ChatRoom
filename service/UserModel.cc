@@ -24,7 +24,7 @@ void service::UserModel::login(std::string &username,
     {
         throw std::runtime_error("密码错误");
     }
-
+    
 }
 
 
@@ -59,8 +59,61 @@ void service::UserModel::registdo(std::string &username,std::string &password,st
 
 }
 
+// User service::UserModel::quert(int id)
+// {
+//     auto clientPtr = drogon::app().getDbClient();
+//     auto res = clientPtr->execSqlSync("select * from users where id = ?",id);
+//     if(res !=nullptr)
+//     {
+//         User user;
+//         user.
+        
+//     }
+    
+// }
+
+
+void service::UserModel::updateState(const std::string state,int id)
+{
+    auto clientPtr = drogon::app().getDbClient();
+    LOG_ERROR<<"数据库连接成功";
+    try{
+        auto res = clientPtr->execSqlSync("update user set state = ? where id=? ",state,id);
+        LOG_ERROR<<"更新状态成功";
+    }
+    catch(const DrogonDbException& e){
+        LOG_ERROR<<"状态更新失败";
+    }
+}
 
 
 
+void service::UserModel::resetState()
+{
+    auto clientPtr = drogon::app().getDbClient();
+    LOG_ERROR<<"数据库连接成功";
+    try{
+        auto res = clientPtr->execSqlSync("update user set state = 'offline' where state = 'online'");
+        LOG_ERROR<<"更新状态成功";
+    }
+    catch(const DrogonDbException& e){
+        LOG_ERROR<<"状态更新失败";
+    }
+    
+}
 
 
+void service::FriendModel::insert(int userid,int friendid)
+{
+    auto clientPtr = drogon::app().getDbClient();
+        LOG_ERROR<<"数据库连接成功";
+    try{
+        auto res = clientPtr->execSqlSync("insert into friend values(?, ?)",userid,friendid);
+        LOG_ERROR<<"添加成功";
+    }
+    catch(const DrogonDbException& e){
+        LOG_ERROR<<"添加失败";
+    }
+
+
+}

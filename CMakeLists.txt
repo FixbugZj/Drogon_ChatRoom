@@ -21,6 +21,15 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(${PROJECT_NAME} main.cc)
 
+# cryptopp
+# 指定 Crypto++ 的头文件路径
+include_directories(/usr/include/cryptopp)
+
+# 指定 Crypto++ 的库文件路径
+link_directories(/usr/lib/x86_64-linux-gnu)
+
+# 链接 Crypto++ 库
+target_link_libraries(${PROJECT_NAME} PRIVATE cryptopp)
 
 find_package(Drogon CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE Drogon::Drogon)
@@ -44,6 +53,7 @@ aux_source_directory(plugins PLUGIN_SRC)
 aux_source_directory(models MODEL_SRC)
 aux_source_directory(common COMMON_SRC)
 aux_source_directory(service SVC_SRC)
+aux_source_directory(utils UTILS_SRC)
 
 
 drogon_create_views(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/views
@@ -59,6 +69,7 @@ target_sources(${PROJECT_NAME}
                ${COMMON_SRC}
                ${CTL_SRC}
                ${SVC_SRC}
+               ${UTILS_SRC}
                ${FILTER_SRC}
                ${PLUGIN_SRC}
                ${MODEL_SRC})
@@ -68,3 +79,7 @@ target_sources(${PROJECT_NAME}
 add_subdirectory(test)
 
 file(COPY config.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+
+
+
