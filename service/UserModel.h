@@ -13,6 +13,44 @@
 
 namespace service{
 
+class User
+{
+    public:
+    User(int id = -1, std::string name = "", std::string pwd = "", std::string state = "offline")
+    {
+        this->id = id;
+        this->name = name;
+        this->password = pwd;
+        this->state = state;
+    }
+
+    void setId(int id) { this->id = id; }
+    void setName(std::string name) { this->name = name; }
+    void setPwd(std::string pwd) { this->password = pwd; }
+    void setState(std::string state) { this->state = state; }
+
+    int getId() { return this->id; }
+    std::string getName() { return this->name; }
+    std::string getPwd() { return this->password; }
+    std::string getState() { return this->state; }
+
+protected:
+    int id;
+    std::string name;
+    std::string password;
+    std::string state;
+
+};
+
+
+class GroupUser : public User
+{
+public:
+    void setRole(std::string role) { this->role = role; }
+    std::string getRole() { return this->role; }
+private:
+    std::string role;
+};
 
 
 class UserModel 
@@ -32,19 +70,39 @@ public:
 };
 
 
-
 class FriendModel
 {
 public:
     void insert(int userid,int friendid);
 
-    //vector<User> query(int userid); //返回好友列表
+    std::vector<User> query(int userid); //返回好友列表
 };
 
 
 class Group
 {
+    public:
+    Group(int id = -1, std::string name = "", std::string desc = "")
+    {
+        this->id = id;
+        this->name = name;
+        this->desc = desc;
+    }
 
+    void setId(int id) { this->id = id; }
+    void setName(std::string name) { this->name = name; }
+    void setDesc(std::string desc) { this->desc = desc; }
+
+    int getId() { return this->id; }
+    std::string getName() { return this->name; }
+    std::string getDesc() { return this->desc; }
+    std::vector<GroupUser> &getUsers() { return this->users; }
+
+private:
+    int id;
+    std::string name;
+    std::string desc;
+    std::vector<GroupUser> users;
 };
 
 
@@ -55,16 +113,11 @@ public:
     void createGroup(std::string groupname,std::string groupdesc);
     void addGroup(int userid,int groupid,std::string role);
     // 查询用户所在群组信息
-    //vector<Group> queryGroups(int userid);
+    std::vector<Group> queryGroups(int userid);
     // 根据指定的groupid查询群组用户id列表，除userid自己，主要用户群聊业务给群组其它成员群发消息
     std::vector<int> queryGroupUsers(int userid, int groupid);
 };
 
-class GroupUser 
-{
-public:
-
-};
 
 
 class offlineMessageModel

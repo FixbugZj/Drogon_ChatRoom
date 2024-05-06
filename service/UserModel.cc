@@ -43,36 +43,20 @@ void service::UserModel::registdo(std::string &username,std::string &password,st
                         username,password,nickname);
     
             throw std::runtime_error("注册成功");
-            //return common::Response(200,"注册成功");
         }
         else
         {
         throw std::runtime_error("用户名冲突");
-        //return common::Response(300,"用户名冲突");
-
         }
     }
     catch(const DrogonDbException& e){
         throw std::runtime_error("注册失败,用户名冲突");
-        // LOG_ERROR<<"用户名冲突";.3
-        //return common::Response(300,"用户名冲突");
     }
 
 
 }
 
-// User service::UserModel::quert(int id)
-// {
-//     auto clientPtr = drogon::app().getDbClient();
-//     auto res = clientPtr->execSqlSync("select * from users where id = ?",id);
-//     if(res !=nullptr)
-//     {
-//         User user;
-//         user.
-        
-//     }
-    
-// }
+
 
 
 void service::UserModel::updateState(const std::string state,int id)
@@ -108,7 +92,7 @@ void service::UserModel::resetState()
 void service::FriendModel::insert(int userid,int friendid)
 {
     auto clientPtr = drogon::app().getDbClient();
-        LOG_ERROR<<"数据库连接成功";
+
     try{
         auto res = clientPtr->execSqlSync("insert into friends values(?, ?)",userid,friendid);
         LOG_ERROR<<"添加成功";
@@ -119,6 +103,37 @@ void service::FriendModel::insert(int userid,int friendid)
 
 
 }
+
+std::vector<service::User> service::FriendModel::query(int userid) //返回好友列表
+{
+    auto clientPtr = drogon::app().getDbClient();
+    std::vector<service::User> vec;
+    try{
+        auto res = clientPtr->execSqlSync("select users.id,users.username,users.state from users  inner join friends on friends.friendid = users.id where friends.userid=?",userid);
+        for(auto row : res)
+        {
+            int id = row["id"].as<int>();
+            std::string name = row["username"].as<std::string>();
+            std::string state = row["state"].as<std::string>();
+            LOG_INFO<<id;
+            LOG_INFO<<name;
+            LOG_INFO<<state;
+
+            User user;
+            user.setId(id);
+            user.setName(name);
+            user.setState(state);
+            vec.push_back(user);
+            
+        }
+        return vec;
+        LOG_ERROR<<"查询成功";
+    }catch(const DrogonDbException& e){
+        LOG_ERROR<<"查询失败";
+    }
+
+}
+
 
 void service::GroupModel::createGroup(std::string groupname,std::string groupdesc)
 {

@@ -17,8 +17,25 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
     HttpViewData data;
     data.insert("nickname",userinfo.getValueOfNickname());
     LOG_INFO<<userinfo.getValueOfNickname();
+
+    
     LOG_INFO<<userinfo.getValueOfUsername();
     LOG_INFO<<userinfo.getValueOfPassword();
+    int id = userinfo.getValueOfId();
+    std::vector<service::User> vec;
+
+    vec = service::FriendModel().query(id);
+    for(auto row :vec)
+    {
+        int id = row.getId();
+        std::string name = row.getName();
+        std::string state = row.getState();
+
+        LOG_INFO<<id;
+        LOG_INFO<<name;
+        LOG_INFO<<state;
+    }
+
 
     auto resp = HttpResponse::newHttpViewResponse("chat",data);
 
@@ -127,3 +144,5 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
 
 
 }
+
+
