@@ -1,6 +1,10 @@
 #pragma once
 
 #include <drogon/HttpController.h>
+#include "../service/UserModel.h"
+
+
+
 #include "../models/Users.h"
 #include "../models/Friends.h"
 #include "../models/Groupuser.h"
@@ -9,8 +13,6 @@
 #include "userfunc.h"
 
 using namespace drogon;
-
-
 
 class chatpage : public drogon::HttpController<chatpage>
 {
@@ -21,15 +23,14 @@ class chatpage : public drogon::HttpController<chatpage>
     // METHOD_ADD(chatpage::your_method_name, "/{1}/{2}/list", Get); // path is /chatpage/{arg1}/{arg2}/list
     // ADD_METHOD_TO(chatpage::your_method_name, "/absolute/path/{1}/{2}/list", Get); // path is /absolute/path/{arg1}/{arg2}/list
     ADD_METHOD_TO(chatpage::getchatPage,"/user/chat",Get);
-
     ADD_METHOD_TO(chatpage::addfriend,"/user/chat/addfriend",Post);
     ADD_METHOD_TO(chatpage::addgroup,"/user/chat/addgroup",Post);
     ADD_METHOD_TO(chatpage::oneChat,"/user/chat/oneChat",Post);
 
-    
     METHOD_LIST_END
-
-    
+    // your declaration of processing function maybe like this:
+    // void get(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback, int p1, std::string p2);
+    // void your_method_name(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback, double p1, int p2) const;
 
     void getchatPage(const HttpRequestPtr& req, 
     std::function<void (const HttpResponsePtr &)> &&callback) const;
@@ -45,9 +46,4 @@ class chatpage : public drogon::HttpController<chatpage>
     void oneChat(const HttpRequestPtr& req, 
     std::function<void (const HttpResponsePtr &)> &&callback) const;
 
-    // your declaration of processing function maybe like this:
-    // void get(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback, int p1, std::string p2);
-    // void your_method_name(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback, double p1, int p2) const;
 };
-
-

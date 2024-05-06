@@ -4,6 +4,13 @@
 #include <string>
 #include <vector>
 
+#include "../models/Users.h"
+#include "../models/Friends.h"
+#include "../models/Groupuser.h"
+#include "../models/Allgroup.h"
+#include "../models/Offlinemessages.h"
+
+
 namespace service{
 
 
@@ -43,8 +50,10 @@ class Group
 
 class GroupModel
 {
-    bool createGroup();
-    void addGroup(int userid,int groupid);
+public:
+
+    void createGroup(std::string groupname,std::string groupdesc);
+    void addGroup(int userid,int groupid,std::string role);
     // 查询用户所在群组信息
     //vector<Group> queryGroups(int userid);
     // 根据指定的groupid查询群组用户id列表，除userid自己，主要用户群聊业务给群组其它成员群发消息
@@ -53,13 +62,14 @@ class GroupModel
 
 class GroupUser 
 {
-
+public:
 
 };
 
 
 class offlineMessageModel
 {
+public:
     //存储
     void insert(int userid,std::string msg);
     //移除

@@ -4,6 +4,7 @@
 #include <drogon/drogon.h>
 #include "UserModel.h"
 
+
 using namespace drogon;
 using namespace drogon::orm;
 using namespace drogon_model::db;
@@ -24,6 +25,7 @@ void service::UserModel::login(std::string &username,
     {
         throw std::runtime_error("密码错误");
     }
+    
     
 }
 
@@ -108,7 +110,7 @@ void service::FriendModel::insert(int userid,int friendid)
     auto clientPtr = drogon::app().getDbClient();
         LOG_ERROR<<"数据库连接成功";
     try{
-        auto res = clientPtr->execSqlSync("insert into friend values(?, ?)",userid,friendid);
+        auto res = clientPtr->execSqlSync("insert into friends values(?, ?)",userid,friendid);
         LOG_ERROR<<"添加成功";
     }
     catch(const DrogonDbException& e){
@@ -117,3 +119,111 @@ void service::FriendModel::insert(int userid,int friendid)
 
 
 }
+
+void service::GroupModel::createGroup(std::string groupname,std::string groupdesc)
+{
+    auto clientPtr = drogon::app().getDbClient();
+    try{
+        auto res = clientPtr->execSqlSync("insert into allgroup(groupname, groupdesc) values(?, ?)",groupname,groupdesc);
+        LOG_ERROR<<"创建成功";
+    }
+    catch(const DrogonDbException& e){
+        LOG_ERROR<<"创建失败";
+    }
+
+
+}
+
+void service::GroupModel::addGroup(int userid,int groupid,std::string role)
+{
+    auto clientPtr = drogon::app().getDbClient();
+    try{
+        auto res = clientPtr->execSqlSync("insert into groupuser values(?, ?, ?)",groupid,userid,role);
+        LOG_ERROR<<"加入成功";
+    }
+    catch(const DrogonDbException& e){
+        LOG_ERROR<<"加入失败";
+    }
+
+
+}
+
+
+
+
+//根据指定groupid 查询群组用户id列表 ，除userid自己，主要用户群聊业务给群组其它成员群发消息
+std::vector<int> service::GroupModel::queryGroupUsers(int userid, int groupid)
+{
+    auto clientPtr = drogon::app().getDbClient();
+
+    std::vector<int> idVec;
+    try{
+        auto res = clientPtr->execSqlSync("select userid from groupuser where groupid = ? and userid != ?",groupid,userid);        
+        LOG_ERROR<<"查询成功";
+
+        for(auto row:res)
+        {
+            int id = row["userid"].as<int>();
+            LOG_ERROR<<id;
+            idVec.push_back(id);
+        }
+
+        return idVec;
+    }
+    catch(const DrogonDbException& e){
+        LOG_ERROR<<"查询失败";
+    }
+    
+}
+
+
+//存储
+void service::offlineMessageModel::insert(int userid,std::string msg)
+{
+    auto clientPtr = drogon::app().getDbClient();
+    try{
+    auto res = clientPtr->execSqlSync("insert into offlinemessage values(?, ?)",userid,msg);        
+        LOG_ERROR<<"插入成功";
+    }
+    catch(const DrogonDbException& e){
+        LOG_ERROR<<"插入失败";
+    }
+
+}
+//移除
+void service::offlineMessageModel::remove(int userid)
+{
+    auto clientPtr = drogon::app().getDbClient();
+    try{
+    auto res = clientPtr->execSqlSync("delete from offlinemessage where userid=?",userid);        
+        LOG_ERROR<<"删除成功";
+    }
+    catch(const DrogonDbException& e){
+        LOG_ERROR<<"删除失败";
+    }
+
+
+}
+//查询用户离线消息
+std::vector<std::string> service::offlineMessageModel::query(int userid)
+{
+    auto clientPtr = drogon::app().getDbClient();
+    std::vector<std::string> vec;
+    try{
+    auto res = clientPtr->execSqlSync("select message from offlinemessage where userid = ?",userid);        
+        LOG_ERROR<<"成功";
+        for(auto row :res)
+        {
+            std::string message = row["message"].as<std::string>();
+            LOG_ERROR<<message;
+            vec.push_back(message);
+        }
+        return vec;
+    }   
+    catch(const DrogonDbException& e){
+        LOG_ERROR<<"失败";
+    }
+
+}
+
+

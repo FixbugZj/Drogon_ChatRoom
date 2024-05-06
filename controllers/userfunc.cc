@@ -5,31 +5,34 @@
 #include "../service/UserModel.h"
 #include <drogon/orm/Result.h>
 
+
+
 using namespace orm;
-//using namespace drogon_model::db;
+using namespace drogon_model::db;
 
 // Add definition of your processing function here
 void userfunc::loginPage(const HttpRequestPtr& req, 
 std::function<void (const HttpResponsePtr &)> &&callback) const
 {
     
-   // data.insert("nickname",std::string("于森"));
-    auto session = req->session();
-    auto userinfo = session->get<drogon_model::db::Users>("userinfo");
+    // data.insert("nickname",std::string("于森"));
+    //auto session = req->session();
+    //auto userinfo = session->get<drogon_model::db::Users>("userinfo");
     
-    auto sessionID = req->session().get()->sessionId();
-    HttpViewData data;
-    data.insert("nickname",userinfo.getValueOfNickname());
+    
+    //HttpViewData data;
+    //data.insert("nickname",userinfo.getValueOfNickname());
+    //LOG_INFO<<userinfo.getValueOfNickname();
 
-    auto resp = HttpResponse::newHttpViewResponse("login",data);
+    auto resp = HttpResponse::newHttpViewResponse("login");
     callback(resp);
 }
 
 
-void userfunc::dologin(const HttpRequestPtr& req, 
+void userfunc::doLogin(const HttpRequestPtr& req, 
 std::function<void (const HttpResponsePtr &)> &&callback,
-//drogon_model::db::Users &user,
-User user) const
+//drogon_model::db::Users &user
+User users) const   //
 {
     auto jsonBody = req->getJsonObject();
 
@@ -44,24 +47,28 @@ User user) const
 
     LOG_INFO<<username;
     LOG_INFO<<password;
-    
-    
+
+    Mapper<Users> mapper(app().getDbClient());
+    auto userIndb = mapper.findOne({Users::Cols::_username,username});
     try
     {   
         int userid;
         
         service::UserModel().login(username,password);
         auto clientDb=drogon::app().getDbClient();
+
+        
+
         auto res = clientDb->execSqlSync("select id from users where username = ?",username);
         for(auto row:res)
         {
             int id = row["id"].as<int>();
             LOG_ERROR<<id;
         }
+    
+        //WebSocketConnectionPtr conn;
         
-        WebSocketConnectionPtr conn;
-        
-        _userConnMap.insert(std::make_pair(userid, conn));
+        //_userConnMap.insert(std::make_pair(userid, conn));
 
 
     }catch(const std::exception& e)
@@ -70,15 +77,14 @@ User user) const
     }
 
     
-
-    auto session=req->session();
-    //session.insert();
-
     auto resp = HttpResponse::newHttpResponse();
     resp->setStatusCode(k200OK);
     callback(resp);
 
-}
+    auto session=req->session();
+    session->insert("userinfo",userIndb);
+
+    }
 
 
 
@@ -110,6 +116,10 @@ std::function<void (const HttpResponsePtr &)> &&callback
 
 
 //-------------------------
+
+
+
+
 
 
 

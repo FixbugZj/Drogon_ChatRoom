@@ -50,7 +50,7 @@
     "app": {
         //number_of_threads: The number of IO threads, 1 by default, if the value is set to 0, the number of threads
         //is the number of CPU cores
-        "number_of_threads": 1,
+        "number_of_threads": 0,
         //enable_session: False by default
         "enable_session": true,
         "session_timeout": 1800,

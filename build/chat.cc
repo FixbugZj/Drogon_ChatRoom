@@ -210,7 +210,7 @@ chat_tmp_stream<<"\n";
 	chat_tmp_stream << "    <script>\n";
 	chat_tmp_stream << "    function sendMessage(){\n";
 	chat_tmp_stream << "        const messageValue = document.getElementById('messageInput').value\n";
-	chat_tmp_stream << "        const socket = new WebSocket(\"ws://192.168.205.134:8000/chat\");\n";
+	chat_tmp_stream << "        const socket = new WebSocket(\"ws://192.168.205.134:8000/user/chat/oneChat\");\n";
 	chat_tmp_stream << "        socket.onopen = ()=>{\n";
 	chat_tmp_stream << "             console.log(\"WebSocket opened\");\n";
 	chat_tmp_stream << "        };\n";

@@ -1,9 +1,17 @@
 #pragma once
 #include <drogon/HttpController.h>
-#include <drogon/WebSocketController.h>
+
+
+
+
 #include "../service/UserModel.h"
-#include <models/Users.h>
-#include <unordered_map>
+#include "../models/Users.h"
+#include "../models/Friends.h"
+#include "../models/Groupuser.h"
+#include "../models/Allgroup.h"
+#include "../models/Offlinemessages.h"
+
+
 using namespace drogon;
 
 
@@ -29,22 +37,27 @@ class userfunc : public drogon::HttpController<userfunc>
     // ADD_METHOD_TO(userlogin::your_method_name, "/absolute/path/{1}/{2}/list", Get); // path is /absolute/path/{arg1}/{arg2}/list
 
     ADD_METHOD_TO(userfunc::loginPage, "/login", Get); 
-    ADD_METHOD_TO(userfunc::dologin,"/login",Post);
+    ADD_METHOD_TO(userfunc::doLogin,"/login",Post);
     ADD_METHOD_TO(userfunc::doregister,"/register",Post);
     //ADD_METHOD_TO(userlogin::logout,"/logout",Post);
+
+
 
     METHOD_LIST_END
     // your declaration of processing function maybe like this:
     // void get(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback, int p1, std::string p2);
     void loginPage (const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback) const;
-    void dologin   (const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback,User user) const; //rogon_model::db::Users
+    void doLogin   (const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback,User users) const; //drogon_model::db::Users  //User users
     
     void doregister(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback) const; //drogon_model::db::Users
     //void logout(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback)const;
 
+
+
 private:
     //存储用户连接
-    mutable std::unordered_map<int, std::shared_ptr<WebSocketConnection>> _userConnMap;
+//mutable  std::unordered_map<int, std::shared_ptr<WebSocketConnection>> _userConnMap;
+    
     
 };
 

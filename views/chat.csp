@@ -180,7 +180,7 @@
     <script>
     function sendMessage(){
         const messageValue = document.getElementById('messageInput').value
-        const socket = new WebSocket("ws://192.168.205.134:8000/chat");
+        const socket = new WebSocket("ws://192.168.205.134:8000/user/chat/oneChat");
         socket.onopen = ()=>{
              console.log("WebSocket opened");
         };
