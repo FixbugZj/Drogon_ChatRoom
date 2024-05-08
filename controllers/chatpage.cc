@@ -1,24 +1,127 @@
 #include "chatpage.h"
 
 #include "../service/UserModel.h"
+#include <drogon/orm/Mapper.h>
+#include <drogon/orm/Mapper.h>
+#include <drogon/orm/Exception.h>
+#include <stdexcept>
+#include "../service/UserModel.h"
+#include <drogon/orm/Result.h>
+
+using namespace orm;
+using namespace drogon_model::db;
+
+
+
+
+void chatpage::loginPage(const HttpRequestPtr& req, 
+std::function<void (const HttpResponsePtr &)> &&callback)
+{
+
+    auto resp = HttpResponse::newHttpViewResponse("login");
+    callback(resp);
+}
+
+
+void chatpage::doLogin(const HttpRequestPtr& req, 
+std::function<void (const HttpResponsePtr &)> &&callback
+//const WebSocketConnectionPtr& wsConnPtr
+)    //
+{
+    auto jsonBody = req->getJsonObject();
+
+    if(!jsonBody){
+        LOG_INFO<<"接收失败";
+    }
+    
+
+    std::string username = (*jsonBody)["username"].asString();
+    std::string password = (*jsonBody)["password"].asString(); 
+
+    LOG_INFO<<username;
+    LOG_INFO<<password;
+
+    Mapper<Users> mapper(app().getDbClient());
+    auto userIndb = mapper.findOne({Users::Cols::_username,username});
+
+    try
+    {   
+        int userid;
+        
+        service::UserModel().login(username,password);
+        auto clientDb=drogon::app().getDbClient();
+        
+        auto res = clientDb->execSqlSync("select id from users where username = ?",username);
+        for(auto row:res)
+        {
+            userid = row["id"].as<int>();
+            LOG_ERROR<<userid;
+        }
+
+        //-------------------------------
+
+        //userConnMap_.insert({userid,wsConnPtr});
+
+        //-------------------------------
+
+
+
+        
+    }catch(const std::exception& e)
+    {
+        throw std::runtime_error("登陆失败");
+    }
+
+    
+    auto resp = HttpResponse::newHttpResponse();
+    resp->setStatusCode(k200OK);
+    callback(resp);
+
+    auto session=req->session();
+    session->insert("userinfo",userIndb);
+
+
+}
+
+
+
+void chatpage::doregister(const HttpRequestPtr& req, 
+std::function<void (const HttpResponsePtr &)> &&callback
+) 
+{   
+
+    auto JsonBody = req->getJsonObject();
+    if(!JsonBody)
+    {
+        LOG_INFO<<"接收失败";
+    }
+    
+    std::string username = (*JsonBody)["username"].asString();
+    std::string password = (*JsonBody)["password"].asString();
+    std::string nickname = (*JsonBody)["nickname"].asString();
+    service::UserModel().registdo(username,password,nickname);
+    
+    
+    auto resp = HttpResponse::newHttpResponse();
+    resp->setStatusCode(k200OK);
+    callback(resp);   
+
+}
+
 // Add definition of your processing function here
 void chatpage::getchatPage(const HttpRequestPtr& req, 
-std::function<void (const HttpResponsePtr &)> &&callback) const
+std::function<void (const HttpResponsePtr &)> &&callback) 
 {
     
     auto session = req->getSession();
-    //session->get<User>("userinfo");
-
-    //--------------------------------------
-
-    //--------------------------------------    
+   
     auto userinfo = session->get<drogon_model::db::Users>("userinfo");
 
     HttpViewData data;
     data.insert("nickname",userinfo.getValueOfNickname());
     LOG_INFO<<userinfo.getValueOfNickname();
 
-    
+
     LOG_INFO<<userinfo.getValueOfUsername();
     LOG_INFO<<userinfo.getValueOfPassword();
     int id = userinfo.getValueOfId();
@@ -37,6 +140,9 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
     }
 
 
+
+
+
     auto resp = HttpResponse::newHttpViewResponse("chat",data);
 
     resp->setStatusCode(k200OK);
@@ -46,7 +152,7 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
 
 
 void chatpage::addfriend(const HttpRequestPtr& req, 
-std::function<void (const HttpResponsePtr &)> &&callback) const
+std::function<void (const HttpResponsePtr &)> &&callback) 
 {
     auto jsonBody = req->getJsonObject();
 
@@ -75,7 +181,7 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
 
 
 void chatpage::addgroup(const HttpRequestPtr& req, 
-std::function<void (const HttpResponsePtr &)> &&callback) const
+std::function<void (const HttpResponsePtr &)> &&callback)
 {
     auto jsonBody = req->getJsonObject();
     
@@ -107,8 +213,10 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
 }
 
 
-void chatpage::oneChat(const HttpRequestPtr& req, 
-std::function<void (const HttpResponsePtr &)> &&callback) const
+void chatpage::oneChat(const HttpRequestPtr& req,
+std::function<void (const HttpResponsePtr &)> &&callback
+//const WebSocketConnectionPtr& conn
+) 
 {
 
     auto jsonBody = req->getJsonObject();
@@ -116,31 +224,38 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
     if(!jsonBody){
         LOG_INFO<<"接收失败";
     }
-    //LOG_ERROR<<*jsonBody;
-    std::string id = (*jsonBody)["id"].asString();
-    std::string toid = (*jsonBody)["toid"].asString();
+
+    int id = (*jsonBody)["id"].asInt();
+    int toid = (*jsonBody)["toid"].asInt();
     std::string message = (*jsonBody)["message"].asString();
+
 
         LOG_INFO<<id;
         LOG_INFO<<toid;
         LOG_INFO<<message;
 
 
-    //------------------
-    auto session  = req->getSession();
-    auto userinfo = session->get<drogon_model::db::Users>("userinfo");
-    
-    
-
-    //-------------------
     Json::Value json;
     json["message"] = message;
+    //------------------
     
-
-
-    auto resp = HttpResponse::newHttpJsonResponse(json);
+        
+    //-------------------
+    auto resp = HttpResponse::newHttpResponse();
     resp->setStatusCode(k200OK);
     callback(resp);
+
+
+}
+
+
+void chatpage::groupChat(const HttpRequestPtr& req,  
+std::function<void (const HttpResponsePtr &)> &&callback
+//const WebSocketConnectionPtr& conn
+) 
+{
+
+
 
 
 }

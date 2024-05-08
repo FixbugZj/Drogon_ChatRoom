@@ -30,7 +30,7 @@
 </html>
 <script type="text/javascript">
     var uname = prompt('请输入用户名', 'user' + uuid(8, 16));
-    var ws = new WebSocket("ws://192.168.205.134:8000/chat");
+    var ws = new WebSocket("ws://192.168.205.134:8000/user/chat/oneChat");
     ws.onopen = function () {
         var data = "系统消息：建立连接成功";
         listMsg(data);

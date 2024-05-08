@@ -49,7 +49,7 @@ std::string test::genText(const DrTemplateData& test_view_data)
 	test_tmp_stream << "</html>\n";
 	test_tmp_stream << "<script type=\"text/javascript\">\n";
 	test_tmp_stream << "    var uname = prompt('请输入用户名', 'user' + uuid(8, 16));\n";
-	test_tmp_stream << "    var ws = new WebSocket(\"ws://192.168.205.134:8000/chat\");\n";
+	test_tmp_stream << "    var ws = new WebSocket(\"ws://192.168.205.134:8000/user/chat/oneChat\");\n";
 	test_tmp_stream << "    ws.onopen = function () {\n";
 	test_tmp_stream << "        var data = \"系统消息：建立连接成功\";\n";
 	test_tmp_stream << "        listMsg(data);\n";

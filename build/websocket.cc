@@ -51,7 +51,7 @@ websocket_tmp_stream<<"\n";
 	websocket_tmp_stream << "    \n";
 	websocket_tmp_stream << "    <script>\n";
 	websocket_tmp_stream << "        // 创建 WebSocket 连接\n";
-	websocket_tmp_stream << "        const socket = new WebSocket(\"ws://192.168.205.134:8000/websocket\"); // 你的 WebSocket 服务器地址\n";
+	websocket_tmp_stream << "        const socket = new WebSocket(\"ws://192.168.205.134:8000/user/chat/oneChat\"); // 你的 WebSocket 服务器地址\n";
 websocket_tmp_stream<<"\n";
 	websocket_tmp_stream << "        // 当连接打开时执行\n";
 	websocket_tmp_stream << "        socket.onopen = function(event) {\n";
