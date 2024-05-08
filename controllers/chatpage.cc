@@ -114,7 +114,7 @@ std::function<void (const HttpResponsePtr &)> &&callback)
 {
     
     auto session = req->getSession();
-   
+
     auto userinfo = session->get<drogon_model::db::Users>("userinfo");
 
     HttpViewData data;

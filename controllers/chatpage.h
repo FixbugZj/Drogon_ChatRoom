@@ -18,9 +18,6 @@
 using namespace drogon;
 
 
-
-
-
 class chatpage : public drogon::HttpController<chatpage>
 {
   public:

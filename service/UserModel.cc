@@ -205,6 +205,7 @@ void service::offlineMessageModel::insert(int userid,std::string msg)
     }
 
 }
+
 //移除
 void service::offlineMessageModel::remove(int userid)
 {
@@ -219,6 +220,7 @@ void service::offlineMessageModel::remove(int userid)
 
 
 }
+
 //查询用户离线消息
 std::vector<std::string> service::offlineMessageModel::query(int userid)
 {
