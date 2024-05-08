@@ -72,15 +72,9 @@ class chatpage : public drogon::HttpController<chatpage>
     
   private:
 
-  std::unordered_map<int,std::shared_ptr<WebSocketConnection>> userConnMap_;
-
-
-
-
   service::UserModel _userModel;
   service::FriendModel _friendModel;
   service::GroupModel _groupModel;
-
 
 
 };
