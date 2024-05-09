@@ -3,7 +3,7 @@
 #include <drogon/orm/Exception.h>
 #include <drogon/drogon.h>
 #include "UserModel.h"
-
+#include "../utils/cryptopp.h"
 
 using namespace drogon;
 using namespace drogon::orm;
@@ -20,7 +20,11 @@ void service::UserModel::login(std::string &username,
     auto userInDb = 
             mapper.findOne({Users::Cols::_username,username});
     
+    //--------------------
+    //Cryptopp cryptopp;
     
+
+    //--------------------
     if(userInDb.getValueOfPassword() != password)
     {
         throw std::runtime_error("密码错误");
@@ -162,8 +166,6 @@ void service::GroupModel::addGroup(int userid,int groupid,std::string role)
 
 
 }
-
-
 
 
 //根据指定groupid 查询群组用户id列表 ，除userid自己，主要用户群聊业务给群组其它成员群发消息

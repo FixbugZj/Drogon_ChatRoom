@@ -15,7 +15,7 @@ using namespace drogon_model::db;
 
 
 void chatpage::loginPage(const HttpRequestPtr& req, 
-std::function<void (const HttpResponsePtr &)> &&callback)
+std::function<void (const HttpResponsePtr &)> &&callback) const
 {
 
     auto resp = HttpResponse::newHttpViewResponse("login");
@@ -26,7 +26,7 @@ std::function<void (const HttpResponsePtr &)> &&callback)
 void chatpage::doLogin(const HttpRequestPtr& req, 
 std::function<void (const HttpResponsePtr &)> &&callback
 //const WebSocketConnectionPtr& wsConnPtr
-)    //
+) const    //
 {
     auto jsonBody = req->getJsonObject();
 
@@ -87,7 +87,7 @@ std::function<void (const HttpResponsePtr &)> &&callback
 
 void chatpage::doregister(const HttpRequestPtr& req, 
 std::function<void (const HttpResponsePtr &)> &&callback
-) 
+)  const
 {   
 
     auto JsonBody = req->getJsonObject();
@@ -110,7 +110,8 @@ std::function<void (const HttpResponsePtr &)> &&callback
 
 // Add definition of your processing function here
 void chatpage::getchatPage(const HttpRequestPtr& req, 
-std::function<void (const HttpResponsePtr &)> &&callback) 
+std::function<void (const HttpResponsePtr &)> &&callback
+)  const
 {
     
     auto session = req->getSession();
@@ -152,7 +153,8 @@ std::function<void (const HttpResponsePtr &)> &&callback)
 
 
 void chatpage::addfriend(const HttpRequestPtr& req, 
-std::function<void (const HttpResponsePtr &)> &&callback) 
+std::function<void (const HttpResponsePtr &)> &&callback
+) const 
 {
     auto jsonBody = req->getJsonObject();
 
@@ -181,7 +183,8 @@ std::function<void (const HttpResponsePtr &)> &&callback)
 
 
 void chatpage::addgroup(const HttpRequestPtr& req, 
-std::function<void (const HttpResponsePtr &)> &&callback)
+std::function<void (const HttpResponsePtr &)> &&callback
+) const
 {
     auto jsonBody = req->getJsonObject();
     
@@ -216,7 +219,7 @@ std::function<void (const HttpResponsePtr &)> &&callback)
 void chatpage::oneChat(const HttpRequestPtr& req,
 std::function<void (const HttpResponsePtr &)> &&callback
 //const WebSocketConnectionPtr& conn
-) 
+) const
 {
 
     auto jsonBody = req->getJsonObject();
@@ -252,7 +255,7 @@ std::function<void (const HttpResponsePtr &)> &&callback
 void chatpage::groupChat(const HttpRequestPtr& req,  
 std::function<void (const HttpResponsePtr &)> &&callback
 //const WebSocketConnectionPtr& conn
-) 
+) const
 {
 
 
@@ -260,4 +263,31 @@ std::function<void (const HttpResponsePtr &)> &&callback
 
 }
 
+
+
+void chatpage::createGroups(const HttpRequestPtr& req,  
+std::function<void (const HttpResponsePtr &)> &&callback
+)const
+{
+    auto jsonBody = req->getJsonObject();
+
+    if(!jsonBody){
+        LOG_INFO<<"接收失败";
+    }
+
+
+    std::string groupname = (*jsonBody)["groupname"].asString();
+    std::string groupdesc = (*jsonBody)["groupdesc"].asString();
+
+    try{
+        service::GroupModel().createGroup(groupname,groupdesc);
+        throw std::runtime_error("创建成功");
+
+    }catch(const std::exception& e)
+    {
+        throw std::runtime_error("创建失败");
+    }
+
+
+}
 

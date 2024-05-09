@@ -43,31 +43,38 @@ class chatpage : public drogon::HttpController<chatpage>
 
 
     void loginPage (const HttpRequestPtr& req,
-    std::function<void (const HttpResponsePtr &)> &&callback);
+    std::function<void (const HttpResponsePtr &)> &&callback) const;
 
     void doLogin   (const HttpRequestPtr& req, 
-    std::function<void (const HttpResponsePtr &)> &&callback); //drogon_model::db::Users  //User users ,User users
+    std::function<void (const HttpResponsePtr &)> &&callback) const; //drogon_model::db::Users  //User users ,User users
     
     void doregister(const HttpRequestPtr& req, 
-    std::function<void (const HttpResponsePtr &)> &&callback); //drogon_model::db::Users
+    std::function<void (const HttpResponsePtr &)> &&callback) const; //drogon_model::db::Users
 
     void getchatPage(const HttpRequestPtr& req, 
-    std::function<void (const HttpResponsePtr &)> &&callback);
+    std::function<void (const HttpResponsePtr &)> &&callback) const;
 
     void addfriend(const HttpRequestPtr& req, 
-    std::function<void (const HttpResponsePtr &)> &&callback);
+    std::function<void (const HttpResponsePtr &)> &&callback) const;
     
     void addgroup(const HttpRequestPtr& req, 
-    std::function<void (const HttpResponsePtr &)> &&callback);
+    std::function<void (const HttpResponsePtr &)> &&callback) const;
 
     void oneChat(const HttpRequestPtr& req,  
-    std::function<void (const HttpResponsePtr &)> &&callback);
+    std::function<void (const HttpResponsePtr &)> &&callback) const;
 
     void groupChat(const HttpRequestPtr& req,  
-    std::function<void (const HttpResponsePtr &)> &&callback);
+    std::function<void (const HttpResponsePtr &)> &&callback) const;
+
+    void createGroups(const HttpRequestPtr& req,  
+    std::function<void (const HttpResponsePtr &)> &&callback) const;
+
+
 
     
+
   private:
+
 
   service::UserModel _userModel;
   service::FriendModel _friendModel;
@@ -75,9 +82,6 @@ class chatpage : public drogon::HttpController<chatpage>
 
 
 };
-
-
-
 
 
 
