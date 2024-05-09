@@ -8,105 +8,13 @@
 #include "../service/UserModel.h"
 #include <drogon/orm/Result.h>
 
+
+
 using namespace orm;
 using namespace drogon_model::db;
 
 
 
-
-void chatpage::loginPage(const HttpRequestPtr& req, 
-std::function<void (const HttpResponsePtr &)> &&callback) const
-{
-
-    auto resp = HttpResponse::newHttpViewResponse("login");
-    callback(resp);
-}
-
-
-void chatpage::doLogin(const HttpRequestPtr& req, 
-std::function<void (const HttpResponsePtr &)> &&callback
-//const WebSocketConnectionPtr& wsConnPtr
-) const    //
-{
-    auto jsonBody = req->getJsonObject();
-
-    if(!jsonBody){
-        LOG_INFO<<"接收失败";
-    }
-    
-
-    std::string username = (*jsonBody)["username"].asString();
-    std::string password = (*jsonBody)["password"].asString(); 
-
-    LOG_INFO<<username;
-    LOG_INFO<<password;
-
-    Mapper<Users> mapper(app().getDbClient());
-    auto userIndb = mapper.findOne({Users::Cols::_username,username});
-
-    try
-    {   
-        int userid;
-        
-        service::UserModel().login(username,password);
-        auto clientDb=drogon::app().getDbClient();
-        
-        auto res = clientDb->execSqlSync("select id from users where username = ?",username);
-        for(auto row:res)
-        {
-            userid = row["id"].as<int>();
-            LOG_ERROR<<userid;
-        }
-
-        //-------------------------------
-
-        //userConnMap_.insert({userid,wsConnPtr});
-
-        //-------------------------------
-
-
-
-        
-    }catch(const std::exception& e)
-    {
-        throw std::runtime_error("登陆失败");
-    }
-
-    
-    auto resp = HttpResponse::newHttpResponse();
-    resp->setStatusCode(k200OK);
-    callback(resp);
-
-    auto session=req->session();
-    session->insert("userinfo",userIndb);
-
-
-}
-
-
-
-void chatpage::doregister(const HttpRequestPtr& req, 
-std::function<void (const HttpResponsePtr &)> &&callback
-)  const
-{   
-
-    auto JsonBody = req->getJsonObject();
-    if(!JsonBody)
-    {
-        LOG_INFO<<"接收失败";
-    }
-    
-    std::string username = (*JsonBody)["username"].asString();
-    std::string password = (*JsonBody)["password"].asString();
-    std::string nickname = (*JsonBody)["nickname"].asString();
-    service::UserModel().registdo(username,password,nickname);
-    
-    
-    auto resp = HttpResponse::newHttpResponse();
-    resp->setStatusCode(k200OK);
-    callback(resp);   
-
-}
 
 // Add definition of your processing function here
 void chatpage::getchatPage(const HttpRequestPtr& req, 
@@ -126,6 +34,7 @@ std::function<void (const HttpResponsePtr &)> &&callback
     LOG_INFO<<userinfo.getValueOfUsername();
     LOG_INFO<<userinfo.getValueOfPassword();
     int id = userinfo.getValueOfId();
+    
     std::vector<service::User> vec;
 
     vec = service::FriendModel().query(id);
@@ -269,25 +178,78 @@ void chatpage::createGroups(const HttpRequestPtr& req,
 std::function<void (const HttpResponsePtr &)> &&callback
 )const
 {
+    Json::Value data;
+
     auto jsonBody = req->getJsonObject();
 
-    if(!jsonBody){
-        LOG_INFO<<"接收失败";
-    }
-
-
-    std::string groupname = (*jsonBody)["groupname"].asString();
-    std::string groupdesc = (*jsonBody)["groupdesc"].asString();
-
     try{
+        if(!jsonBody)
+        {
+            LOG_INFO<<"接收失败";
+        }
+        std::string groupname = (*jsonBody)["groupname"].asString();
+        std::string groupdesc = (*jsonBody)["groupdesc"].asString();
         service::GroupModel().createGroup(groupname,groupdesc);
-        throw std::runtime_error("创建成功");
+
+        data["msg"] = "create success";
+
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp);
 
     }catch(const std::exception& e)
     {
-        throw std::runtime_error("创建失败");
+        data["msg"] = "create error";
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp);
+
     }
 
 
 }
 
+
+
+void chatpage::getUserInfo(const HttpRequestPtr& req,  
+std::function<void (const HttpResponsePtr &)> &&callback) const
+{
+    Json::Value data;
+
+    try
+    {
+        auto jsonBody = req->getJsonObject();
+        auto session  = req->getSession();
+
+        if(jsonBody==nullptr || jsonBody->empty())
+        {
+            data["msg"] = "json is empty";
+            return callback(HttpResponse::newHttpJsonResponse(data));
+        }
+
+        auto userInfo = session->get<drogon_model::db::Users>("userinfo");
+
+        auto id = userInfo.getValueOfId();
+        auto nickname = userInfo.getValueOfNickname();
+        auto username = userInfo.getValueOfUsername();
+        
+        data["id"] = id;
+        data["nickname"] = nickname;
+        data["username"] = username;
+
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp);
+
+    }
+    catch(const std::exception& e)
+    {
+        throw std::runtime_error("查询失败");
+        data["message"]= "查询失败";
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp);
+
+    }
+    
+}

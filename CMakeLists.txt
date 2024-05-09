@@ -36,6 +36,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Drogon::Drogon)
 
 
 
+
 if (CMAKE_CXX_STANDARD LESS 17)
     message(FATAL_ERROR "c++17 or higher is required")
 elseif (CMAKE_CXX_STANDARD LESS 20)

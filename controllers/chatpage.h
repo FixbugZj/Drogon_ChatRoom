@@ -15,6 +15,7 @@
 #include "../service/UserModel.h"
 
 
+
 using namespace drogon;
 
 
@@ -26,9 +27,7 @@ class chatpage : public drogon::HttpController<chatpage>
     // METHOD_ADD(chatpage::get, "/{2}/{1}", Get); // path is /chatpage/{arg2}/{arg1}
     // METHOD_ADD(chatpage::your_method_name, "/{1}/{2}/list", Get); // path is /chatpage/{arg1}/{arg2}/list
     // ADD_METHOD_TO(chatpage::your_method_name, "/absolute/path/{1}/{2}/list", Get); // path is /absolute/path/{arg1}/{arg2}/list
-    ADD_METHOD_TO(chatpage::loginPage, "/login", Get); 
-    ADD_METHOD_TO(chatpage::doLogin,"/login",Post);
-    ADD_METHOD_TO(chatpage::doregister,"/register",Post);
+
     
     
     ADD_METHOD_TO(chatpage::getchatPage,"/user/chat",Get);
@@ -36,20 +35,18 @@ class chatpage : public drogon::HttpController<chatpage>
     ADD_METHOD_TO(chatpage::addgroup,"/user/chat/addgroup",Post);
     ADD_METHOD_TO(chatpage::oneChat,"/user/chat/oneChat",Post);
 
+    ADD_METHOD_TO(chatpage::createGroups,"/user/chat/createGroup",Post);
+
+    ADD_METHOD_TO(chatpage::getUserInfo,"/user/chat/getUserInfo",Post);
+
+
     METHOD_LIST_END
     // your declaration of processing function maybe like this:
     // void get(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback, int p1, std::string p2);
     // void your_method_name(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback, double p1, int p2) const;
 
 
-    void loginPage (const HttpRequestPtr& req,
-    std::function<void (const HttpResponsePtr &)> &&callback) const;
 
-    void doLogin   (const HttpRequestPtr& req, 
-    std::function<void (const HttpResponsePtr &)> &&callback) const; //drogon_model::db::Users  //User users ,User users
-    
-    void doregister(const HttpRequestPtr& req, 
-    std::function<void (const HttpResponsePtr &)> &&callback) const; //drogon_model::db::Users
 
     void getchatPage(const HttpRequestPtr& req, 
     std::function<void (const HttpResponsePtr &)> &&callback) const;
@@ -69,7 +66,8 @@ class chatpage : public drogon::HttpController<chatpage>
     void createGroups(const HttpRequestPtr& req,  
     std::function<void (const HttpResponsePtr &)> &&callback) const;
 
-
+    void getUserInfo(const HttpRequestPtr& req,  
+    std::function<void (const HttpResponsePtr &)> &&callback) const;
 
     
 
