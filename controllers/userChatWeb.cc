@@ -11,8 +11,9 @@
 
 using namespace drogon;
 using namespace drogon_model::db;
+using namespace global;
 
-void userChatWeb::handleNewMessage(const WebSocketConnectionPtr& wsConnPtr, std::string &&message, const WebSocketMessageType &type)
+void controllers::userChatWeb::handleNewMessage(const WebSocketConnectionPtr& wsConnPtr, std::string &&message, const WebSocketMessageType &type)
 {
     // write your application logic here
     LOG_INFO<<wsConnPtr.get()->connected()<< "  "<<message;
@@ -56,7 +57,7 @@ void userChatWeb::handleNewMessage(const WebSocketConnectionPtr& wsConnPtr, std:
 
 }
 
-void userChatWeb::handleNewConnection(const HttpRequestPtr &req, const WebSocketConnectionPtr& wsConnPtr)
+void controllers::userChatWeb::handleNewConnection(const HttpRequestPtr &req, const WebSocketConnectionPtr& wsConnPtr)
 {
 
     auto value = req->getParameter("id");
@@ -73,7 +74,7 @@ void userChatWeb::handleNewConnection(const HttpRequestPtr &req, const WebSocket
 }
 
 
-void userChatWeb::handleConnectionClosed(const WebSocketConnectionPtr& wsConnPtr)
+void controllers::userChatWeb::handleConnectionClosed(const WebSocketConnectionPtr& wsConnPtr)
 {
     // write your application logic here
     

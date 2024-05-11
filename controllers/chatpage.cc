@@ -17,7 +17,7 @@ using namespace drogon_model::db;
 
 
 // Add definition of your processing function here
-void chatpage::getchatPage(const HttpRequestPtr& req, 
+void controllers::chatpage::getchatPage(const HttpRequestPtr& req, 
 std::function<void (const HttpResponsePtr &)> &&callback
 )  const
 {
@@ -61,7 +61,7 @@ std::function<void (const HttpResponsePtr &)> &&callback
 
 
 
-void chatpage::addfriend(const HttpRequestPtr& req, 
+void controllers::chatpage::addfriend(const HttpRequestPtr& req, 
 std::function<void (const HttpResponsePtr &)> &&callback
 ) const 
 {
@@ -91,7 +91,7 @@ std::function<void (const HttpResponsePtr &)> &&callback
 
 
 
-void chatpage::addgroup(const HttpRequestPtr& req, 
+void controllers::chatpage::addgroup(const HttpRequestPtr& req, 
 std::function<void (const HttpResponsePtr &)> &&callback
 ) const
 {
@@ -125,7 +125,7 @@ std::function<void (const HttpResponsePtr &)> &&callback
 }
 
 
-void chatpage::oneChat(const HttpRequestPtr& req,
+void controllers::chatpage::oneChat(const HttpRequestPtr& req,
 std::function<void (const HttpResponsePtr &)> &&callback
 //const WebSocketConnectionPtr& conn
 ) const
@@ -161,7 +161,7 @@ std::function<void (const HttpResponsePtr &)> &&callback
 }
 
 
-void chatpage::groupChat(const HttpRequestPtr& req,  
+void controllers::chatpage::groupChat(const HttpRequestPtr& req,  
 std::function<void (const HttpResponsePtr &)> &&callback
 //const WebSocketConnectionPtr& conn
 ) const
@@ -174,7 +174,7 @@ std::function<void (const HttpResponsePtr &)> &&callback
 
 
 
-void chatpage::createGroups(const HttpRequestPtr& req,  
+void controllers::chatpage::createGroups(const HttpRequestPtr& req,  
 std::function<void (const HttpResponsePtr &)> &&callback
 )const
 {
@@ -211,7 +211,7 @@ std::function<void (const HttpResponsePtr &)> &&callback
 
 
 
-void chatpage::getUserInfo(const HttpRequestPtr& req,  
+void controllers::chatpage::getUserInfo(const HttpRequestPtr& req,  
 std::function<void (const HttpResponsePtr &)> &&callback) const
 {
     Json::Value data;

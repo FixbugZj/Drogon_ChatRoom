@@ -19,8 +19,9 @@ struct JsonMessage
   std::string message;
 };
 
-
-class userChatWeb : public drogon::WebSocketController<userChatWeb>
+namespace controllers
+{
+  class userChatWeb : public drogon::WebSocketController<userChatWeb>
 {
   public:
     void handleNewMessage(const WebSocketConnectionPtr&,
@@ -37,7 +38,10 @@ class userChatWeb : public drogon::WebSocketController<userChatWeb>
     WS_PATH_LIST_END
 
   private:
-    std::unordered_map<int,std::shared_ptr<WebSocketConnection>> userConnMap_;
+
 };
+}
+
+
 
 

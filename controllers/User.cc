@@ -35,7 +35,7 @@ std::function<void (const HttpResponsePtr &)> &&callback
 ) const    //
 {
     Json::Value data;
-
+    
     try
     {   
         auto jsonBody = req->getJsonObject();

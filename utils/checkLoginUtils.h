@@ -5,14 +5,17 @@
 #include <drogon/HttpAppFramework.h>
 #include <optional>
 
-class CheckLogin
+
+namespace utils
+{
+    class CheckLogin
 {
 public:
     [[gnu::always_inline]] inline static std::optional<std::string> checklogin(const drogon::HttpRequestPtr& req);
 
 };
 
-std::optional<std::string> CheckLogin::checklogin(const drogon::HttpRequestPtr& req)
+std::optional<std::string> utils::CheckLogin::checklogin(const drogon::HttpRequestPtr& req)
 {
     try
     {
@@ -31,5 +34,7 @@ std::optional<std::string> CheckLogin::checklogin(const drogon::HttpRequestPtr& 
     }
 
 }
+}
+
 
 #endif

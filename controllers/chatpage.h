@@ -19,7 +19,10 @@
 using namespace drogon;
 
 
-class chatpage : public drogon::HttpController<chatpage>
+namespace controllers
+{
+
+  class chatpage : public drogon::HttpController<chatpage>
 {
   public:
     METHOD_LIST_BEGIN
@@ -80,6 +83,8 @@ class chatpage : public drogon::HttpController<chatpage>
 
 
 };
+}
+
 
 
 
