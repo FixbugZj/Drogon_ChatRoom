@@ -13,7 +13,7 @@ using namespace drogon_model::db;
 
 void service::UserModel::login(std::string &username,
                         std::string &password) 
-{
+{ 
     auto clientDb=drogon::app().getDbClient();
     Mapper<Users> mapper(clientDb);
 
