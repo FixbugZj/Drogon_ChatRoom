@@ -45,7 +45,7 @@ class Users
     struct Cols
     {
         static const std::string _id;
-        static const std::string _username;
+        static const std::string _account;
         static const std::string _password;
         static const std::string _nickname;
         static const std::string _create_time;
@@ -111,14 +111,14 @@ class Users
     ///Set the value of the column id
     void setId(const int32_t &pId) noexcept;
 
-    /**  For column username  */
-    ///Get the value of the column username, returns the default value if the column is null
-    const std::string &getValueOfUsername() const noexcept;
+    /**  For column account  */
+    ///Get the value of the column account, returns the default value if the column is null
+    const std::string &getValueOfAccount() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getUsername() const noexcept;
-    ///Set the value of the column username
-    void setUsername(const std::string &pUsername) noexcept;
-    void setUsername(std::string &&pUsername) noexcept;
+    const std::shared_ptr<std::string> &getAccount() const noexcept;
+    ///Set the value of the column account
+    void setAccount(const std::string &pAccount) noexcept;
+    void setAccount(std::string &&pAccount) noexcept;
 
     /**  For column password  */
     ///Get the value of the column password, returns the default value if the column is null
@@ -199,7 +199,7 @@ class Users
     ///For mysql or sqlite3
     void updateId(const uint64_t id);
     std::shared_ptr<int32_t> id_;
-    std::shared_ptr<std::string> username_;
+    std::shared_ptr<std::string> account_;
     std::shared_ptr<std::string> password_;
     std::shared_ptr<std::string> nickname_;
     std::shared_ptr<::trantor::Date> createTime_;
@@ -239,7 +239,7 @@ class Users
             ++parametersCount;
         if(dirtyFlag_[1])
         {
-            sql += "username,";
+            sql += "account,";
             ++parametersCount;
         }
         if(dirtyFlag_[2])

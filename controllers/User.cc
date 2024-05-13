@@ -17,6 +17,7 @@ using namespace drogon_model::db;
 // Add definition of your processing function here
 
 
+
 void controllers::User::loginPage(const HttpRequestPtr& req, 
 std::function<void (const HttpResponsePtr &)> &&callback) const
 {
@@ -47,18 +48,18 @@ std::function<void (const HttpResponsePtr &)> &&callback
         }
         
 
-        std::string username = (*jsonBody)["username"].asString();
+        std::string account = (*jsonBody)["account"].asString();
         std::string password = (*jsonBody)["password"].asString(); 
 
-        LOG_INFO<<username;
+        LOG_INFO<<account;
         LOG_INFO<<password;
 
         Mapper<Users> mapper(app().getDbClient());
-        auto userIndb = mapper.findOne({Users::Cols::_username,username});
+        auto userIndb = mapper.findOne({Users::Cols::_account,account});
 
 
 
-        service::UserModel().login(username,password);
+        service::UserModel().login(account,password);
 
         // auto clientDb=drogon::app().getDbClient();
         
@@ -132,7 +133,7 @@ std::function<void (const HttpResponsePtr &)> &&callback
     std::string username = (*JsonBody)["username"].asString();
     std::string password = (*JsonBody)["password"].asString();
     std::string nickname = (*JsonBody)["nickname"].asString();
-    service::UserModel().registdo(username,password,nickname);
+    //service::UserModel().registdo(username,password,nickname);
     
     
     auto resp = HttpResponse::newHttpResponse();

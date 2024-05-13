@@ -26,7 +26,7 @@ class User : public drogon::HttpController<User>
     ADD_METHOD_TO(User::loginPage, "/login", Get); 
     ADD_METHOD_TO(User::doLogin,"/login",Post);
     ADD_METHOD_TO(User::doregister,"/register",Post);
-    
+  
     METHOD_LIST_END
     // your declaration of processing function maybe like this:
     // void get(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback, int p1, std::string p2);
@@ -39,8 +39,6 @@ class User : public drogon::HttpController<User>
     
     void doregister(const HttpRequestPtr& req, 
     std::function<void (const HttpResponsePtr &)> &&callback) const; //drogon_model::db::Users
-
-    
 
 };
 

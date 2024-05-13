@@ -15,7 +15,6 @@
 #include "../service/UserModel.h"
 
 
-
 using namespace drogon;
 
 
@@ -41,7 +40,7 @@ namespace controllers
     ADD_METHOD_TO(chatpage::createGroups,"/user/chat/createGroup",Post);
 
     ADD_METHOD_TO(chatpage::getUserInfo,"/user/chat/getUserInfo",Post);
-
+    
 
     METHOD_LIST_END
     // your declaration of processing function maybe like this:

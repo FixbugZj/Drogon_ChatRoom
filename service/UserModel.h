@@ -16,28 +16,28 @@ namespace service{
 class User
 {
     public:
-    User(int id = -1, std::string name = "", std::string pwd = "", std::string state = "offline")
+    User(int id = -1, std::string nickname = "", std::string account = "", std::string state = "offline")
     {
         this->id = id;
-        this->name = name;
-        this->password = pwd;
+        this->nickname = nickname;
+        this->account = account;
         this->state = state;
     }
 
     void setId(int id) { this->id = id; }
-    void setName(std::string name) { this->name = name; }
-    void setPwd(std::string pwd) { this->password = pwd; }
+    void setNickName(std::string nickname) { this->nickname = nickname; }
+    void setAccount(std::string account) { this->account = account; }
     void setState(std::string state) { this->state = state; }
 
     int getId() { return this->id; }
-    std::string getName() { return this->name; }
-    std::string getPwd() { return this->password; }
+    std::string getName() { return this->nickname; }
+    std::string getAccount() { return this->account; }
     std::string getState() { return this->state; }
 
 protected:
     int id;
-    std::string name;
-    std::string password;
+    std::string account;
+    std::string nickname;
     std::string state;
 
 };
@@ -57,9 +57,9 @@ class UserModel
 {
 public:
 
-    void login(std::string &username, std::string &password);
+    void login(std::string &account, std::string &password);
 
-    void registdo(std::string &username,std::string &password,std::string nickname);
+    void registdo(std::string account,std::string &password,std::string &nickname);
 
 
     void updateState(const std::string state,int id);

@@ -11,23 +11,22 @@ using namespace drogon_model::db;
 
 
 
-void service::UserModel::login(std::string &username,
+void service::UserModel::login(std::string &account,
                         std::string &password) 
 { 
     auto clientDb=drogon::app().getDbClient();
     Mapper<Users> mapper(clientDb);
 
     auto userInDb = 
-            mapper.findOne({Users::Cols::_username,username});
+            mapper.findOne({Users::Cols::_account,account});
     
     //--------------------
     //Cryptopp cryptopp;
-    
 
     //--------------------
     if(userInDb.getValueOfPassword() != password)
     {
-        throw std::runtime_error("密码错误");
+        LOG_ERROR<<"密码错误";
     }
     
     
@@ -35,16 +34,16 @@ void service::UserModel::login(std::string &username,
 
 
 
-void service::UserModel::registdo(std::string &username,std::string &password,std::string nickname)
+void service::UserModel::registdo(std::string account,std::string &password,std::string &nickname)
 {
     auto clientPtr = drogon::app().getDbClient();
-    auto res = clientPtr->execSqlSync("select username from users where username = ?",username);
+    auto res = clientPtr->execSqlSync("select account from users where account = ?",account);
 
     try{
         if(res.empty())
         {
-            clientPtr->execSqlSync("INSERT INTO users(username,password,nickname) VALUES (?,?,?)",
-                        username,password,nickname);
+            clientPtr->execSqlSync("INSERT INTO users(account,password,nickname) VALUES (?,?,?)",
+                        account,password,nickname);
     
             throw std::runtime_error("注册成功");
         }
@@ -81,7 +80,7 @@ void service::UserModel::updateState(const std::string state,int id)
 void service::UserModel::resetState()
 {
     auto clientPtr = drogon::app().getDbClient();
-    LOG_ERROR<<"数据库连接成功";
+        LOG_ERROR<<"数据库连接成功";
     try{
         auto res = clientPtr->execSqlSync("update user set state = 'offline' where state = 'online'");
         LOG_ERROR<<"更新状态成功";
@@ -113,19 +112,19 @@ std::vector<service::User> service::FriendModel::query(int userid) //返回好�
     auto clientPtr = drogon::app().getDbClient();
     std::vector<service::User> vec;
     try{
-        auto res = clientPtr->execSqlSync("select users.id,users.username,users.state from users  inner join friends on friends.friendid = users.id where friends.userid=?",userid);
+        auto res = clientPtr->execSqlSync("select users.id,users.nickname,users.state from users  inner join friends on friends.friendid = users.id where friends.userid=?",userid);
         for(auto row : res)
         {
             int id = row["id"].as<int>();
-            std::string name = row["username"].as<std::string>();
+            std::string nickname = row["nickname"].as<std::string>();
             std::string state = row["state"].as<std::string>();
             LOG_INFO<<id;
-            LOG_INFO<<name;
+            LOG_INFO<<nickname;
             LOG_INFO<<state;
 
             User user;
             user.setId(id);
-            user.setName(name);
+            user.setNickName(nickname);
             user.setState(state);
             vec.push_back(user);
             

@@ -31,7 +31,7 @@ std::function<void (const HttpResponsePtr &)> &&callback
     LOG_INFO<<userinfo.getValueOfNickname();
 
 
-    LOG_INFO<<userinfo.getValueOfUsername();
+    LOG_INFO<<userinfo.getValueOfAccount();
     LOG_INFO<<userinfo.getValueOfPassword();
     int id = userinfo.getValueOfId();
     
@@ -231,11 +231,11 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
 
         auto id = userInfo.getValueOfId();
         auto nickname = userInfo.getValueOfNickname();
-        auto username = userInfo.getValueOfUsername();
+        auto account = userInfo.getValueOfAccount();
         
         data["id"] = id;
         data["nickname"] = nickname;
-        data["username"] = username;
+        data["username"] = account;
 
         auto resp = HttpResponse::newHttpJsonResponse(data);
         resp->setStatusCode(k200OK);
