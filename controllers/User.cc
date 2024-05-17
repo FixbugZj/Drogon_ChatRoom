@@ -13,7 +13,7 @@
 
 
 using namespace orm;
-using namespace drogon_model::db;
+using namespace drogon_model::koi;
 // Add definition of your processing function here
 
 
@@ -22,12 +22,13 @@ void controllers::User::loginPage(const HttpRequestPtr& req,
 std::function<void (const HttpResponsePtr &)> &&callback) const
 {
 
-    auto resp = HttpResponse::newHttpViewResponse("login");
+    Json::Value json;
+    json["message"] = "ok";
+
+    auto resp = HttpResponse::newHttpJsonResponse(json);
     callback(resp);
 
 }
-
-
 
 
 void controllers::User::doLogin(const HttpRequestPtr& req, 
@@ -61,18 +62,18 @@ std::function<void (const HttpResponsePtr &)> &&callback
 
         service::UserModel().login(account,password);
 
-        // auto clientDb=drogon::app().getDbClient();
+        auto clientDb=drogon::app().getDbClient();
         
 
-        // int userid;
-        // std::string nickname;
-        // auto res = clientDb->execSqlSync("select id,nickname from users where username = ?",username);
-        // for(auto row:res)
-        // {
-        //     userid = row["id"].as<int>();
-        //     nickname = row["nickname"].as<std::string>();
-        //     LOG_INFO<<userid;
-        // }
+        int id;
+        std::string nickname;
+        auto res = clientDb->execSqlSync("select id,nickname from users where account = ?",account);
+        for(auto row:res)
+        {
+            id = row["id"].as<int>();
+            nickname = row["nickname"].as<std::string>();
+            LOG_INFO<<id;
+        }
 
 
         //-------------------------------
@@ -88,10 +89,12 @@ std::function<void (const HttpResponsePtr &)> &&callback
         // std::cout << "secret = " << drogon::app().getCustomConfig()["jwt-secret"].asString() << std::endl;
         // std::cout << "sessionTime = " << drogon::app().getCustomConfig()["jwt-sessionTime"].asInt() << std::endl;
 
-        data["message"] = "ok";
-        // data["nickename"] = nickname;
+
+         data["message"] = "ok";
+        // data["nickname"] = nickname;
         // data["token"] = token;
-        // data["id"] = userid;
+        // data["id"] = id;
+        
         //-------------------------------
 
 
@@ -123,21 +126,34 @@ void controllers::User::doregister(const HttpRequestPtr& req,
 std::function<void (const HttpResponsePtr &)> &&callback
 )  const
 {   
+    Json::Value data;
 
-    auto JsonBody = req->getJsonObject();
-    if(!JsonBody)
+    try
     {
-        LOG_INFO<<"接收失败";
+        auto JsonBody = req->getJsonObject();
+        if(!JsonBody)
+        {
+            LOG_INFO<<"接收失败";
+        }
+        
+        std::string account = (*JsonBody)["account"].asString();
+        std::string password = (*JsonBody)["password"].asString();
+        std::string nickname = (*JsonBody)["nickname"].asString();
+        service::UserModel().registdo(account,password,nickname);
+        
+        data["message"] = "ok";
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp);   
+    }
+    catch(const std::exception& e)
+    {   
+        data["message"] = "error";
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp); 
+
     }
     
-    std::string username = (*JsonBody)["username"].asString();
-    std::string password = (*JsonBody)["password"].asString();
-    std::string nickname = (*JsonBody)["nickname"].asString();
-    //service::UserModel().registdo(username,password,nickname);
     
-    
-    auto resp = HttpResponse::newHttpResponse();
-    resp->setStatusCode(k200OK);
-    callback(resp);   
-
 }

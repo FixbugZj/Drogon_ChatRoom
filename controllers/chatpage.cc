@@ -11,7 +11,7 @@
 
 
 using namespace orm;
-using namespace drogon_model::db;
+using namespace drogon_model::koi;
 
 
 
@@ -21,13 +21,14 @@ void controllers::chatpage::getchatPage(const HttpRequestPtr& req,
 std::function<void (const HttpResponsePtr &)> &&callback
 )  const
 {
-    
+    Json::Value data;
+
     auto session = req->getSession();
 
-    auto userinfo = session->get<drogon_model::db::Users>("userinfo");
+    auto userinfo = session->get<drogon_model::koi::Users>("userinfo");
 
-    HttpViewData data;
-    data.insert("nickname",userinfo.getValueOfNickname());
+    // HttpViewData data;
+    // data.insert("nickname",userinfo.getValueOfNickname());
     LOG_INFO<<userinfo.getValueOfNickname();
 
 
@@ -38,6 +39,7 @@ std::function<void (const HttpResponsePtr &)> &&callback
     std::vector<service::User> vec;
 
     vec = service::FriendModel().query(id);
+
     for(auto row :vec)
     {
         int id = row.getId();
@@ -48,13 +50,8 @@ std::function<void (const HttpResponsePtr &)> &&callback
         LOG_INFO<<name;
         LOG_INFO<<state;
     }
-
-
-
-
-
-    auto resp = HttpResponse::newHttpViewResponse("chat",data);
-
+    data["message"] = "ok";
+    auto resp = HttpResponse::newHttpJsonResponse(data);
     resp->setStatusCode(k200OK);
     callback(resp);
 }
@@ -71,12 +68,12 @@ std::function<void (const HttpResponsePtr &)> &&callback
         LOG_INFO<<"接收失败";
     }
 
-    int userid = (*jsonBody)["userid"].asInt();
+    int id = (*jsonBody)["id"].asInt();
     int friendid = (*jsonBody)["friendid"].asInt();
-    LOG_INFO<<userid;
+    LOG_INFO<<id;
     LOG_INFO<<friendid;
     try{
-        service::FriendModel().insert(userid,friendid);
+        service::FriendModel().insert(id,friendid);
         throw std::runtime_error("添加成功");
 
     }catch(const std::exception& e)
@@ -103,15 +100,15 @@ std::function<void (const HttpResponsePtr &)> &&callback
         LOG_INFO<<"接收失败";
     }
 
-    int userid = (*jsonBody)["userid"].asInt();
+    int id = (*jsonBody)["id"].asInt();
     int groupid = (*jsonBody)["groupid"].asInt();
     std::string role = (*jsonBody)["role"].asString();
-    LOG_INFO<<userid;
+    LOG_INFO<<id;
     LOG_INFO<<groupid;
     LOG_INFO<<role;
 
     try{
-        service::GroupModel().addGroup(userid,groupid,role);
+        service::GroupModel().addGroup(id,groupid,role);
         throw std::runtime_error("加入成功");
 
     }catch(const std::exception& e)
@@ -166,7 +163,7 @@ std::function<void (const HttpResponsePtr &)> &&callback
 //const WebSocketConnectionPtr& conn
 ) const
 {
-
+    
 
 
 
@@ -227,15 +224,22 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
             return callback(HttpResponse::newHttpJsonResponse(data));
         }
 
-        auto userInfo = session->get<drogon_model::db::Users>("userinfo");
+        auto userInfo = session->get<drogon_model::koi::Users>("userinfo");
 
-        auto id = userInfo.getValueOfId();
-        auto nickname = userInfo.getValueOfNickname();
-        auto account = userInfo.getValueOfAccount();
+        int id = userInfo.getValueOfId();
+        std::string nickname = userInfo.getValueOfNickname();
+        std::string account = userInfo.getValueOfAccount();
         
+        std::string phone = userInfo.getValueOfPhone();
         data["id"] = id;
         data["nickname"] = nickname;
-        data["username"] = account;
+        data["account"] = account;
+        data["phone"] = phone;
+
+        /*
+        生日 :
+        手机 :
+        */
 
         auto resp = HttpResponse::newHttpJsonResponse(data);
         resp->setStatusCode(k200OK);
@@ -253,3 +257,86 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
     }
     
 }
+
+
+void controllers::chatpage::changeUserNickname(const HttpRequestPtr& req,  
+    std::function<void (const HttpResponsePtr &)> &&callback) const
+{
+    Json::Value data;
+    try
+    {
+        auto jsonBody = req->getJsonObject();
+        if(jsonBody==nullptr || jsonBody->empty())
+        {
+            data["msg"] = "json is empty";
+            return callback(HttpResponse::newHttpJsonResponse(data));
+        }
+
+        //id , nickname
+        int id = (*jsonBody)["id"].asInt();
+        std::string nickname = (*jsonBody)["nickname"].asString();
+
+        auto clientDb=drogon::app().getDbClient();
+        auto res = clientDb->execSqlSync("update koi.users set nickname = ? where id = ?",nickname,id);
+        
+        data["message"] = "修改成功";
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp);
+
+    }
+    catch(const std::exception& e)
+    {
+        data["message"] = "修改失败";
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp);
+
+    }
+    
+}
+
+
+
+
+
+void controllers::chatpage::changeUserPassWord(const HttpRequestPtr& req,  
+std::function<void (const HttpResponsePtr &)> &&callback) const
+{
+    Json::Value data;
+    try
+    {
+        auto jsonBody = req->getJsonObject();
+        if(jsonBody==nullptr || jsonBody->empty())
+        {
+            data["msg"] = "json is empty";
+            return callback(HttpResponse::newHttpJsonResponse(data));
+        }
+
+        //id , nickname
+        int id = (*jsonBody)["id"].asInt();
+        std::string password = (*jsonBody)["password"].asString();
+
+        auto clientDb=drogon::app().getDbClient();
+        auto res = clientDb->execSqlSync("update koi.users set passwrod = ? where id = ?",password,id);
+        
+        data["message"] = "修改成功";
+
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp);
+
+    }
+    catch(const std::exception& e)
+    {
+        data["message"] = "修改失败";
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp);
+
+    }
+    
+}
+
+
+

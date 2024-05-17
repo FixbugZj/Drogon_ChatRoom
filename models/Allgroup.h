@@ -36,7 +36,7 @@ using DbClientPtr = std::shared_ptr<DbClient>;
 }
 namespace drogon_model
 {
-namespace db
+namespace koi
 {
 
 class Allgroup
@@ -220,5 +220,5 @@ class Allgroup
         return sql;
     }
 };
-} // namespace db
+} // namespace koi
 } // namespace drogon_model

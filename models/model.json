@@ -4,17 +4,17 @@
     //filename: sqlite3 db file name
     //"filename":"",
     //host: server address,localhost by default;
-    "host": "192.168.205.134",
+    "host": "123.57.74.65",
     //port: server port, 5432 by default;
     "port": 3306,
     //dbname: Database name;
-    "dbname": "db",
+    "dbname": "koi",
     //schema: valid for postgreSQL, "public" by default;
     "schema": "public",
     //user: User name
-    "user": "root",
+    "user": "koi",
     //password or passwd: Password
-    "password": "123456",
+    "password": "koi@admin2024",
     //client_encoding: The character set used by drogon_ctl. it is empty string by default which 
     //means use the default character set.
     "client_encoding": "utf8",

@@ -36,7 +36,7 @@ using DbClientPtr = std::shared_ptr<DbClient>;
 }
 namespace drogon_model
 {
-namespace db
+namespace koi
 {
 
 class Groupuser
@@ -45,7 +45,7 @@ class Groupuser
     struct Cols
     {
         static const std::string _groupid;
-        static const std::string _userid;
+        static const std::string _id;
         static const std::string _grouprole;
     };
 
@@ -53,7 +53,7 @@ class Groupuser
     static const std::string tableName;
     static const bool hasPrimaryKey;
     static const std::vector<std::string> primaryKeyName;
-    using PrimaryKeyType = std::tuple<int32_t,int32_t>;//groupid,userid
+    using PrimaryKeyType = std::tuple<int32_t,int32_t>;//groupid,id
     PrimaryKeyType getPrimaryKey() const;
 
     /**
@@ -106,13 +106,13 @@ class Groupuser
     ///Set the value of the column groupid
     void setGroupid(const int32_t &pGroupid) noexcept;
 
-    /**  For column userid  */
-    ///Get the value of the column userid, returns the default value if the column is null
-    const int32_t &getValueOfUserid() const noexcept;
+    /**  For column id  */
+    ///Get the value of the column id, returns the default value if the column is null
+    const int32_t &getValueOfId() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<int32_t> &getUserid() const noexcept;
-    ///Set the value of the column userid
-    void setUserid(const int32_t &pUserid) noexcept;
+    const std::shared_ptr<int32_t> &getId() const noexcept;
+    ///Set the value of the column id
+    void setId(const int32_t &pId) noexcept;
 
     /**  For column grouprole  */
     ///Get the value of the column grouprole, returns the default value if the column is null
@@ -147,7 +147,7 @@ class Groupuser
     ///For mysql or sqlite3
     void updateId(const uint64_t id);
     std::shared_ptr<int32_t> groupid_;
-    std::shared_ptr<int32_t> userid_;
+    std::shared_ptr<int32_t> id_;
     std::shared_ptr<std::string> grouprole_;
     struct MetaData
     {
@@ -164,13 +164,13 @@ class Groupuser
   public:
     static const std::string &sqlForFindingByPrimaryKey()
     {
-        static const std::string sql="select * from " + tableName + " where groupid = ? and userid = ?";
+        static const std::string sql="select * from " + tableName + " where groupid = ? and id = ?";
         return sql;
     }
 
     static const std::string &sqlForDeletingByPrimaryKey()
     {
-        static const std::string sql="delete from " + tableName + " where groupid = ? and userid = ?";
+        static const std::string sql="delete from " + tableName + " where groupid = ? and id = ?";
         return sql;
     }
     std::string sqlForInserting(bool &needSelection) const
@@ -185,7 +185,7 @@ class Groupuser
         }
         if(dirtyFlag_[1])
         {
-            sql += "userid,";
+            sql += "id,";
             ++parametersCount;
         }
         sql += "grouprole,";
@@ -230,5 +230,5 @@ class Groupuser
         return sql;
     }
 };
-} // namespace db
+} // namespace koi
 } // namespace drogon_model

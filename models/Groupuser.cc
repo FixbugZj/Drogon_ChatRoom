@@ -11,18 +11,18 @@
 
 using namespace drogon;
 using namespace drogon::orm;
-using namespace drogon_model::db;
+using namespace drogon_model::koi;
 
 const std::string Groupuser::Cols::_groupid = "groupid";
-const std::string Groupuser::Cols::_userid = "userid";
+const std::string Groupuser::Cols::_id = "id";
 const std::string Groupuser::Cols::_grouprole = "grouprole";
-const std::vector<std::string> Groupuser::primaryKeyName = {"groupid","userid"};
+const std::vector<std::string> Groupuser::primaryKeyName = {"groupid","id"};
 const bool Groupuser::hasPrimaryKey = true;
 const std::string Groupuser::tableName = "groupuser";
 
 const std::vector<typename Groupuser::MetaData> Groupuser::metaData_={
 {"groupid","int32_t","int",4,0,1,1},
-{"userid","int32_t","int",4,0,1,1},
+{"id","int32_t","int",4,0,1,1},
 {"grouprole","std::string","enum('creator','normal')",0,0,0,0}
 };
 const std::string &Groupuser::getColumnName(size_t index) noexcept(false)
@@ -38,9 +38,9 @@ Groupuser::Groupuser(const Row &r, const ssize_t indexOffset) noexcept
         {
             groupid_=std::make_shared<int32_t>(r["groupid"].as<int32_t>());
         }
-        if(!r["userid"].isNull())
+        if(!r["id"].isNull())
         {
-            userid_=std::make_shared<int32_t>(r["userid"].as<int32_t>());
+            id_=std::make_shared<int32_t>(r["id"].as<int32_t>());
         }
         if(!r["grouprole"].isNull())
         {
@@ -64,7 +64,7 @@ Groupuser::Groupuser(const Row &r, const ssize_t indexOffset) noexcept
         index = offset + 1;
         if(!r[index].isNull())
         {
-            userid_=std::make_shared<int32_t>(r[index].as<int32_t>());
+            id_=std::make_shared<int32_t>(r[index].as<int32_t>());
         }
         index = offset + 2;
         if(!r[index].isNull())
@@ -95,7 +95,7 @@ Groupuser::Groupuser(const Json::Value &pJson, const std::vector<std::string> &p
         dirtyFlag_[1] = true;
         if(!pJson[pMasqueradingVector[1]].isNull())
         {
-            userid_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[1]].asInt64());
+            id_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[1]].asInt64());
         }
     }
     if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
@@ -118,12 +118,12 @@ Groupuser::Groupuser(const Json::Value &pJson) noexcept(false)
             groupid_=std::make_shared<int32_t>((int32_t)pJson["groupid"].asInt64());
         }
     }
-    if(pJson.isMember("userid"))
+    if(pJson.isMember("id"))
     {
         dirtyFlag_[1]=true;
-        if(!pJson["userid"].isNull())
+        if(!pJson["id"].isNull())
         {
-            userid_=std::make_shared<int32_t>((int32_t)pJson["userid"].asInt64());
+            id_=std::make_shared<int32_t>((int32_t)pJson["id"].asInt64());
         }
     }
     if(pJson.isMember("grouprole"))
@@ -155,7 +155,7 @@ void Groupuser::updateByMasqueradedJson(const Json::Value &pJson,
     {
         if(!pJson[pMasqueradingVector[1]].isNull())
         {
-            userid_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[1]].asInt64());
+            id_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[1]].asInt64());
         }
     }
     if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
@@ -177,11 +177,11 @@ void Groupuser::updateByJson(const Json::Value &pJson) noexcept(false)
             groupid_=std::make_shared<int32_t>((int32_t)pJson["groupid"].asInt64());
         }
     }
-    if(pJson.isMember("userid"))
+    if(pJson.isMember("id"))
     {
-        if(!pJson["userid"].isNull())
+        if(!pJson["id"].isNull())
         {
-            userid_=std::make_shared<int32_t>((int32_t)pJson["userid"].asInt64());
+            id_=std::make_shared<int32_t>((int32_t)pJson["id"].asInt64());
         }
     }
     if(pJson.isMember("grouprole"))
@@ -211,20 +211,20 @@ void Groupuser::setGroupid(const int32_t &pGroupid) noexcept
     dirtyFlag_[0] = true;
 }
 
-const int32_t &Groupuser::getValueOfUserid() const noexcept
+const int32_t &Groupuser::getValueOfId() const noexcept
 {
     static const int32_t defaultValue = int32_t();
-    if(userid_)
-        return *userid_;
+    if(id_)
+        return *id_;
     return defaultValue;
 }
-const std::shared_ptr<int32_t> &Groupuser::getUserid() const noexcept
+const std::shared_ptr<int32_t> &Groupuser::getId() const noexcept
 {
-    return userid_;
+    return id_;
 }
-void Groupuser::setUserid(const int32_t &pUserid) noexcept
+void Groupuser::setId(const int32_t &pId) noexcept
 {
-    userid_ = std::make_shared<int32_t>(pUserid);
+    id_ = std::make_shared<int32_t>(pId);
     dirtyFlag_[1] = true;
 }
 
@@ -260,14 +260,14 @@ void Groupuser::updateId(const uint64_t id)
 }
 typename Groupuser::PrimaryKeyType Groupuser::getPrimaryKey() const
 {
-    return std::make_tuple(*groupid_,*userid_);
+    return std::make_tuple(*groupid_,*id_);
 }
 
 const std::vector<std::string> &Groupuser::insertColumns() noexcept
 {
     static const std::vector<std::string> inCols={
         "groupid",
-        "userid",
+        "id",
         "grouprole"
     };
     return inCols;
@@ -288,9 +288,9 @@ void Groupuser::outputArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[1])
     {
-        if(getUserid())
+        if(getId())
         {
-            binder << getValueOfUserid();
+            binder << getValueOfId();
         }
         else
         {
@@ -343,9 +343,9 @@ void Groupuser::updateArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[1])
     {
-        if(getUserid())
+        if(getId())
         {
-            binder << getValueOfUserid();
+            binder << getValueOfId();
         }
         else
         {
@@ -375,13 +375,13 @@ Json::Value Groupuser::toJson() const
     {
         ret["groupid"]=Json::Value();
     }
-    if(getUserid())
+    if(getId())
     {
-        ret["userid"]=getValueOfUserid();
+        ret["id"]=getValueOfId();
     }
     else
     {
-        ret["userid"]=Json::Value();
+        ret["id"]=Json::Value();
     }
     if(getGrouprole())
     {
@@ -413,9 +413,9 @@ Json::Value Groupuser::toMasqueradedJson(
         }
         if(!pMasqueradingVector[1].empty())
         {
-            if(getUserid())
+            if(getId())
             {
-                ret[pMasqueradingVector[1]]=getValueOfUserid();
+                ret[pMasqueradingVector[1]]=getValueOfId();
             }
             else
             {
@@ -444,13 +444,13 @@ Json::Value Groupuser::toMasqueradedJson(
     {
         ret["groupid"]=Json::Value();
     }
-    if(getUserid())
+    if(getId())
     {
-        ret["userid"]=getValueOfUserid();
+        ret["id"]=getValueOfId();
     }
     else
     {
-        ret["userid"]=Json::Value();
+        ret["id"]=Json::Value();
     }
     if(getGrouprole())
     {
@@ -475,14 +475,14 @@ bool Groupuser::validateJsonForCreation(const Json::Value &pJson, std::string &e
         err="The groupid column cannot be null";
         return false;
     }
-    if(pJson.isMember("userid"))
+    if(pJson.isMember("id"))
     {
-        if(!validJsonOfField(1, "userid", pJson["userid"], err, true))
+        if(!validJsonOfField(1, "id", pJson["id"], err, true))
             return false;
     }
     else
     {
-        err="The userid column cannot be null";
+        err="The id column cannot be null";
         return false;
     }
     if(pJson.isMember("grouprole"))
@@ -556,9 +556,9 @@ bool Groupuser::validateJsonForUpdate(const Json::Value &pJson, std::string &err
         err = "The value of primary key must be set in the json object for update";
         return false;
     }
-    if(pJson.isMember("userid"))
+    if(pJson.isMember("id"))
     {
-        if(!validJsonOfField(1, "userid", pJson["userid"], err, false))
+        if(!validJsonOfField(1, "id", pJson["id"], err, false))
             return false;
     }
     else

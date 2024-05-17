@@ -23,9 +23,9 @@ class User : public drogon::HttpController<User>
     // METHOD_ADD(UserService::your_method_name, "/{1}/{2}/list", Get); // path is /UserService/{arg1}/{arg2}/list
     // ADD_METHOD_TO(UserService::your_method_name, "/absolute/path/{1}/{2}/list", Get); // path is /absolute/path/{arg1}/{arg2}/list
 
-    ADD_METHOD_TO(User::loginPage, "/login", Get); 
-    ADD_METHOD_TO(User::doLogin,"/login",Post);
-    ADD_METHOD_TO(User::doregister,"/register",Post);
+    ADD_METHOD_TO(User::loginPage, "/login", Get,Options); 
+    ADD_METHOD_TO(User::doLogin,"/login",Post,Options);
+    ADD_METHOD_TO(User::doregister,"/register",Post,Options);
   
     METHOD_LIST_END
     // your declaration of processing function maybe like this:

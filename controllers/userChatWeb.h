@@ -19,6 +19,8 @@ struct JsonMessage
   std::string message;
 };
 
+
+
 namespace controllers
 {
   class userChatWeb : public drogon::WebSocketController<userChatWeb>
@@ -30,10 +32,11 @@ namespace controllers
     void handleNewConnection(const HttpRequestPtr &,
                                     const WebSocketConnectionPtr&) override;
     void handleConnectionClosed(const WebSocketConnectionPtr&) override;
+    
     WS_PATH_LIST_BEGIN
     // list path definitions here;
     // WS_PATH_ADD("/path", "filter1", "filter2", ...);
-    WS_PATH_ADD("/user/chat");
+    WS_PATH_ADD("/user/chat",Get,Post,Options);
     
     WS_PATH_LIST_END
 

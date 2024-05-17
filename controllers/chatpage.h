@@ -32,23 +32,22 @@ namespace controllers
 
     
     
-    ADD_METHOD_TO(chatpage::getchatPage,"/user/chat",Get);
-    ADD_METHOD_TO(chatpage::addfriend,"/user/chat/addfriend",Post);
-    ADD_METHOD_TO(chatpage::addgroup,"/user/chat/addgroup",Post);
-    ADD_METHOD_TO(chatpage::oneChat,"/user/chat/oneChat",Post);
+    ADD_METHOD_TO(chatpage::getchatPage,"/user/chat",Get,Options);
+    ADD_METHOD_TO(chatpage::addfriend,"/user/chat/addfriend",Post,Options);
+    ADD_METHOD_TO(chatpage::addgroup,"/user/chat/addgroup",Post,Options);
+    ADD_METHOD_TO(chatpage::oneChat,"/user/chat/oneChat",Post,Options);
 
-    ADD_METHOD_TO(chatpage::createGroups,"/user/chat/createGroup",Post);
+    ADD_METHOD_TO(chatpage::createGroups,"/user/chat/createGroup",Post,Options);
 
-    ADD_METHOD_TO(chatpage::getUserInfo,"/user/chat/getUserInfo",Post);
-    
+    ADD_METHOD_TO(chatpage::getUserInfo,"/user/chat/getUserInfo",Post,Options);
+    ADD_METHOD_TO(chatpage::changeUserNickname,"/user/chat/changeUserNickname",Post,Options);
+    ADD_METHOD_TO(chatpage::changeUserPassWord,"/user/chat/changeUserPassWord",Post,Options);
+
 
     METHOD_LIST_END
     // your declaration of processing function maybe like this:
     // void get(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback, int p1, std::string p2);
     // void your_method_name(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback, double p1, int p2) const;
-
-
-
 
     void getchatPage(const HttpRequestPtr& req, 
     std::function<void (const HttpResponsePtr &)> &&callback) const;
@@ -71,10 +70,14 @@ namespace controllers
     void getUserInfo(const HttpRequestPtr& req,  
     std::function<void (const HttpResponsePtr &)> &&callback) const;
 
-    
+    void changeUserNickname(const HttpRequestPtr& req,  
+    std::function<void (const HttpResponsePtr &)> &&callback) const;
+
+    void changeUserPassWord(const HttpRequestPtr& req,  
+    std::function<void (const HttpResponsePtr &)> &&callback) const;
+
 
   private:
-
 
   service::UserModel _userModel;
   service::FriendModel _friendModel;

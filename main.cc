@@ -3,38 +3,36 @@
 using namespace drogon;
 
 int main() {
-    //Set HTTP listener address and port
-    //drogon::app().addListener("192.168.205.134", 8000);
-    //Load config file
-    app().setExceptionHandler(
-        [](const std::exception &e,
-        const HttpRequestPtr&req,
-        std::function<void(const HttpResponsePtr &)>&&callback)
-        {   
-            Json::Value json;
-            
-            if(typeid(e)==typeid(std::invalid_argument)|| 
-            typeid(e)==typeid(std::runtime_error))
-            {
-                json["error"] = e.what();
-            }
+  // Set HTTP listener address and port
+  
+  // Load config file
+  
 
-            if(typeid(e)==typeid(orm::UnexpectedRows))
-            {
-                
-                json["error"] = "未知错误";
-                
-            }
+  drogon::app().loadConfigFile("./config.json");
+  // Cors
+  // 设置 CORS 头
+    drogon::app().registerHandler("/", [](const drogon::HttpRequestPtr& req, 
+                                             std::function<void(const drogon::HttpResponsePtr&)>&& callback) {
+         auto resp = drogon::HttpResponse::newHttpResponse();
+        resp->addHeader("Access-Control-Allow-Origin", "*"); // 允许所有来源的请求
+        resp->addHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS"); // 允许的 HTTP 方法
+        resp->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Content-Length, Host, Connection"); // 允许的请求头
+        callback(resp);
+    });
 
-            auto resp = HttpResponse::newHttpJsonResponse(json);
-            resp->setStatusCode(k400BadRequest);
-            callback(resp);
-        }
-    );
 
-    drogon::app().loadConfigFile("./config.json");
-    //Run HTTP framework,the method will block in the internal event loop
-    drogon::app().run();
 
-    return 0;
+    drogon::app().registerPostHandlingAdvice([](const HttpRequestPtr &,
+      const drogon::HttpResponsePtr &resp)
+      {
+        resp->addHeader("Access-Control-Allow-Origin", "*");
+        resp->addHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS"); // 允许的 HTTP 方法
+        resp->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Content-Length, Host, Connection"); // 允许的请求头
+        
+      });
+
+  // Run HTTP framework,the method will block in the internal event loop
+  drogon::app().run();
+
+  return 0;
 }

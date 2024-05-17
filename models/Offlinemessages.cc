@@ -11,16 +11,16 @@
 
 using namespace drogon;
 using namespace drogon::orm;
-using namespace drogon_model::db;
+using namespace drogon_model::koi;
 
-const std::string Offlinemessages::Cols::_userid = "userid";
+const std::string Offlinemessages::Cols::_id = "id";
 const std::string Offlinemessages::Cols::_message = "message";
-const std::string Offlinemessages::primaryKeyName = "userid";
+const std::string Offlinemessages::primaryKeyName = "id";
 const bool Offlinemessages::hasPrimaryKey = true;
 const std::string Offlinemessages::tableName = "offlinemessages";
 
 const std::vector<typename Offlinemessages::MetaData> Offlinemessages::metaData_={
-{"userid","int32_t","int",4,0,1,1},
+{"id","int32_t","int",4,0,1,1},
 {"message","std::string","varchar(500)",500,0,0,1}
 };
 const std::string &Offlinemessages::getColumnName(size_t index) noexcept(false)
@@ -32,9 +32,9 @@ Offlinemessages::Offlinemessages(const Row &r, const ssize_t indexOffset) noexce
 {
     if(indexOffset < 0)
     {
-        if(!r["userid"].isNull())
+        if(!r["id"].isNull())
         {
-            userid_=std::make_shared<int32_t>(r["userid"].as<int32_t>());
+            id_=std::make_shared<int32_t>(r["id"].as<int32_t>());
         }
         if(!r["message"].isNull())
         {
@@ -53,7 +53,7 @@ Offlinemessages::Offlinemessages(const Row &r, const ssize_t indexOffset) noexce
         index = offset + 0;
         if(!r[index].isNull())
         {
-            userid_=std::make_shared<int32_t>(r[index].as<int32_t>());
+            id_=std::make_shared<int32_t>(r[index].as<int32_t>());
         }
         index = offset + 1;
         if(!r[index].isNull())
@@ -76,7 +76,7 @@ Offlinemessages::Offlinemessages(const Json::Value &pJson, const std::vector<std
         dirtyFlag_[0] = true;
         if(!pJson[pMasqueradingVector[0]].isNull())
         {
-            userid_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
+            id_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
         }
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
@@ -91,12 +91,12 @@ Offlinemessages::Offlinemessages(const Json::Value &pJson, const std::vector<std
 
 Offlinemessages::Offlinemessages(const Json::Value &pJson) noexcept(false)
 {
-    if(pJson.isMember("userid"))
+    if(pJson.isMember("id"))
     {
         dirtyFlag_[0]=true;
-        if(!pJson["userid"].isNull())
+        if(!pJson["id"].isNull())
         {
-            userid_=std::make_shared<int32_t>((int32_t)pJson["userid"].asInt64());
+            id_=std::make_shared<int32_t>((int32_t)pJson["id"].asInt64());
         }
     }
     if(pJson.isMember("message"))
@@ -121,7 +121,7 @@ void Offlinemessages::updateByMasqueradedJson(const Json::Value &pJson,
     {
         if(!pJson[pMasqueradingVector[0]].isNull())
         {
-            userid_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
+            id_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
         }
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
@@ -136,11 +136,11 @@ void Offlinemessages::updateByMasqueradedJson(const Json::Value &pJson,
 
 void Offlinemessages::updateByJson(const Json::Value &pJson) noexcept(false)
 {
-    if(pJson.isMember("userid"))
+    if(pJson.isMember("id"))
     {
-        if(!pJson["userid"].isNull())
+        if(!pJson["id"].isNull())
         {
-            userid_=std::make_shared<int32_t>((int32_t)pJson["userid"].asInt64());
+            id_=std::make_shared<int32_t>((int32_t)pJson["id"].asInt64());
         }
     }
     if(pJson.isMember("message"))
@@ -153,26 +153,26 @@ void Offlinemessages::updateByJson(const Json::Value &pJson) noexcept(false)
     }
 }
 
-const int32_t &Offlinemessages::getValueOfUserid() const noexcept
+const int32_t &Offlinemessages::getValueOfId() const noexcept
 {
     static const int32_t defaultValue = int32_t();
-    if(userid_)
-        return *userid_;
+    if(id_)
+        return *id_;
     return defaultValue;
 }
-const std::shared_ptr<int32_t> &Offlinemessages::getUserid() const noexcept
+const std::shared_ptr<int32_t> &Offlinemessages::getId() const noexcept
 {
-    return userid_;
+    return id_;
 }
-void Offlinemessages::setUserid(const int32_t &pUserid) noexcept
+void Offlinemessages::setId(const int32_t &pId) noexcept
 {
-    userid_ = std::make_shared<int32_t>(pUserid);
+    id_ = std::make_shared<int32_t>(pId);
     dirtyFlag_[0] = true;
 }
 const typename Offlinemessages::PrimaryKeyType & Offlinemessages::getPrimaryKey() const
 {
-    assert(userid_);
-    return *userid_;
+    assert(id_);
+    return *id_;
 }
 
 const std::string &Offlinemessages::getValueOfMessage() const noexcept
@@ -204,7 +204,7 @@ void Offlinemessages::updateId(const uint64_t id)
 const std::vector<std::string> &Offlinemessages::insertColumns() noexcept
 {
     static const std::vector<std::string> inCols={
-        "userid",
+        "id",
         "message"
     };
     return inCols;
@@ -214,9 +214,9 @@ void Offlinemessages::outputArgs(drogon::orm::internal::SqlBinder &binder) const
 {
     if(dirtyFlag_[0])
     {
-        if(getUserid())
+        if(getId())
         {
-            binder << getValueOfUserid();
+            binder << getValueOfId();
         }
         else
         {
@@ -254,9 +254,9 @@ void Offlinemessages::updateArgs(drogon::orm::internal::SqlBinder &binder) const
 {
     if(dirtyFlag_[0])
     {
-        if(getUserid())
+        if(getId())
         {
-            binder << getValueOfUserid();
+            binder << getValueOfId();
         }
         else
         {
@@ -278,13 +278,13 @@ void Offlinemessages::updateArgs(drogon::orm::internal::SqlBinder &binder) const
 Json::Value Offlinemessages::toJson() const
 {
     Json::Value ret;
-    if(getUserid())
+    if(getId())
     {
-        ret["userid"]=getValueOfUserid();
+        ret["id"]=getValueOfId();
     }
     else
     {
-        ret["userid"]=Json::Value();
+        ret["id"]=Json::Value();
     }
     if(getMessage())
     {
@@ -305,9 +305,9 @@ Json::Value Offlinemessages::toMasqueradedJson(
     {
         if(!pMasqueradingVector[0].empty())
         {
-            if(getUserid())
+            if(getId())
             {
-                ret[pMasqueradingVector[0]]=getValueOfUserid();
+                ret[pMasqueradingVector[0]]=getValueOfId();
             }
             else
             {
@@ -328,13 +328,13 @@ Json::Value Offlinemessages::toMasqueradedJson(
         return ret;
     }
     LOG_ERROR << "Masquerade failed";
-    if(getUserid())
+    if(getId())
     {
-        ret["userid"]=getValueOfUserid();
+        ret["id"]=getValueOfId();
     }
     else
     {
-        ret["userid"]=Json::Value();
+        ret["id"]=Json::Value();
     }
     if(getMessage())
     {
@@ -349,14 +349,14 @@ Json::Value Offlinemessages::toMasqueradedJson(
 
 bool Offlinemessages::validateJsonForCreation(const Json::Value &pJson, std::string &err)
 {
-    if(pJson.isMember("userid"))
+    if(pJson.isMember("id"))
     {
-        if(!validJsonOfField(0, "userid", pJson["userid"], err, true))
+        if(!validJsonOfField(0, "id", pJson["id"], err, true))
             return false;
     }
     else
     {
-        err="The userid column cannot be null";
+        err="The id column cannot be null";
         return false;
     }
     if(pJson.isMember("message"))
@@ -417,9 +417,9 @@ bool Offlinemessages::validateMasqueradedJsonForCreation(const Json::Value &pJso
 }
 bool Offlinemessages::validateJsonForUpdate(const Json::Value &pJson, std::string &err)
 {
-    if(pJson.isMember("userid"))
+    if(pJson.isMember("id"))
     {
-        if(!validJsonOfField(0, "userid", pJson["userid"], err, false))
+        if(!validJsonOfField(0, "id", pJson["id"], err, false))
             return false;
     }
     else

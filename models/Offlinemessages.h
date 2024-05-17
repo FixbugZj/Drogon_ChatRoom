@@ -36,7 +36,7 @@ using DbClientPtr = std::shared_ptr<DbClient>;
 }
 namespace drogon_model
 {
-namespace db
+namespace koi
 {
 
 class Offlinemessages
@@ -44,7 +44,7 @@ class Offlinemessages
   public:
     struct Cols
     {
-        static const std::string _userid;
+        static const std::string _id;
         static const std::string _message;
     };
 
@@ -97,13 +97,13 @@ class Offlinemessages
                           std::string &err,
                           bool isForCreation);
 
-    /**  For column userid  */
-    ///Get the value of the column userid, returns the default value if the column is null
-    const int32_t &getValueOfUserid() const noexcept;
+    /**  For column id  */
+    ///Get the value of the column id, returns the default value if the column is null
+    const int32_t &getValueOfId() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<int32_t> &getUserid() const noexcept;
-    ///Set the value of the column userid
-    void setUserid(const int32_t &pUserid) noexcept;
+    const std::shared_ptr<int32_t> &getId() const noexcept;
+    ///Set the value of the column id
+    void setId(const int32_t &pId) noexcept;
 
     /**  For column message  */
     ///Get the value of the column message, returns the default value if the column is null
@@ -136,7 +136,7 @@ class Offlinemessages
     void updateArgs(drogon::orm::internal::SqlBinder &binder) const;
     ///For mysql or sqlite3
     void updateId(const uint64_t id);
-    std::shared_ptr<int32_t> userid_;
+    std::shared_ptr<int32_t> id_;
     std::shared_ptr<std::string> message_;
     struct MetaData
     {
@@ -153,13 +153,13 @@ class Offlinemessages
   public:
     static const std::string &sqlForFindingByPrimaryKey()
     {
-        static const std::string sql="select * from " + tableName + " where userid = ?";
+        static const std::string sql="select * from " + tableName + " where id = ?";
         return sql;
     }
 
     static const std::string &sqlForDeletingByPrimaryKey()
     {
-        static const std::string sql="delete from " + tableName + " where userid = ?";
+        static const std::string sql="delete from " + tableName + " where id = ?";
         return sql;
     }
     std::string sqlForInserting(bool &needSelection) const
@@ -169,7 +169,7 @@ class Offlinemessages
         needSelection = false;
         if(dirtyFlag_[0])
         {
-            sql += "userid,";
+            sql += "id,";
             ++parametersCount;
         }
         if(dirtyFlag_[1])
@@ -204,5 +204,5 @@ class Offlinemessages
         return sql;
     }
 };
-} // namespace db
+} // namespace koi
 } // namespace drogon_model

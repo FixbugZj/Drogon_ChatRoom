@@ -11,7 +11,7 @@
 
 using namespace drogon;
 using namespace drogon::orm;
-using namespace drogon_model::db;
+using namespace drogon_model::koi;
 
 const std::string Allgroup::Cols::_id = "id";
 const std::string Allgroup::Cols::_groupname = "groupname";

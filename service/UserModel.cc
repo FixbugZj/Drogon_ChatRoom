@@ -7,7 +7,7 @@
 
 using namespace drogon;
 using namespace drogon::orm;
-using namespace drogon_model::db;
+using namespace drogon_model::koi;
 
 
 
@@ -38,10 +38,11 @@ void service::UserModel::registdo(std::string account,std::string &password,std:
 {
     auto clientPtr = drogon::app().getDbClient();
     auto res = clientPtr->execSqlSync("select account from users where account = ?",account);
-
+    
     try{
         if(res.empty())
-        {
+        {   
+
             clientPtr->execSqlSync("INSERT INTO users(account,password,nickname) VALUES (?,?,?)",
                         account,password,nickname);
     
@@ -53,7 +54,7 @@ void service::UserModel::registdo(std::string account,std::string &password,std:
         }
     }
     catch(const DrogonDbException& e){
-        throw std::runtime_error("注册失败,用户名冲突");
+        throw std::runtime_error("注册失败");
     }
 
 
@@ -152,11 +153,11 @@ void service::GroupModel::createGroup(std::string groupname,std::string groupdes
 
 }
 
-void service::GroupModel::addGroup(int userid,int groupid,std::string role)
+void service::GroupModel::addGroup(int id,int groupid,std::string role)
 {
     auto clientPtr = drogon::app().getDbClient();
     try{
-        auto res = clientPtr->execSqlSync("insert into groupuser values(?, ?, ?)",groupid,userid,role);
+        auto res = clientPtr->execSqlSync("insert into groupuser values(?, ?, ?)",groupid,id,role);
         LOG_ERROR<<"加入成功";
     }
     catch(const DrogonDbException& e){
@@ -168,18 +169,18 @@ void service::GroupModel::addGroup(int userid,int groupid,std::string role)
 
 
 //根据指定groupid 查询群组用户id列表 ，除userid自己，主要用户群聊业务给群组其它成员群发消息
-std::vector<int> service::GroupModel::queryGroupUsers(int userid, int groupid)
+std::vector<int> service::GroupModel::queryGroupUsers(int id, int groupid)
 {
     auto clientPtr = drogon::app().getDbClient();
 
     std::vector<int> idVec;
     try{
-        auto res = clientPtr->execSqlSync("select userid from groupuser where groupid = ? and userid != ?",groupid,userid);        
+        auto res = clientPtr->execSqlSync("select id from groupuser where groupid = ? and id != ?",groupid,id);        
         LOG_ERROR<<"查询成功";
 
         for(auto row:res)
         {
-            int id = row["userid"].as<int>();
+            int id = row["id"].as<int>();
             LOG_ERROR<<id;
             idVec.push_back(id);
         }
@@ -194,11 +195,11 @@ std::vector<int> service::GroupModel::queryGroupUsers(int userid, int groupid)
 
 
 //存储
-void service::offlineMessageModel::insert(int userid,std::string msg)
+void service::offlineMessageModel::insert(int id,std::string msg)
 {
     auto clientPtr = drogon::app().getDbClient();
     try{
-    auto res = clientPtr->execSqlSync("insert into offlinemessage values(?, ?)",userid,msg);        
+    auto res = clientPtr->execSqlSync("insert into offlinemessage values(?, ?)",id,msg);        
         LOG_ERROR<<"插入成功";
     }
     catch(const DrogonDbException& e){
@@ -208,11 +209,11 @@ void service::offlineMessageModel::insert(int userid,std::string msg)
 }
 
 //移除
-void service::offlineMessageModel::remove(int userid)
+void service::offlineMessageModel::remove(int id)
 {
     auto clientPtr = drogon::app().getDbClient();
     try{
-    auto res = clientPtr->execSqlSync("delete from offlinemessage where userid=?",userid);        
+    auto res = clientPtr->execSqlSync("delete from offlinemessage where userid=?",id);        
         LOG_ERROR<<"删除成功";
     }
     catch(const DrogonDbException& e){
@@ -223,12 +224,12 @@ void service::offlineMessageModel::remove(int userid)
 }
 
 //查询用户离线消息
-std::vector<std::string> service::offlineMessageModel::query(int userid)
+std::vector<std::string> service::offlineMessageModel::query(int id)
 {
     auto clientPtr = drogon::app().getDbClient();
     std::vector<std::string> vec;
     try{
-    auto res = clientPtr->execSqlSync("select message from offlinemessage where userid = ?",userid);        
+    auto res = clientPtr->execSqlSync("select message from offlinemessage where id = ?",id);        
         LOG_ERROR<<"成功";
         for(auto row :res)
         {

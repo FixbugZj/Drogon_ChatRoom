@@ -11,29 +11,37 @@
 
 using namespace drogon;
 using namespace drogon::orm;
-using namespace drogon_model::db;
+using namespace drogon_model::koi;
 
 const std::string Users::Cols::_id = "id";
+const std::string Users::Cols::_nickname = "nickname";
 const std::string Users::Cols::_account = "account";
 const std::string Users::Cols::_password = "password";
-const std::string Users::Cols::_nickname = "nickname";
-const std::string Users::Cols::_create_time = "create_time";
-const std::string Users::Cols::_update_time = "update_time";
-const std::string Users::Cols::_last_login_time = "last_login_time";
-const std::string Users::Cols::_state = "state";
+const std::string Users::Cols::_avatarUrl = "avatarUrl";
+const std::string Users::Cols::_isValid = "isValid";
+const std::string Users::Cols::_sex = "sex";
+const std::string Users::Cols::_phone = "phone";
+const std::string Users::Cols::_salt = "salt";
+const std::string Users::Cols::_roleId = "roleId";
+const std::string Users::Cols::_createTime = "createTime";
+const std::string Users::Cols::_updateTime = "updateTime";
 const std::string Users::primaryKeyName = "id";
 const bool Users::hasPrimaryKey = true;
 const std::string Users::tableName = "users";
 
 const std::vector<typename Users::MetaData> Users::metaData_={
-{"id","int32_t","int",4,1,1,1},
-{"account","std::string","varchar(50)",50,0,0,1},
-{"password","std::string","varchar(50)",50,0,0,1},
-{"nickname","std::string","varchar(255)",255,0,0,0},
-{"create_time","::trantor::Date","datetime",0,0,0,0},
-{"update_time","::trantor::Date","datetime",0,0,0,0},
-{"last_login_time","::trantor::Date","datetime",0,0,0,0},
-{"state","std::string","enum('online','offline')",0,0,0,0}
+{"id","uint64_t","bigint unsigned",8,1,1,1},
+{"nickname","std::string","varchar(255)",255,0,0,1},
+{"account","std::string","varchar(255)",255,0,0,1},
+{"password","std::string","varchar(255)",255,0,0,1},
+{"avatarUrl","std::string","varchar(255)",255,0,0,1},
+{"isValid","int8_t","tinyint(1)",1,0,0,1},
+{"sex","std::string","varchar(2)",2,0,0,1},
+{"phone","std::string","varchar(255)",255,0,0,1},
+{"salt","std::string","varchar(255)",255,0,0,1},
+{"roleId","std::string","text",0,0,0,0},
+{"createTime","::trantor::Date","datetime",0,0,0,0},
+{"updateTime","::trantor::Date","datetime",0,0,0,0}
 };
 const std::string &Users::getColumnName(size_t index) noexcept(false)
 {
@@ -46,7 +54,11 @@ Users::Users(const Row &r, const ssize_t indexOffset) noexcept
     {
         if(!r["id"].isNull())
         {
-            id_=std::make_shared<int32_t>(r["id"].as<int32_t>());
+            id_=std::make_shared<uint64_t>(r["id"].as<uint64_t>());
+        }
+        if(!r["nickname"].isNull())
+        {
+            nickname_=std::make_shared<std::string>(r["nickname"].as<std::string>());
         }
         if(!r["account"].isNull())
         {
@@ -56,13 +68,33 @@ Users::Users(const Row &r, const ssize_t indexOffset) noexcept
         {
             password_=std::make_shared<std::string>(r["password"].as<std::string>());
         }
-        if(!r["nickname"].isNull())
+        if(!r["avatarUrl"].isNull())
         {
-            nickname_=std::make_shared<std::string>(r["nickname"].as<std::string>());
+            avatarurl_=std::make_shared<std::string>(r["avatarUrl"].as<std::string>());
         }
-        if(!r["create_time"].isNull())
+        if(!r["isValid"].isNull())
         {
-            auto timeStr = r["create_time"].as<std::string>();
+            isvalid_=std::make_shared<int8_t>(r["isValid"].as<int8_t>());
+        }
+        if(!r["sex"].isNull())
+        {
+            sex_=std::make_shared<std::string>(r["sex"].as<std::string>());
+        }
+        if(!r["phone"].isNull())
+        {
+            phone_=std::make_shared<std::string>(r["phone"].as<std::string>());
+        }
+        if(!r["salt"].isNull())
+        {
+            salt_=std::make_shared<std::string>(r["salt"].as<std::string>());
+        }
+        if(!r["roleId"].isNull())
+        {
+            roleid_=std::make_shared<std::string>(r["roleId"].as<std::string>());
+        }
+        if(!r["createTime"].isNull())
+        {
+            auto timeStr = r["createTime"].as<std::string>();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
             auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
@@ -79,12 +111,12 @@ Users::Users(const Row &r, const ssize_t indexOffset) noexcept
                     }
                     decimalNum = (size_t)atol(decimals.c_str());
                 }
-                createTime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+                createtime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
             }
         }
-        if(!r["update_time"].isNull())
+        if(!r["updateTime"].isNull())
         {
-            auto timeStr = r["update_time"].as<std::string>();
+            auto timeStr = r["updateTime"].as<std::string>();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
             auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
@@ -101,40 +133,14 @@ Users::Users(const Row &r, const ssize_t indexOffset) noexcept
                     }
                     decimalNum = (size_t)atol(decimals.c_str());
                 }
-                updateTime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+                updatetime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
             }
-        }
-        if(!r["last_login_time"].isNull())
-        {
-            auto timeStr = r["last_login_time"].as<std::string>();
-            struct tm stm;
-            memset(&stm,0,sizeof(stm));
-            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
-            time_t t = mktime(&stm);
-            size_t decimalNum = 0;
-            if(p)
-            {
-                if(*p=='.')
-                {
-                    std::string decimals(p+1,&timeStr[timeStr.length()]);
-                    while(decimals.length()<6)
-                    {
-                        decimals += "0";
-                    }
-                    decimalNum = (size_t)atol(decimals.c_str());
-                }
-                lastLoginTime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
-            }
-        }
-        if(!r["state"].isNull())
-        {
-            state_=std::make_shared<std::string>(r["state"].as<std::string>());
         }
     }
     else
     {
         size_t offset = (size_t)indexOffset;
-        if(offset + 8 > r.size())
+        if(offset + 12 > r.size())
         {
             LOG_FATAL << "Invalid SQL result for this model";
             return;
@@ -143,72 +149,56 @@ Users::Users(const Row &r, const ssize_t indexOffset) noexcept
         index = offset + 0;
         if(!r[index].isNull())
         {
-            id_=std::make_shared<int32_t>(r[index].as<int32_t>());
+            id_=std::make_shared<uint64_t>(r[index].as<uint64_t>());
         }
         index = offset + 1;
         if(!r[index].isNull())
         {
-            account_=std::make_shared<std::string>(r[index].as<std::string>());
+            nickname_=std::make_shared<std::string>(r[index].as<std::string>());
         }
         index = offset + 2;
         if(!r[index].isNull())
         {
-            password_=std::make_shared<std::string>(r[index].as<std::string>());
+            account_=std::make_shared<std::string>(r[index].as<std::string>());
         }
         index = offset + 3;
         if(!r[index].isNull())
         {
-            nickname_=std::make_shared<std::string>(r[index].as<std::string>());
+            password_=std::make_shared<std::string>(r[index].as<std::string>());
         }
         index = offset + 4;
         if(!r[index].isNull())
         {
-            auto timeStr = r[index].as<std::string>();
-            struct tm stm;
-            memset(&stm,0,sizeof(stm));
-            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
-            time_t t = mktime(&stm);
-            size_t decimalNum = 0;
-            if(p)
-            {
-                if(*p=='.')
-                {
-                    std::string decimals(p+1,&timeStr[timeStr.length()]);
-                    while(decimals.length()<6)
-                    {
-                        decimals += "0";
-                    }
-                    decimalNum = (size_t)atol(decimals.c_str());
-                }
-                createTime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
-            }
+            avatarurl_=std::make_shared<std::string>(r[index].as<std::string>());
         }
         index = offset + 5;
         if(!r[index].isNull())
         {
-            auto timeStr = r[index].as<std::string>();
-            struct tm stm;
-            memset(&stm,0,sizeof(stm));
-            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
-            time_t t = mktime(&stm);
-            size_t decimalNum = 0;
-            if(p)
-            {
-                if(*p=='.')
-                {
-                    std::string decimals(p+1,&timeStr[timeStr.length()]);
-                    while(decimals.length()<6)
-                    {
-                        decimals += "0";
-                    }
-                    decimalNum = (size_t)atol(decimals.c_str());
-                }
-                updateTime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
-            }
+            isvalid_=std::make_shared<int8_t>(r[index].as<int8_t>());
         }
         index = offset + 6;
         if(!r[index].isNull())
         {
+            sex_=std::make_shared<std::string>(r[index].as<std::string>());
+        }
+        index = offset + 7;
+        if(!r[index].isNull())
+        {
+            phone_=std::make_shared<std::string>(r[index].as<std::string>());
+        }
+        index = offset + 8;
+        if(!r[index].isNull())
+        {
+            salt_=std::make_shared<std::string>(r[index].as<std::string>());
+        }
+        index = offset + 9;
+        if(!r[index].isNull())
+        {
+            roleid_=std::make_shared<std::string>(r[index].as<std::string>());
+        }
+        index = offset + 10;
+        if(!r[index].isNull())
+        {
             auto timeStr = r[index].as<std::string>();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
@@ -226,13 +216,31 @@ Users::Users(const Row &r, const ssize_t indexOffset) noexcept
                     }
                     decimalNum = (size_t)atol(decimals.c_str());
                 }
-                lastLoginTime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+                createtime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
             }
         }
-        index = offset + 7;
+        index = offset + 11;
         if(!r[index].isNull())
         {
-            state_=std::make_shared<std::string>(r[index].as<std::string>());
+            auto timeStr = r[index].as<std::string>();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                updatetime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
         }
     }
 
@@ -240,7 +248,7 @@ Users::Users(const Row &r, const ssize_t indexOffset) noexcept
 
 Users::Users(const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 8)
+    if(pMasqueradingVector.size() != 12)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
@@ -250,7 +258,7 @@ Users::Users(const Json::Value &pJson, const std::vector<std::string> &pMasquera
         dirtyFlag_[0] = true;
         if(!pJson[pMasqueradingVector[0]].isNull())
         {
-            id_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
+            id_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[0]].asUInt64());
         }
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
@@ -258,7 +266,7 @@ Users::Users(const Json::Value &pJson, const std::vector<std::string> &pMasquera
         dirtyFlag_[1] = true;
         if(!pJson[pMasqueradingVector[1]].isNull())
         {
-            account_=std::make_shared<std::string>(pJson[pMasqueradingVector[1]].asString());
+            nickname_=std::make_shared<std::string>(pJson[pMasqueradingVector[1]].asString());
         }
     }
     if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
@@ -266,7 +274,7 @@ Users::Users(const Json::Value &pJson, const std::vector<std::string> &pMasquera
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull())
         {
-            password_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
+            account_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
         }
     }
     if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
@@ -274,7 +282,7 @@ Users::Users(const Json::Value &pJson, const std::vector<std::string> &pMasquera
         dirtyFlag_[3] = true;
         if(!pJson[pMasqueradingVector[3]].isNull())
         {
-            nickname_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
+            password_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
         }
     }
     if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
@@ -282,25 +290,7 @@ Users::Users(const Json::Value &pJson, const std::vector<std::string> &pMasquera
         dirtyFlag_[4] = true;
         if(!pJson[pMasqueradingVector[4]].isNull())
         {
-            auto timeStr = pJson[pMasqueradingVector[4]].asString();
-            struct tm stm;
-            memset(&stm,0,sizeof(stm));
-            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
-            time_t t = mktime(&stm);
-            size_t decimalNum = 0;
-            if(p)
-            {
-                if(*p=='.')
-                {
-                    std::string decimals(p+1,&timeStr[timeStr.length()]);
-                    while(decimals.length()<6)
-                    {
-                        decimals += "0";
-                    }
-                    decimalNum = (size_t)atol(decimals.c_str());
-                }
-                createTime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
-            }
+            avatarurl_=std::make_shared<std::string>(pJson[pMasqueradingVector[4]].asString());
         }
     }
     if(!pMasqueradingVector[5].empty() && pJson.isMember(pMasqueradingVector[5]))
@@ -308,25 +298,7 @@ Users::Users(const Json::Value &pJson, const std::vector<std::string> &pMasquera
         dirtyFlag_[5] = true;
         if(!pJson[pMasqueradingVector[5]].isNull())
         {
-            auto timeStr = pJson[pMasqueradingVector[5]].asString();
-            struct tm stm;
-            memset(&stm,0,sizeof(stm));
-            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
-            time_t t = mktime(&stm);
-            size_t decimalNum = 0;
-            if(p)
-            {
-                if(*p=='.')
-                {
-                    std::string decimals(p+1,&timeStr[timeStr.length()]);
-                    while(decimals.length()<6)
-                    {
-                        decimals += "0";
-                    }
-                    decimalNum = (size_t)atol(decimals.c_str());
-                }
-                updateTime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
-            }
+            isvalid_=std::make_shared<int8_t>((int8_t)pJson[pMasqueradingVector[5]].asInt64());
         }
     }
     if(!pMasqueradingVector[6].empty() && pJson.isMember(pMasqueradingVector[6]))
@@ -334,7 +306,39 @@ Users::Users(const Json::Value &pJson, const std::vector<std::string> &pMasquera
         dirtyFlag_[6] = true;
         if(!pJson[pMasqueradingVector[6]].isNull())
         {
-            auto timeStr = pJson[pMasqueradingVector[6]].asString();
+            sex_=std::make_shared<std::string>(pJson[pMasqueradingVector[6]].asString());
+        }
+    }
+    if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]))
+    {
+        dirtyFlag_[7] = true;
+        if(!pJson[pMasqueradingVector[7]].isNull())
+        {
+            phone_=std::make_shared<std::string>(pJson[pMasqueradingVector[7]].asString());
+        }
+    }
+    if(!pMasqueradingVector[8].empty() && pJson.isMember(pMasqueradingVector[8]))
+    {
+        dirtyFlag_[8] = true;
+        if(!pJson[pMasqueradingVector[8]].isNull())
+        {
+            salt_=std::make_shared<std::string>(pJson[pMasqueradingVector[8]].asString());
+        }
+    }
+    if(!pMasqueradingVector[9].empty() && pJson.isMember(pMasqueradingVector[9]))
+    {
+        dirtyFlag_[9] = true;
+        if(!pJson[pMasqueradingVector[9]].isNull())
+        {
+            roleid_=std::make_shared<std::string>(pJson[pMasqueradingVector[9]].asString());
+        }
+    }
+    if(!pMasqueradingVector[10].empty() && pJson.isMember(pMasqueradingVector[10]))
+    {
+        dirtyFlag_[10] = true;
+        if(!pJson[pMasqueradingVector[10]].isNull())
+        {
+            auto timeStr = pJson[pMasqueradingVector[10]].asString();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
             auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
@@ -351,16 +355,34 @@ Users::Users(const Json::Value &pJson, const std::vector<std::string> &pMasquera
                     }
                     decimalNum = (size_t)atol(decimals.c_str());
                 }
-                lastLoginTime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+                createtime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
             }
         }
     }
-    if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]))
+    if(!pMasqueradingVector[11].empty() && pJson.isMember(pMasqueradingVector[11]))
     {
-        dirtyFlag_[7] = true;
-        if(!pJson[pMasqueradingVector[7]].isNull())
+        dirtyFlag_[11] = true;
+        if(!pJson[pMasqueradingVector[11]].isNull())
         {
-            state_=std::make_shared<std::string>(pJson[pMasqueradingVector[7]].asString());
+            auto timeStr = pJson[pMasqueradingVector[11]].asString();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                updatetime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
         }
     }
 }
@@ -372,12 +394,20 @@ Users::Users(const Json::Value &pJson) noexcept(false)
         dirtyFlag_[0]=true;
         if(!pJson["id"].isNull())
         {
-            id_=std::make_shared<int32_t>((int32_t)pJson["id"].asInt64());
+            id_=std::make_shared<uint64_t>((uint64_t)pJson["id"].asUInt64());
+        }
+    }
+    if(pJson.isMember("nickname"))
+    {
+        dirtyFlag_[1]=true;
+        if(!pJson["nickname"].isNull())
+        {
+            nickname_=std::make_shared<std::string>(pJson["nickname"].asString());
         }
     }
     if(pJson.isMember("account"))
     {
-        dirtyFlag_[1]=true;
+        dirtyFlag_[2]=true;
         if(!pJson["account"].isNull())
         {
             account_=std::make_shared<std::string>(pJson["account"].asString());
@@ -385,78 +415,66 @@ Users::Users(const Json::Value &pJson) noexcept(false)
     }
     if(pJson.isMember("password"))
     {
-        dirtyFlag_[2]=true;
+        dirtyFlag_[3]=true;
         if(!pJson["password"].isNull())
         {
             password_=std::make_shared<std::string>(pJson["password"].asString());
         }
     }
-    if(pJson.isMember("nickname"))
-    {
-        dirtyFlag_[3]=true;
-        if(!pJson["nickname"].isNull())
-        {
-            nickname_=std::make_shared<std::string>(pJson["nickname"].asString());
-        }
-    }
-    if(pJson.isMember("create_time"))
+    if(pJson.isMember("avatarUrl"))
     {
         dirtyFlag_[4]=true;
-        if(!pJson["create_time"].isNull())
+        if(!pJson["avatarUrl"].isNull())
         {
-            auto timeStr = pJson["create_time"].asString();
-            struct tm stm;
-            memset(&stm,0,sizeof(stm));
-            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
-            time_t t = mktime(&stm);
-            size_t decimalNum = 0;
-            if(p)
-            {
-                if(*p=='.')
-                {
-                    std::string decimals(p+1,&timeStr[timeStr.length()]);
-                    while(decimals.length()<6)
-                    {
-                        decimals += "0";
-                    }
-                    decimalNum = (size_t)atol(decimals.c_str());
-                }
-                createTime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
-            }
+            avatarurl_=std::make_shared<std::string>(pJson["avatarUrl"].asString());
         }
     }
-    if(pJson.isMember("update_time"))
+    if(pJson.isMember("isValid"))
     {
         dirtyFlag_[5]=true;
-        if(!pJson["update_time"].isNull())
+        if(!pJson["isValid"].isNull())
         {
-            auto timeStr = pJson["update_time"].asString();
-            struct tm stm;
-            memset(&stm,0,sizeof(stm));
-            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
-            time_t t = mktime(&stm);
-            size_t decimalNum = 0;
-            if(p)
-            {
-                if(*p=='.')
-                {
-                    std::string decimals(p+1,&timeStr[timeStr.length()]);
-                    while(decimals.length()<6)
-                    {
-                        decimals += "0";
-                    }
-                    decimalNum = (size_t)atol(decimals.c_str());
-                }
-                updateTime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
-            }
+            isvalid_=std::make_shared<int8_t>((int8_t)pJson["isValid"].asInt64());
         }
     }
-    if(pJson.isMember("last_login_time"))
+    if(pJson.isMember("sex"))
     {
         dirtyFlag_[6]=true;
-        if(!pJson["last_login_time"].isNull())
+        if(!pJson["sex"].isNull())
         {
-            auto timeStr = pJson["last_login_time"].asString();
+            sex_=std::make_shared<std::string>(pJson["sex"].asString());
+        }
+    }
+    if(pJson.isMember("phone"))
+    {
+        dirtyFlag_[7]=true;
+        if(!pJson["phone"].isNull())
+        {
+            phone_=std::make_shared<std::string>(pJson["phone"].asString());
+        }
+    }
+    if(pJson.isMember("salt"))
+    {
+        dirtyFlag_[8]=true;
+        if(!pJson["salt"].isNull())
+        {
+            salt_=std::make_shared<std::string>(pJson["salt"].asString());
+        }
+    }
+    if(pJson.isMember("roleId"))
+    {
+        dirtyFlag_[9]=true;
+        if(!pJson["roleId"].isNull())
+        {
+            roleid_=std::make_shared<std::string>(pJson["roleId"].asString());
+        }
+    }
+    if(pJson.isMember("createTime"))
+    {
+        dirtyFlag_[10]=true;
+        if(!pJson["createTime"].isNull())
+        {
+            auto timeStr = pJson["createTime"].asString();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
             auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
@@ -473,16 +491,34 @@ Users::Users(const Json::Value &pJson) noexcept(false)
                     }
                     decimalNum = (size_t)atol(decimals.c_str());
                 }
-                lastLoginTime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+                createtime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
             }
         }
     }
-    if(pJson.isMember("state"))
+    if(pJson.isMember("updateTime"))
     {
-        dirtyFlag_[7]=true;
-        if(!pJson["state"].isNull())
+        dirtyFlag_[11]=true;
+        if(!pJson["updateTime"].isNull())
         {
-            state_=std::make_shared<std::string>(pJson["state"].asString());
+            auto timeStr = pJson["updateTime"].asString();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                updatetime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
         }
     }
 }
@@ -490,7 +526,7 @@ Users::Users(const Json::Value &pJson) noexcept(false)
 void Users::updateByMasqueradedJson(const Json::Value &pJson,
                                             const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 8)
+    if(pMasqueradingVector.size() != 12)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
@@ -499,7 +535,7 @@ void Users::updateByMasqueradedJson(const Json::Value &pJson,
     {
         if(!pJson[pMasqueradingVector[0]].isNull())
         {
-            id_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
+            id_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[0]].asUInt64());
         }
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
@@ -507,7 +543,7 @@ void Users::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[1] = true;
         if(!pJson[pMasqueradingVector[1]].isNull())
         {
-            account_=std::make_shared<std::string>(pJson[pMasqueradingVector[1]].asString());
+            nickname_=std::make_shared<std::string>(pJson[pMasqueradingVector[1]].asString());
         }
     }
     if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
@@ -515,7 +551,7 @@ void Users::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull())
         {
-            password_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
+            account_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
         }
     }
     if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
@@ -523,7 +559,7 @@ void Users::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[3] = true;
         if(!pJson[pMasqueradingVector[3]].isNull())
         {
-            nickname_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
+            password_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
         }
     }
     if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
@@ -531,25 +567,7 @@ void Users::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[4] = true;
         if(!pJson[pMasqueradingVector[4]].isNull())
         {
-            auto timeStr = pJson[pMasqueradingVector[4]].asString();
-            struct tm stm;
-            memset(&stm,0,sizeof(stm));
-            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
-            time_t t = mktime(&stm);
-            size_t decimalNum = 0;
-            if(p)
-            {
-                if(*p=='.')
-                {
-                    std::string decimals(p+1,&timeStr[timeStr.length()]);
-                    while(decimals.length()<6)
-                    {
-                        decimals += "0";
-                    }
-                    decimalNum = (size_t)atol(decimals.c_str());
-                }
-                createTime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
-            }
+            avatarurl_=std::make_shared<std::string>(pJson[pMasqueradingVector[4]].asString());
         }
     }
     if(!pMasqueradingVector[5].empty() && pJson.isMember(pMasqueradingVector[5]))
@@ -557,25 +575,7 @@ void Users::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[5] = true;
         if(!pJson[pMasqueradingVector[5]].isNull())
         {
-            auto timeStr = pJson[pMasqueradingVector[5]].asString();
-            struct tm stm;
-            memset(&stm,0,sizeof(stm));
-            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
-            time_t t = mktime(&stm);
-            size_t decimalNum = 0;
-            if(p)
-            {
-                if(*p=='.')
-                {
-                    std::string decimals(p+1,&timeStr[timeStr.length()]);
-                    while(decimals.length()<6)
-                    {
-                        decimals += "0";
-                    }
-                    decimalNum = (size_t)atol(decimals.c_str());
-                }
-                updateTime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
-            }
+            isvalid_=std::make_shared<int8_t>((int8_t)pJson[pMasqueradingVector[5]].asInt64());
         }
     }
     if(!pMasqueradingVector[6].empty() && pJson.isMember(pMasqueradingVector[6]))
@@ -583,7 +583,39 @@ void Users::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[6] = true;
         if(!pJson[pMasqueradingVector[6]].isNull())
         {
-            auto timeStr = pJson[pMasqueradingVector[6]].asString();
+            sex_=std::make_shared<std::string>(pJson[pMasqueradingVector[6]].asString());
+        }
+    }
+    if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]))
+    {
+        dirtyFlag_[7] = true;
+        if(!pJson[pMasqueradingVector[7]].isNull())
+        {
+            phone_=std::make_shared<std::string>(pJson[pMasqueradingVector[7]].asString());
+        }
+    }
+    if(!pMasqueradingVector[8].empty() && pJson.isMember(pMasqueradingVector[8]))
+    {
+        dirtyFlag_[8] = true;
+        if(!pJson[pMasqueradingVector[8]].isNull())
+        {
+            salt_=std::make_shared<std::string>(pJson[pMasqueradingVector[8]].asString());
+        }
+    }
+    if(!pMasqueradingVector[9].empty() && pJson.isMember(pMasqueradingVector[9]))
+    {
+        dirtyFlag_[9] = true;
+        if(!pJson[pMasqueradingVector[9]].isNull())
+        {
+            roleid_=std::make_shared<std::string>(pJson[pMasqueradingVector[9]].asString());
+        }
+    }
+    if(!pMasqueradingVector[10].empty() && pJson.isMember(pMasqueradingVector[10]))
+    {
+        dirtyFlag_[10] = true;
+        if(!pJson[pMasqueradingVector[10]].isNull())
+        {
+            auto timeStr = pJson[pMasqueradingVector[10]].asString();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
             auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
@@ -600,16 +632,34 @@ void Users::updateByMasqueradedJson(const Json::Value &pJson,
                     }
                     decimalNum = (size_t)atol(decimals.c_str());
                 }
-                lastLoginTime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+                createtime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
             }
         }
     }
-    if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]))
+    if(!pMasqueradingVector[11].empty() && pJson.isMember(pMasqueradingVector[11]))
     {
-        dirtyFlag_[7] = true;
-        if(!pJson[pMasqueradingVector[7]].isNull())
+        dirtyFlag_[11] = true;
+        if(!pJson[pMasqueradingVector[11]].isNull())
         {
-            state_=std::make_shared<std::string>(pJson[pMasqueradingVector[7]].asString());
+            auto timeStr = pJson[pMasqueradingVector[11]].asString();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                updatetime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
         }
     }
 }
@@ -620,12 +670,20 @@ void Users::updateByJson(const Json::Value &pJson) noexcept(false)
     {
         if(!pJson["id"].isNull())
         {
-            id_=std::make_shared<int32_t>((int32_t)pJson["id"].asInt64());
+            id_=std::make_shared<uint64_t>((uint64_t)pJson["id"].asUInt64());
+        }
+    }
+    if(pJson.isMember("nickname"))
+    {
+        dirtyFlag_[1] = true;
+        if(!pJson["nickname"].isNull())
+        {
+            nickname_=std::make_shared<std::string>(pJson["nickname"].asString());
         }
     }
     if(pJson.isMember("account"))
     {
-        dirtyFlag_[1] = true;
+        dirtyFlag_[2] = true;
         if(!pJson["account"].isNull())
         {
             account_=std::make_shared<std::string>(pJson["account"].asString());
@@ -633,78 +691,66 @@ void Users::updateByJson(const Json::Value &pJson) noexcept(false)
     }
     if(pJson.isMember("password"))
     {
-        dirtyFlag_[2] = true;
+        dirtyFlag_[3] = true;
         if(!pJson["password"].isNull())
         {
             password_=std::make_shared<std::string>(pJson["password"].asString());
         }
     }
-    if(pJson.isMember("nickname"))
-    {
-        dirtyFlag_[3] = true;
-        if(!pJson["nickname"].isNull())
-        {
-            nickname_=std::make_shared<std::string>(pJson["nickname"].asString());
-        }
-    }
-    if(pJson.isMember("create_time"))
+    if(pJson.isMember("avatarUrl"))
     {
         dirtyFlag_[4] = true;
-        if(!pJson["create_time"].isNull())
+        if(!pJson["avatarUrl"].isNull())
         {
-            auto timeStr = pJson["create_time"].asString();
-            struct tm stm;
-            memset(&stm,0,sizeof(stm));
-            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
-            time_t t = mktime(&stm);
-            size_t decimalNum = 0;
-            if(p)
-            {
-                if(*p=='.')
-                {
-                    std::string decimals(p+1,&timeStr[timeStr.length()]);
-                    while(decimals.length()<6)
-                    {
-                        decimals += "0";
-                    }
-                    decimalNum = (size_t)atol(decimals.c_str());
-                }
-                createTime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
-            }
+            avatarurl_=std::make_shared<std::string>(pJson["avatarUrl"].asString());
         }
     }
-    if(pJson.isMember("update_time"))
+    if(pJson.isMember("isValid"))
     {
         dirtyFlag_[5] = true;
-        if(!pJson["update_time"].isNull())
+        if(!pJson["isValid"].isNull())
         {
-            auto timeStr = pJson["update_time"].asString();
-            struct tm stm;
-            memset(&stm,0,sizeof(stm));
-            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
-            time_t t = mktime(&stm);
-            size_t decimalNum = 0;
-            if(p)
-            {
-                if(*p=='.')
-                {
-                    std::string decimals(p+1,&timeStr[timeStr.length()]);
-                    while(decimals.length()<6)
-                    {
-                        decimals += "0";
-                    }
-                    decimalNum = (size_t)atol(decimals.c_str());
-                }
-                updateTime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
-            }
+            isvalid_=std::make_shared<int8_t>((int8_t)pJson["isValid"].asInt64());
         }
     }
-    if(pJson.isMember("last_login_time"))
+    if(pJson.isMember("sex"))
     {
         dirtyFlag_[6] = true;
-        if(!pJson["last_login_time"].isNull())
+        if(!pJson["sex"].isNull())
         {
-            auto timeStr = pJson["last_login_time"].asString();
+            sex_=std::make_shared<std::string>(pJson["sex"].asString());
+        }
+    }
+    if(pJson.isMember("phone"))
+    {
+        dirtyFlag_[7] = true;
+        if(!pJson["phone"].isNull())
+        {
+            phone_=std::make_shared<std::string>(pJson["phone"].asString());
+        }
+    }
+    if(pJson.isMember("salt"))
+    {
+        dirtyFlag_[8] = true;
+        if(!pJson["salt"].isNull())
+        {
+            salt_=std::make_shared<std::string>(pJson["salt"].asString());
+        }
+    }
+    if(pJson.isMember("roleId"))
+    {
+        dirtyFlag_[9] = true;
+        if(!pJson["roleId"].isNull())
+        {
+            roleid_=std::make_shared<std::string>(pJson["roleId"].asString());
+        }
+    }
+    if(pJson.isMember("createTime"))
+    {
+        dirtyFlag_[10] = true;
+        if(!pJson["createTime"].isNull())
+        {
+            auto timeStr = pJson["createTime"].asString();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
             auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
@@ -721,84 +767,58 @@ void Users::updateByJson(const Json::Value &pJson) noexcept(false)
                     }
                     decimalNum = (size_t)atol(decimals.c_str());
                 }
-                lastLoginTime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+                createtime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
             }
         }
     }
-    if(pJson.isMember("state"))
+    if(pJson.isMember("updateTime"))
     {
-        dirtyFlag_[7] = true;
-        if(!pJson["state"].isNull())
+        dirtyFlag_[11] = true;
+        if(!pJson["updateTime"].isNull())
         {
-            state_=std::make_shared<std::string>(pJson["state"].asString());
+            auto timeStr = pJson["updateTime"].asString();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                updatetime_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
         }
     }
 }
 
-const int32_t &Users::getValueOfId() const noexcept
+const uint64_t &Users::getValueOfId() const noexcept
 {
-    static const int32_t defaultValue = int32_t();
+    static const uint64_t defaultValue = uint64_t();
     if(id_)
         return *id_;
     return defaultValue;
 }
-const std::shared_ptr<int32_t> &Users::getId() const noexcept
+const std::shared_ptr<uint64_t> &Users::getId() const noexcept
 {
     return id_;
 }
-void Users::setId(const int32_t &pId) noexcept
+void Users::setId(const uint64_t &pId) noexcept
 {
-    id_ = std::make_shared<int32_t>(pId);
+    id_ = std::make_shared<uint64_t>(pId);
     dirtyFlag_[0] = true;
 }
 const typename Users::PrimaryKeyType & Users::getPrimaryKey() const
 {
     assert(id_);
     return *id_;
-}
-
-const std::string &Users::getValueOfAccount() const noexcept
-{
-    static const std::string defaultValue = std::string();
-    if(account_)
-        return *account_;
-    return defaultValue;
-}
-const std::shared_ptr<std::string> &Users::getAccount() const noexcept
-{
-    return account_;
-}
-void Users::setAccount(const std::string &pAccount) noexcept
-{
-    account_ = std::make_shared<std::string>(pAccount);
-    dirtyFlag_[1] = true;
-}
-void Users::setAccount(std::string &&pAccount) noexcept
-{
-    account_ = std::make_shared<std::string>(std::move(pAccount));
-    dirtyFlag_[1] = true;
-}
-
-const std::string &Users::getValueOfPassword() const noexcept
-{
-    static const std::string defaultValue = std::string();
-    if(password_)
-        return *password_;
-    return defaultValue;
-}
-const std::shared_ptr<std::string> &Users::getPassword() const noexcept
-{
-    return password_;
-}
-void Users::setPassword(const std::string &pPassword) noexcept
-{
-    password_ = std::make_shared<std::string>(pPassword);
-    dirtyFlag_[2] = true;
-}
-void Users::setPassword(std::string &&pPassword) noexcept
-{
-    password_ = std::make_shared<std::string>(std::move(pPassword));
-    dirtyFlag_[2] = true;
 }
 
 const std::string &Users::getValueOfNickname() const noexcept
@@ -815,127 +835,253 @@ const std::shared_ptr<std::string> &Users::getNickname() const noexcept
 void Users::setNickname(const std::string &pNickname) noexcept
 {
     nickname_ = std::make_shared<std::string>(pNickname);
-    dirtyFlag_[3] = true;
+    dirtyFlag_[1] = true;
 }
 void Users::setNickname(std::string &&pNickname) noexcept
 {
     nickname_ = std::make_shared<std::string>(std::move(pNickname));
-    dirtyFlag_[3] = true;
-}
-void Users::setNicknameToNull() noexcept
-{
-    nickname_.reset();
-    dirtyFlag_[3] = true;
+    dirtyFlag_[1] = true;
 }
 
-const ::trantor::Date &Users::getValueOfCreateTime() const noexcept
-{
-    static const ::trantor::Date defaultValue = ::trantor::Date();
-    if(createTime_)
-        return *createTime_;
-    return defaultValue;
-}
-const std::shared_ptr<::trantor::Date> &Users::getCreateTime() const noexcept
-{
-    return createTime_;
-}
-void Users::setCreateTime(const ::trantor::Date &pCreateTime) noexcept
-{
-    createTime_ = std::make_shared<::trantor::Date>(pCreateTime);
-    dirtyFlag_[4] = true;
-}
-void Users::setCreateTimeToNull() noexcept
-{
-    createTime_.reset();
-    dirtyFlag_[4] = true;
-}
-
-const ::trantor::Date &Users::getValueOfUpdateTime() const noexcept
-{
-    static const ::trantor::Date defaultValue = ::trantor::Date();
-    if(updateTime_)
-        return *updateTime_;
-    return defaultValue;
-}
-const std::shared_ptr<::trantor::Date> &Users::getUpdateTime() const noexcept
-{
-    return updateTime_;
-}
-void Users::setUpdateTime(const ::trantor::Date &pUpdateTime) noexcept
-{
-    updateTime_ = std::make_shared<::trantor::Date>(pUpdateTime);
-    dirtyFlag_[5] = true;
-}
-void Users::setUpdateTimeToNull() noexcept
-{
-    updateTime_.reset();
-    dirtyFlag_[5] = true;
-}
-
-const ::trantor::Date &Users::getValueOfLastLoginTime() const noexcept
-{
-    static const ::trantor::Date defaultValue = ::trantor::Date();
-    if(lastLoginTime_)
-        return *lastLoginTime_;
-    return defaultValue;
-}
-const std::shared_ptr<::trantor::Date> &Users::getLastLoginTime() const noexcept
-{
-    return lastLoginTime_;
-}
-void Users::setLastLoginTime(const ::trantor::Date &pLastLoginTime) noexcept
-{
-    lastLoginTime_ = std::make_shared<::trantor::Date>(pLastLoginTime);
-    dirtyFlag_[6] = true;
-}
-void Users::setLastLoginTimeToNull() noexcept
-{
-    lastLoginTime_.reset();
-    dirtyFlag_[6] = true;
-}
-
-const std::string &Users::getValueOfState() const noexcept
+const std::string &Users::getValueOfAccount() const noexcept
 {
     static const std::string defaultValue = std::string();
-    if(state_)
-        return *state_;
+    if(account_)
+        return *account_;
     return defaultValue;
 }
-const std::shared_ptr<std::string> &Users::getState() const noexcept
+const std::shared_ptr<std::string> &Users::getAccount() const noexcept
 {
-    return state_;
+    return account_;
 }
-void Users::setState(const std::string &pState) noexcept
+void Users::setAccount(const std::string &pAccount) noexcept
 {
-    state_ = std::make_shared<std::string>(pState);
+    account_ = std::make_shared<std::string>(pAccount);
+    dirtyFlag_[2] = true;
+}
+void Users::setAccount(std::string &&pAccount) noexcept
+{
+    account_ = std::make_shared<std::string>(std::move(pAccount));
+    dirtyFlag_[2] = true;
+}
+
+const std::string &Users::getValueOfPassword() const noexcept
+{
+    static const std::string defaultValue = std::string();
+    if(password_)
+        return *password_;
+    return defaultValue;
+}
+const std::shared_ptr<std::string> &Users::getPassword() const noexcept
+{
+    return password_;
+}
+void Users::setPassword(const std::string &pPassword) noexcept
+{
+    password_ = std::make_shared<std::string>(pPassword);
+    dirtyFlag_[3] = true;
+}
+void Users::setPassword(std::string &&pPassword) noexcept
+{
+    password_ = std::make_shared<std::string>(std::move(pPassword));
+    dirtyFlag_[3] = true;
+}
+
+const std::string &Users::getValueOfAvatarurl() const noexcept
+{
+    static const std::string defaultValue = std::string();
+    if(avatarurl_)
+        return *avatarurl_;
+    return defaultValue;
+}
+const std::shared_ptr<std::string> &Users::getAvatarurl() const noexcept
+{
+    return avatarurl_;
+}
+void Users::setAvatarurl(const std::string &pAvatarurl) noexcept
+{
+    avatarurl_ = std::make_shared<std::string>(pAvatarurl);
+    dirtyFlag_[4] = true;
+}
+void Users::setAvatarurl(std::string &&pAvatarurl) noexcept
+{
+    avatarurl_ = std::make_shared<std::string>(std::move(pAvatarurl));
+    dirtyFlag_[4] = true;
+}
+
+const int8_t &Users::getValueOfIsvalid() const noexcept
+{
+    static const int8_t defaultValue = int8_t();
+    if(isvalid_)
+        return *isvalid_;
+    return defaultValue;
+}
+const std::shared_ptr<int8_t> &Users::getIsvalid() const noexcept
+{
+    return isvalid_;
+}
+void Users::setIsvalid(const int8_t &pIsvalid) noexcept
+{
+    isvalid_ = std::make_shared<int8_t>(pIsvalid);
+    dirtyFlag_[5] = true;
+}
+
+const std::string &Users::getValueOfSex() const noexcept
+{
+    static const std::string defaultValue = std::string();
+    if(sex_)
+        return *sex_;
+    return defaultValue;
+}
+const std::shared_ptr<std::string> &Users::getSex() const noexcept
+{
+    return sex_;
+}
+void Users::setSex(const std::string &pSex) noexcept
+{
+    sex_ = std::make_shared<std::string>(pSex);
+    dirtyFlag_[6] = true;
+}
+void Users::setSex(std::string &&pSex) noexcept
+{
+    sex_ = std::make_shared<std::string>(std::move(pSex));
+    dirtyFlag_[6] = true;
+}
+
+const std::string &Users::getValueOfPhone() const noexcept
+{
+    static const std::string defaultValue = std::string();
+    if(phone_)
+        return *phone_;
+    return defaultValue;
+}
+const std::shared_ptr<std::string> &Users::getPhone() const noexcept
+{
+    return phone_;
+}
+void Users::setPhone(const std::string &pPhone) noexcept
+{
+    phone_ = std::make_shared<std::string>(pPhone);
     dirtyFlag_[7] = true;
 }
-void Users::setState(std::string &&pState) noexcept
+void Users::setPhone(std::string &&pPhone) noexcept
 {
-    state_ = std::make_shared<std::string>(std::move(pState));
+    phone_ = std::make_shared<std::string>(std::move(pPhone));
     dirtyFlag_[7] = true;
 }
-void Users::setStateToNull() noexcept
+
+const std::string &Users::getValueOfSalt() const noexcept
 {
-    state_.reset();
-    dirtyFlag_[7] = true;
+    static const std::string defaultValue = std::string();
+    if(salt_)
+        return *salt_;
+    return defaultValue;
+}
+const std::shared_ptr<std::string> &Users::getSalt() const noexcept
+{
+    return salt_;
+}
+void Users::setSalt(const std::string &pSalt) noexcept
+{
+    salt_ = std::make_shared<std::string>(pSalt);
+    dirtyFlag_[8] = true;
+}
+void Users::setSalt(std::string &&pSalt) noexcept
+{
+    salt_ = std::make_shared<std::string>(std::move(pSalt));
+    dirtyFlag_[8] = true;
+}
+
+const std::string &Users::getValueOfRoleid() const noexcept
+{
+    static const std::string defaultValue = std::string();
+    if(roleid_)
+        return *roleid_;
+    return defaultValue;
+}
+const std::shared_ptr<std::string> &Users::getRoleid() const noexcept
+{
+    return roleid_;
+}
+void Users::setRoleid(const std::string &pRoleid) noexcept
+{
+    roleid_ = std::make_shared<std::string>(pRoleid);
+    dirtyFlag_[9] = true;
+}
+void Users::setRoleid(std::string &&pRoleid) noexcept
+{
+    roleid_ = std::make_shared<std::string>(std::move(pRoleid));
+    dirtyFlag_[9] = true;
+}
+void Users::setRoleidToNull() noexcept
+{
+    roleid_.reset();
+    dirtyFlag_[9] = true;
+}
+
+const ::trantor::Date &Users::getValueOfCreatetime() const noexcept
+{
+    static const ::trantor::Date defaultValue = ::trantor::Date();
+    if(createtime_)
+        return *createtime_;
+    return defaultValue;
+}
+const std::shared_ptr<::trantor::Date> &Users::getCreatetime() const noexcept
+{
+    return createtime_;
+}
+void Users::setCreatetime(const ::trantor::Date &pCreatetime) noexcept
+{
+    createtime_ = std::make_shared<::trantor::Date>(pCreatetime);
+    dirtyFlag_[10] = true;
+}
+void Users::setCreatetimeToNull() noexcept
+{
+    createtime_.reset();
+    dirtyFlag_[10] = true;
+}
+
+const ::trantor::Date &Users::getValueOfUpdatetime() const noexcept
+{
+    static const ::trantor::Date defaultValue = ::trantor::Date();
+    if(updatetime_)
+        return *updatetime_;
+    return defaultValue;
+}
+const std::shared_ptr<::trantor::Date> &Users::getUpdatetime() const noexcept
+{
+    return updatetime_;
+}
+void Users::setUpdatetime(const ::trantor::Date &pUpdatetime) noexcept
+{
+    updatetime_ = std::make_shared<::trantor::Date>(pUpdatetime);
+    dirtyFlag_[11] = true;
+}
+void Users::setUpdatetimeToNull() noexcept
+{
+    updatetime_.reset();
+    dirtyFlag_[11] = true;
 }
 
 void Users::updateId(const uint64_t id)
 {
-    id_ = std::make_shared<int32_t>(static_cast<int32_t>(id));
+    id_ = std::make_shared<uint64_t>(id);
 }
 
 const std::vector<std::string> &Users::insertColumns() noexcept
 {
     static const std::vector<std::string> inCols={
+        "nickname",
         "account",
         "password",
-        "nickname",
-        "create_time",
-        "update_time",
-        "last_login_time",
-        "state"
+        "avatarUrl",
+        "isValid",
+        "sex",
+        "phone",
+        "salt",
+        "roleId",
+        "createTime",
+        "updateTime"
     };
     return inCols;
 }
@@ -943,28 +1089,6 @@ const std::vector<std::string> &Users::insertColumns() noexcept
 void Users::outputArgs(drogon::orm::internal::SqlBinder &binder) const
 {
     if(dirtyFlag_[1])
-    {
-        if(getAccount())
-        {
-            binder << getValueOfAccount();
-        }
-        else
-        {
-            binder << nullptr;
-        }
-    }
-    if(dirtyFlag_[2])
-    {
-        if(getPassword())
-        {
-            binder << getValueOfPassword();
-        }
-        else
-        {
-            binder << nullptr;
-        }
-    }
-    if(dirtyFlag_[3])
     {
         if(getNickname())
         {
@@ -975,11 +1099,33 @@ void Users::outputArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
+    if(dirtyFlag_[2])
+    {
+        if(getAccount())
+        {
+            binder << getValueOfAccount();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[3])
+    {
+        if(getPassword())
+        {
+            binder << getValueOfPassword();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
     if(dirtyFlag_[4])
     {
-        if(getCreateTime())
+        if(getAvatarurl())
         {
-            binder << getValueOfCreateTime();
+            binder << getValueOfAvatarurl();
         }
         else
         {
@@ -988,9 +1134,9 @@ void Users::outputArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[5])
     {
-        if(getUpdateTime())
+        if(getIsvalid())
         {
-            binder << getValueOfUpdateTime();
+            binder << getValueOfIsvalid();
         }
         else
         {
@@ -999,9 +1145,9 @@ void Users::outputArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[6])
     {
-        if(getLastLoginTime())
+        if(getSex())
         {
-            binder << getValueOfLastLoginTime();
+            binder << getValueOfSex();
         }
         else
         {
@@ -1010,9 +1156,53 @@ void Users::outputArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[7])
     {
-        if(getState())
+        if(getPhone())
         {
-            binder << getValueOfState();
+            binder << getValueOfPhone();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[8])
+    {
+        if(getSalt())
+        {
+            binder << getValueOfSalt();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[9])
+    {
+        if(getRoleid())
+        {
+            binder << getValueOfRoleid();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[10])
+    {
+        if(getCreatetime())
+        {
+            binder << getValueOfCreatetime();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[11])
+    {
+        if(getUpdatetime())
+        {
+            binder << getValueOfUpdatetime();
         }
         else
         {
@@ -1052,34 +1242,28 @@ const std::vector<std::string> Users::updateColumns() const
     {
         ret.push_back(getColumnName(7));
     }
+    if(dirtyFlag_[8])
+    {
+        ret.push_back(getColumnName(8));
+    }
+    if(dirtyFlag_[9])
+    {
+        ret.push_back(getColumnName(9));
+    }
+    if(dirtyFlag_[10])
+    {
+        ret.push_back(getColumnName(10));
+    }
+    if(dirtyFlag_[11])
+    {
+        ret.push_back(getColumnName(11));
+    }
     return ret;
 }
 
 void Users::updateArgs(drogon::orm::internal::SqlBinder &binder) const
 {
     if(dirtyFlag_[1])
-    {
-        if(getAccount())
-        {
-            binder << getValueOfAccount();
-        }
-        else
-        {
-            binder << nullptr;
-        }
-    }
-    if(dirtyFlag_[2])
-    {
-        if(getPassword())
-        {
-            binder << getValueOfPassword();
-        }
-        else
-        {
-            binder << nullptr;
-        }
-    }
-    if(dirtyFlag_[3])
     {
         if(getNickname())
         {
@@ -1090,11 +1274,33 @@ void Users::updateArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
+    if(dirtyFlag_[2])
+    {
+        if(getAccount())
+        {
+            binder << getValueOfAccount();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[3])
+    {
+        if(getPassword())
+        {
+            binder << getValueOfPassword();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
     if(dirtyFlag_[4])
     {
-        if(getCreateTime())
+        if(getAvatarurl())
         {
-            binder << getValueOfCreateTime();
+            binder << getValueOfAvatarurl();
         }
         else
         {
@@ -1103,9 +1309,9 @@ void Users::updateArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[5])
     {
-        if(getUpdateTime())
+        if(getIsvalid())
         {
-            binder << getValueOfUpdateTime();
+            binder << getValueOfIsvalid();
         }
         else
         {
@@ -1114,9 +1320,9 @@ void Users::updateArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[6])
     {
-        if(getLastLoginTime())
+        if(getSex())
         {
-            binder << getValueOfLastLoginTime();
+            binder << getValueOfSex();
         }
         else
         {
@@ -1125,9 +1331,53 @@ void Users::updateArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[7])
     {
-        if(getState())
+        if(getPhone())
         {
-            binder << getValueOfState();
+            binder << getValueOfPhone();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[8])
+    {
+        if(getSalt())
+        {
+            binder << getValueOfSalt();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[9])
+    {
+        if(getRoleid())
+        {
+            binder << getValueOfRoleid();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[10])
+    {
+        if(getCreatetime())
+        {
+            binder << getValueOfCreatetime();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[11])
+    {
+        if(getUpdatetime())
+        {
+            binder << getValueOfUpdatetime();
         }
         else
         {
@@ -1140,11 +1390,19 @@ Json::Value Users::toJson() const
     Json::Value ret;
     if(getId())
     {
-        ret["id"]=getValueOfId();
+        ret["id"]=(Json::UInt64)getValueOfId();
     }
     else
     {
         ret["id"]=Json::Value();
+    }
+    if(getNickname())
+    {
+        ret["nickname"]=getValueOfNickname();
+    }
+    else
+    {
+        ret["nickname"]=Json::Value();
     }
     if(getAccount())
     {
@@ -1162,45 +1420,69 @@ Json::Value Users::toJson() const
     {
         ret["password"]=Json::Value();
     }
-    if(getNickname())
+    if(getAvatarurl())
     {
-        ret["nickname"]=getValueOfNickname();
+        ret["avatarUrl"]=getValueOfAvatarurl();
     }
     else
     {
-        ret["nickname"]=Json::Value();
+        ret["avatarUrl"]=Json::Value();
     }
-    if(getCreateTime())
+    if(getIsvalid())
     {
-        ret["create_time"]=getCreateTime()->toDbStringLocal();
-    }
-    else
-    {
-        ret["create_time"]=Json::Value();
-    }
-    if(getUpdateTime())
-    {
-        ret["update_time"]=getUpdateTime()->toDbStringLocal();
+        ret["isValid"]=getValueOfIsvalid();
     }
     else
     {
-        ret["update_time"]=Json::Value();
+        ret["isValid"]=Json::Value();
     }
-    if(getLastLoginTime())
+    if(getSex())
     {
-        ret["last_login_time"]=getLastLoginTime()->toDbStringLocal();
-    }
-    else
-    {
-        ret["last_login_time"]=Json::Value();
-    }
-    if(getState())
-    {
-        ret["state"]=getValueOfState();
+        ret["sex"]=getValueOfSex();
     }
     else
     {
-        ret["state"]=Json::Value();
+        ret["sex"]=Json::Value();
+    }
+    if(getPhone())
+    {
+        ret["phone"]=getValueOfPhone();
+    }
+    else
+    {
+        ret["phone"]=Json::Value();
+    }
+    if(getSalt())
+    {
+        ret["salt"]=getValueOfSalt();
+    }
+    else
+    {
+        ret["salt"]=Json::Value();
+    }
+    if(getRoleid())
+    {
+        ret["roleId"]=getValueOfRoleid();
+    }
+    else
+    {
+        ret["roleId"]=Json::Value();
+    }
+    if(getCreatetime())
+    {
+        ret["createTime"]=getCreatetime()->toDbStringLocal();
+    }
+    else
+    {
+        ret["createTime"]=Json::Value();
+    }
+    if(getUpdatetime())
+    {
+        ret["updateTime"]=getUpdatetime()->toDbStringLocal();
+    }
+    else
+    {
+        ret["updateTime"]=Json::Value();
     }
     return ret;
 }
@@ -1209,13 +1491,13 @@ Json::Value Users::toMasqueradedJson(
     const std::vector<std::string> &pMasqueradingVector) const
 {
     Json::Value ret;
-    if(pMasqueradingVector.size() == 8)
+    if(pMasqueradingVector.size() == 12)
     {
         if(!pMasqueradingVector[0].empty())
         {
             if(getId())
             {
-                ret[pMasqueradingVector[0]]=getValueOfId();
+                ret[pMasqueradingVector[0]]=(Json::UInt64)getValueOfId();
             }
             else
             {
@@ -1224,9 +1506,9 @@ Json::Value Users::toMasqueradedJson(
         }
         if(!pMasqueradingVector[1].empty())
         {
-            if(getAccount())
+            if(getNickname())
             {
-                ret[pMasqueradingVector[1]]=getValueOfAccount();
+                ret[pMasqueradingVector[1]]=getValueOfNickname();
             }
             else
             {
@@ -1235,9 +1517,9 @@ Json::Value Users::toMasqueradedJson(
         }
         if(!pMasqueradingVector[2].empty())
         {
-            if(getPassword())
+            if(getAccount())
             {
-                ret[pMasqueradingVector[2]]=getValueOfPassword();
+                ret[pMasqueradingVector[2]]=getValueOfAccount();
             }
             else
             {
@@ -1246,9 +1528,9 @@ Json::Value Users::toMasqueradedJson(
         }
         if(!pMasqueradingVector[3].empty())
         {
-            if(getNickname())
+            if(getPassword())
             {
-                ret[pMasqueradingVector[3]]=getValueOfNickname();
+                ret[pMasqueradingVector[3]]=getValueOfPassword();
             }
             else
             {
@@ -1257,9 +1539,9 @@ Json::Value Users::toMasqueradedJson(
         }
         if(!pMasqueradingVector[4].empty())
         {
-            if(getCreateTime())
+            if(getAvatarurl())
             {
-                ret[pMasqueradingVector[4]]=getCreateTime()->toDbStringLocal();
+                ret[pMasqueradingVector[4]]=getValueOfAvatarurl();
             }
             else
             {
@@ -1268,9 +1550,9 @@ Json::Value Users::toMasqueradedJson(
         }
         if(!pMasqueradingVector[5].empty())
         {
-            if(getUpdateTime())
+            if(getIsvalid())
             {
-                ret[pMasqueradingVector[5]]=getUpdateTime()->toDbStringLocal();
+                ret[pMasqueradingVector[5]]=getValueOfIsvalid();
             }
             else
             {
@@ -1279,9 +1561,9 @@ Json::Value Users::toMasqueradedJson(
         }
         if(!pMasqueradingVector[6].empty())
         {
-            if(getLastLoginTime())
+            if(getSex())
             {
-                ret[pMasqueradingVector[6]]=getLastLoginTime()->toDbStringLocal();
+                ret[pMasqueradingVector[6]]=getValueOfSex();
             }
             else
             {
@@ -1290,13 +1572,57 @@ Json::Value Users::toMasqueradedJson(
         }
         if(!pMasqueradingVector[7].empty())
         {
-            if(getState())
+            if(getPhone())
             {
-                ret[pMasqueradingVector[7]]=getValueOfState();
+                ret[pMasqueradingVector[7]]=getValueOfPhone();
             }
             else
             {
                 ret[pMasqueradingVector[7]]=Json::Value();
+            }
+        }
+        if(!pMasqueradingVector[8].empty())
+        {
+            if(getSalt())
+            {
+                ret[pMasqueradingVector[8]]=getValueOfSalt();
+            }
+            else
+            {
+                ret[pMasqueradingVector[8]]=Json::Value();
+            }
+        }
+        if(!pMasqueradingVector[9].empty())
+        {
+            if(getRoleid())
+            {
+                ret[pMasqueradingVector[9]]=getValueOfRoleid();
+            }
+            else
+            {
+                ret[pMasqueradingVector[9]]=Json::Value();
+            }
+        }
+        if(!pMasqueradingVector[10].empty())
+        {
+            if(getCreatetime())
+            {
+                ret[pMasqueradingVector[10]]=getCreatetime()->toDbStringLocal();
+            }
+            else
+            {
+                ret[pMasqueradingVector[10]]=Json::Value();
+            }
+        }
+        if(!pMasqueradingVector[11].empty())
+        {
+            if(getUpdatetime())
+            {
+                ret[pMasqueradingVector[11]]=getUpdatetime()->toDbStringLocal();
+            }
+            else
+            {
+                ret[pMasqueradingVector[11]]=Json::Value();
             }
         }
         return ret;
@@ -1304,11 +1630,19 @@ Json::Value Users::toMasqueradedJson(
     LOG_ERROR << "Masquerade failed";
     if(getId())
     {
-        ret["id"]=getValueOfId();
+        ret["id"]=(Json::UInt64)getValueOfId();
     }
     else
     {
         ret["id"]=Json::Value();
+    }
+    if(getNickname())
+    {
+        ret["nickname"]=getValueOfNickname();
+    }
+    else
+    {
+        ret["nickname"]=Json::Value();
     }
     if(getAccount())
     {
@@ -1326,45 +1660,69 @@ Json::Value Users::toMasqueradedJson(
     {
         ret["password"]=Json::Value();
     }
-    if(getNickname())
+    if(getAvatarurl())
     {
-        ret["nickname"]=getValueOfNickname();
+        ret["avatarUrl"]=getValueOfAvatarurl();
     }
     else
     {
-        ret["nickname"]=Json::Value();
+        ret["avatarUrl"]=Json::Value();
     }
-    if(getCreateTime())
+    if(getIsvalid())
     {
-        ret["create_time"]=getCreateTime()->toDbStringLocal();
-    }
-    else
-    {
-        ret["create_time"]=Json::Value();
-    }
-    if(getUpdateTime())
-    {
-        ret["update_time"]=getUpdateTime()->toDbStringLocal();
+        ret["isValid"]=getValueOfIsvalid();
     }
     else
     {
-        ret["update_time"]=Json::Value();
+        ret["isValid"]=Json::Value();
     }
-    if(getLastLoginTime())
+    if(getSex())
     {
-        ret["last_login_time"]=getLastLoginTime()->toDbStringLocal();
-    }
-    else
-    {
-        ret["last_login_time"]=Json::Value();
-    }
-    if(getState())
-    {
-        ret["state"]=getValueOfState();
+        ret["sex"]=getValueOfSex();
     }
     else
     {
-        ret["state"]=Json::Value();
+        ret["sex"]=Json::Value();
+    }
+    if(getPhone())
+    {
+        ret["phone"]=getValueOfPhone();
+    }
+    else
+    {
+        ret["phone"]=Json::Value();
+    }
+    if(getSalt())
+    {
+        ret["salt"]=getValueOfSalt();
+    }
+    else
+    {
+        ret["salt"]=Json::Value();
+    }
+    if(getRoleid())
+    {
+        ret["roleId"]=getValueOfRoleid();
+    }
+    else
+    {
+        ret["roleId"]=Json::Value();
+    }
+    if(getCreatetime())
+    {
+        ret["createTime"]=getCreatetime()->toDbStringLocal();
+    }
+    else
+    {
+        ret["createTime"]=Json::Value();
+    }
+    if(getUpdatetime())
+    {
+        ret["updateTime"]=getUpdatetime()->toDbStringLocal();
+    }
+    else
+    {
+        ret["updateTime"]=Json::Value();
     }
     return ret;
 }
@@ -1376,9 +1734,19 @@ bool Users::validateJsonForCreation(const Json::Value &pJson, std::string &err)
         if(!validJsonOfField(0, "id", pJson["id"], err, true))
             return false;
     }
+    if(pJson.isMember("nickname"))
+    {
+        if(!validJsonOfField(1, "nickname", pJson["nickname"], err, true))
+            return false;
+    }
+    else
+    {
+        err="The nickname column cannot be null";
+        return false;
+    }
     if(pJson.isMember("account"))
     {
-        if(!validJsonOfField(1, "account", pJson["account"], err, true))
+        if(!validJsonOfField(2, "account", pJson["account"], err, true))
             return false;
     }
     else
@@ -1388,7 +1756,7 @@ bool Users::validateJsonForCreation(const Json::Value &pJson, std::string &err)
     }
     if(pJson.isMember("password"))
     {
-        if(!validJsonOfField(2, "password", pJson["password"], err, true))
+        if(!validJsonOfField(3, "password", pJson["password"], err, true))
             return false;
     }
     else
@@ -1396,29 +1764,64 @@ bool Users::validateJsonForCreation(const Json::Value &pJson, std::string &err)
         err="The password column cannot be null";
         return false;
     }
-    if(pJson.isMember("nickname"))
+    if(pJson.isMember("avatarUrl"))
     {
-        if(!validJsonOfField(3, "nickname", pJson["nickname"], err, true))
+        if(!validJsonOfField(4, "avatarUrl", pJson["avatarUrl"], err, true))
             return false;
     }
-    if(pJson.isMember("create_time"))
+    else
     {
-        if(!validJsonOfField(4, "create_time", pJson["create_time"], err, true))
+        err="The avatarUrl column cannot be null";
+        return false;
+    }
+    if(pJson.isMember("isValid"))
+    {
+        if(!validJsonOfField(5, "isValid", pJson["isValid"], err, true))
             return false;
     }
-    if(pJson.isMember("update_time"))
+    if(pJson.isMember("sex"))
     {
-        if(!validJsonOfField(5, "update_time", pJson["update_time"], err, true))
+        if(!validJsonOfField(6, "sex", pJson["sex"], err, true))
             return false;
     }
-    if(pJson.isMember("last_login_time"))
+    else
     {
-        if(!validJsonOfField(6, "last_login_time", pJson["last_login_time"], err, true))
+        err="The sex column cannot be null";
+        return false;
+    }
+    if(pJson.isMember("phone"))
+    {
+        if(!validJsonOfField(7, "phone", pJson["phone"], err, true))
             return false;
     }
-    if(pJson.isMember("state"))
+    else
     {
-        if(!validJsonOfField(7, "state", pJson["state"], err, true))
+        err="The phone column cannot be null";
+        return false;
+    }
+    if(pJson.isMember("salt"))
+    {
+        if(!validJsonOfField(8, "salt", pJson["salt"], err, true))
+            return false;
+    }
+    else
+    {
+        err="The salt column cannot be null";
+        return false;
+    }
+    if(pJson.isMember("roleId"))
+    {
+        if(!validJsonOfField(9, "roleId", pJson["roleId"], err, true))
+            return false;
+    }
+    if(pJson.isMember("createTime"))
+    {
+        if(!validJsonOfField(10, "createTime", pJson["createTime"], err, true))
+            return false;
+    }
+    if(pJson.isMember("updateTime"))
+    {
+        if(!validJsonOfField(11, "updateTime", pJson["updateTime"], err, true))
             return false;
     }
     return true;
@@ -1427,7 +1830,7 @@ bool Users::validateMasqueradedJsonForCreation(const Json::Value &pJson,
                                                const std::vector<std::string> &pMasqueradingVector,
                                                std::string &err)
 {
-    if(pMasqueradingVector.size() != 8)
+    if(pMasqueradingVector.size() != 12)
     {
         err = "Bad masquerading vector";
         return false;
@@ -1474,6 +1877,11 @@ bool Users::validateMasqueradedJsonForCreation(const Json::Value &pJson,
               if(!validJsonOfField(3, pMasqueradingVector[3], pJson[pMasqueradingVector[3]], err, true))
                   return false;
           }
+        else
+        {
+            err="The " + pMasqueradingVector[3] + " column cannot be null";
+            return false;
+        }
       }
       if(!pMasqueradingVector[4].empty())
       {
@@ -1482,6 +1890,11 @@ bool Users::validateMasqueradedJsonForCreation(const Json::Value &pJson,
               if(!validJsonOfField(4, pMasqueradingVector[4], pJson[pMasqueradingVector[4]], err, true))
                   return false;
           }
+        else
+        {
+            err="The " + pMasqueradingVector[4] + " column cannot be null";
+            return false;
+        }
       }
       if(!pMasqueradingVector[5].empty())
       {
@@ -1498,12 +1911,59 @@ bool Users::validateMasqueradedJsonForCreation(const Json::Value &pJson,
               if(!validJsonOfField(6, pMasqueradingVector[6], pJson[pMasqueradingVector[6]], err, true))
                   return false;
           }
+        else
+        {
+            err="The " + pMasqueradingVector[6] + " column cannot be null";
+            return false;
+        }
       }
       if(!pMasqueradingVector[7].empty())
       {
           if(pJson.isMember(pMasqueradingVector[7]))
           {
               if(!validJsonOfField(7, pMasqueradingVector[7], pJson[pMasqueradingVector[7]], err, true))
+                  return false;
+          }
+        else
+        {
+            err="The " + pMasqueradingVector[7] + " column cannot be null";
+            return false;
+        }
+      }
+      if(!pMasqueradingVector[8].empty())
+      {
+          if(pJson.isMember(pMasqueradingVector[8]))
+          {
+              if(!validJsonOfField(8, pMasqueradingVector[8], pJson[pMasqueradingVector[8]], err, true))
+                  return false;
+          }
+        else
+        {
+            err="The " + pMasqueradingVector[8] + " column cannot be null";
+            return false;
+        }
+      }
+      if(!pMasqueradingVector[9].empty())
+      {
+          if(pJson.isMember(pMasqueradingVector[9]))
+          {
+              if(!validJsonOfField(9, pMasqueradingVector[9], pJson[pMasqueradingVector[9]], err, true))
+                  return false;
+          }
+      }
+      if(!pMasqueradingVector[10].empty())
+      {
+          if(pJson.isMember(pMasqueradingVector[10]))
+          {
+              if(!validJsonOfField(10, pMasqueradingVector[10], pJson[pMasqueradingVector[10]], err, true))
+                  return false;
+          }
+      }
+      if(!pMasqueradingVector[11].empty())
+      {
+          if(pJson.isMember(pMasqueradingVector[11]))
+          {
+              if(!validJsonOfField(11, pMasqueradingVector[11], pJson[pMasqueradingVector[11]], err, true))
                   return false;
           }
       }
@@ -1527,39 +1987,59 @@ bool Users::validateJsonForUpdate(const Json::Value &pJson, std::string &err)
         err = "The value of primary key must be set in the json object for update";
         return false;
     }
+    if(pJson.isMember("nickname"))
+    {
+        if(!validJsonOfField(1, "nickname", pJson["nickname"], err, false))
+            return false;
+    }
     if(pJson.isMember("account"))
     {
-        if(!validJsonOfField(1, "account", pJson["account"], err, false))
+        if(!validJsonOfField(2, "account", pJson["account"], err, false))
             return false;
     }
     if(pJson.isMember("password"))
     {
-        if(!validJsonOfField(2, "password", pJson["password"], err, false))
+        if(!validJsonOfField(3, "password", pJson["password"], err, false))
             return false;
     }
-    if(pJson.isMember("nickname"))
+    if(pJson.isMember("avatarUrl"))
     {
-        if(!validJsonOfField(3, "nickname", pJson["nickname"], err, false))
+        if(!validJsonOfField(4, "avatarUrl", pJson["avatarUrl"], err, false))
             return false;
     }
-    if(pJson.isMember("create_time"))
+    if(pJson.isMember("isValid"))
     {
-        if(!validJsonOfField(4, "create_time", pJson["create_time"], err, false))
+        if(!validJsonOfField(5, "isValid", pJson["isValid"], err, false))
             return false;
     }
-    if(pJson.isMember("update_time"))
+    if(pJson.isMember("sex"))
     {
-        if(!validJsonOfField(5, "update_time", pJson["update_time"], err, false))
+        if(!validJsonOfField(6, "sex", pJson["sex"], err, false))
             return false;
     }
-    if(pJson.isMember("last_login_time"))
+    if(pJson.isMember("phone"))
     {
-        if(!validJsonOfField(6, "last_login_time", pJson["last_login_time"], err, false))
+        if(!validJsonOfField(7, "phone", pJson["phone"], err, false))
             return false;
     }
-    if(pJson.isMember("state"))
+    if(pJson.isMember("salt"))
     {
-        if(!validJsonOfField(7, "state", pJson["state"], err, false))
+        if(!validJsonOfField(8, "salt", pJson["salt"], err, false))
+            return false;
+    }
+    if(pJson.isMember("roleId"))
+    {
+        if(!validJsonOfField(9, "roleId", pJson["roleId"], err, false))
+            return false;
+    }
+    if(pJson.isMember("createTime"))
+    {
+        if(!validJsonOfField(10, "createTime", pJson["createTime"], err, false))
+            return false;
+    }
+    if(pJson.isMember("updateTime"))
+    {
+        if(!validJsonOfField(11, "updateTime", pJson["updateTime"], err, false))
             return false;
     }
     return true;
@@ -1568,7 +2048,7 @@ bool Users::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
                                              const std::vector<std::string> &pMasqueradingVector,
                                              std::string &err)
 {
-    if(pMasqueradingVector.size() != 8)
+    if(pMasqueradingVector.size() != 12)
     {
         err = "Bad masquerading vector";
         return false;
@@ -1619,6 +2099,26 @@ bool Users::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
           if(!validJsonOfField(7, pMasqueradingVector[7], pJson[pMasqueradingVector[7]], err, false))
               return false;
       }
+      if(!pMasqueradingVector[8].empty() && pJson.isMember(pMasqueradingVector[8]))
+      {
+          if(!validJsonOfField(8, pMasqueradingVector[8], pJson[pMasqueradingVector[8]], err, false))
+              return false;
+      }
+      if(!pMasqueradingVector[9].empty() && pJson.isMember(pMasqueradingVector[9]))
+      {
+          if(!validJsonOfField(9, pMasqueradingVector[9], pJson[pMasqueradingVector[9]], err, false))
+              return false;
+      }
+      if(!pMasqueradingVector[10].empty() && pJson.isMember(pMasqueradingVector[10]))
+      {
+          if(!validJsonOfField(10, pMasqueradingVector[10], pJson[pMasqueradingVector[10]], err, false))
+              return false;
+      }
+      if(!pMasqueradingVector[11].empty() && pJson.isMember(pMasqueradingVector[11]))
+      {
+          if(!validJsonOfField(11, pMasqueradingVector[11], pJson[pMasqueradingVector[11]], err, false))
+              return false;
+      }
     }
     catch(const Json::LogicError &e)
     {
@@ -1646,7 +2146,7 @@ bool Users::validJsonOfField(size_t index,
                 err="The automatic primary key cannot be set";
                 return false;
             }
-            if(!pJson.isInt())
+            if(!pJson.isUInt64())
             {
                 err="Type error in the "+fieldName+" field";
                 return false;
@@ -1664,11 +2164,11 @@ bool Users::validJsonOfField(size_t index,
                 return false;
             }
             // asString().length() creates a string object, is there any better way to validate the length?
-            if(pJson.isString() && pJson.asString().length() > 50)
+            if(pJson.isString() && pJson.asString().length() > 255)
             {
                 err="String length exceeds limit for the " +
                     fieldName +
-                    " field (the maximum value is 50)";
+                    " field (the maximum value is 255)";
                 return false;
             }
 
@@ -1685,11 +2185,11 @@ bool Users::validJsonOfField(size_t index,
                 return false;
             }
             // asString().length() creates a string object, is there any better way to validate the length?
-            if(pJson.isString() && pJson.asString().length() > 50)
+            if(pJson.isString() && pJson.asString().length() > 255)
             {
                 err="String length exceeds limit for the " +
                     fieldName +
-                    " field (the maximum value is 50)";
+                    " field (the maximum value is 255)";
                 return false;
             }
 
@@ -1697,7 +2197,8 @@ bool Users::validJsonOfField(size_t index,
         case 3:
             if(pJson.isNull())
             {
-                return true;
+                err="The " + fieldName + " column cannot be null";
+                return false;
             }
             if(!pJson.isString())
             {
@@ -1717,20 +2218,31 @@ bool Users::validJsonOfField(size_t index,
         case 4:
             if(pJson.isNull())
             {
-                return true;
+                err="The " + fieldName + " column cannot be null";
+                return false;
             }
             if(!pJson.isString())
             {
                 err="Type error in the "+fieldName+" field";
                 return false;
             }
+            // asString().length() creates a string object, is there any better way to validate the length?
+            if(pJson.isString() && pJson.asString().length() > 255)
+            {
+                err="String length exceeds limit for the " +
+                    fieldName +
+                    " field (the maximum value is 255)";
+                return false;
+            }
+
             break;
         case 5:
             if(pJson.isNull())
             {
-                return true;
+                err="The " + fieldName + " column cannot be null";
+                return false;
             }
-            if(!pJson.isString())
+            if(!pJson.isInt())
             {
                 err="Type error in the "+fieldName+" field";
                 return false;
@@ -1739,6 +2251,69 @@ bool Users::validJsonOfField(size_t index,
         case 6:
             if(pJson.isNull())
             {
+                err="The " + fieldName + " column cannot be null";
+                return false;
+            }
+            if(!pJson.isString())
+            {
+                err="Type error in the "+fieldName+" field";
+                return false;
+            }
+            // asString().length() creates a string object, is there any better way to validate the length?
+            if(pJson.isString() && pJson.asString().length() > 2)
+            {
+                err="String length exceeds limit for the " +
+                    fieldName +
+                    " field (the maximum value is 2)";
+                return false;
+            }
+
+            break;
+        case 7:
+            if(pJson.isNull())
+            {
+                err="The " + fieldName + " column cannot be null";
+                return false;
+            }
+            if(!pJson.isString())
+            {
+                err="Type error in the "+fieldName+" field";
+                return false;
+            }
+            // asString().length() creates a string object, is there any better way to validate the length?
+            if(pJson.isString() && pJson.asString().length() > 255)
+            {
+                err="String length exceeds limit for the " +
+                    fieldName +
+                    " field (the maximum value is 255)";
+                return false;
+            }
+
+            break;
+        case 8:
+            if(pJson.isNull())
+            {
+                err="The " + fieldName + " column cannot be null";
+                return false;
+            }
+            if(!pJson.isString())
+            {
+                err="Type error in the "+fieldName+" field";
+                return false;
+            }
+            // asString().length() creates a string object, is there any better way to validate the length?
+            if(pJson.isString() && pJson.asString().length() > 255)
+            {
+                err="String length exceeds limit for the " +
+                    fieldName +
+                    " field (the maximum value is 255)";
+                return false;
+            }
+
+            break;
+        case 9:
+            if(pJson.isNull())
+            {
                 return true;
             }
             if(!pJson.isString())
@@ -1747,7 +2322,18 @@ bool Users::validJsonOfField(size_t index,
                 return false;
             }
             break;
-        case 7:
+        case 10:
+            if(pJson.isNull())
+            {
+                return true;
+            }
+            if(!pJson.isString())
+            {
+                err="Type error in the "+fieldName+" field";
+                return false;
+            }
+            break;
+        case 11:
             if(pJson.isNull())
             {
                 return true;

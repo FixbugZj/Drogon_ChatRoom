@@ -11,16 +11,16 @@
 
 using namespace drogon;
 using namespace drogon::orm;
-using namespace drogon_model::db;
+using namespace drogon_model::koi;
 
-const std::string Friends::Cols::_userid = "userid";
+const std::string Friends::Cols::_id = "id";
 const std::string Friends::Cols::_friendid = "friendid";
-const std::vector<std::string> Friends::primaryKeyName = {"userid","friendid"};
+const std::vector<std::string> Friends::primaryKeyName = {"id","friendid"};
 const bool Friends::hasPrimaryKey = true;
 const std::string Friends::tableName = "friends";
 
 const std::vector<typename Friends::MetaData> Friends::metaData_={
-{"userid","int32_t","int",4,0,1,1},
+{"id","int32_t","int",4,0,1,1},
 {"friendid","int32_t","int",4,0,1,1}
 };
 const std::string &Friends::getColumnName(size_t index) noexcept(false)
@@ -32,9 +32,9 @@ Friends::Friends(const Row &r, const ssize_t indexOffset) noexcept
 {
     if(indexOffset < 0)
     {
-        if(!r["userid"].isNull())
+        if(!r["id"].isNull())
         {
-            userid_=std::make_shared<int32_t>(r["userid"].as<int32_t>());
+            id_=std::make_shared<int32_t>(r["id"].as<int32_t>());
         }
         if(!r["friendid"].isNull())
         {
@@ -53,7 +53,7 @@ Friends::Friends(const Row &r, const ssize_t indexOffset) noexcept
         index = offset + 0;
         if(!r[index].isNull())
         {
-            userid_=std::make_shared<int32_t>(r[index].as<int32_t>());
+            id_=std::make_shared<int32_t>(r[index].as<int32_t>());
         }
         index = offset + 1;
         if(!r[index].isNull())
@@ -76,7 +76,7 @@ Friends::Friends(const Json::Value &pJson, const std::vector<std::string> &pMasq
         dirtyFlag_[0] = true;
         if(!pJson[pMasqueradingVector[0]].isNull())
         {
-            userid_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
+            id_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
         }
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
@@ -91,12 +91,12 @@ Friends::Friends(const Json::Value &pJson, const std::vector<std::string> &pMasq
 
 Friends::Friends(const Json::Value &pJson) noexcept(false)
 {
-    if(pJson.isMember("userid"))
+    if(pJson.isMember("id"))
     {
         dirtyFlag_[0]=true;
-        if(!pJson["userid"].isNull())
+        if(!pJson["id"].isNull())
         {
-            userid_=std::make_shared<int32_t>((int32_t)pJson["userid"].asInt64());
+            id_=std::make_shared<int32_t>((int32_t)pJson["id"].asInt64());
         }
     }
     if(pJson.isMember("friendid"))
@@ -121,7 +121,7 @@ void Friends::updateByMasqueradedJson(const Json::Value &pJson,
     {
         if(!pJson[pMasqueradingVector[0]].isNull())
         {
-            userid_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
+            id_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
         }
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
@@ -135,11 +135,11 @@ void Friends::updateByMasqueradedJson(const Json::Value &pJson,
 
 void Friends::updateByJson(const Json::Value &pJson) noexcept(false)
 {
-    if(pJson.isMember("userid"))
+    if(pJson.isMember("id"))
     {
-        if(!pJson["userid"].isNull())
+        if(!pJson["id"].isNull())
         {
-            userid_=std::make_shared<int32_t>((int32_t)pJson["userid"].asInt64());
+            id_=std::make_shared<int32_t>((int32_t)pJson["id"].asInt64());
         }
     }
     if(pJson.isMember("friendid"))
@@ -151,20 +151,20 @@ void Friends::updateByJson(const Json::Value &pJson) noexcept(false)
     }
 }
 
-const int32_t &Friends::getValueOfUserid() const noexcept
+const int32_t &Friends::getValueOfId() const noexcept
 {
     static const int32_t defaultValue = int32_t();
-    if(userid_)
-        return *userid_;
+    if(id_)
+        return *id_;
     return defaultValue;
 }
-const std::shared_ptr<int32_t> &Friends::getUserid() const noexcept
+const std::shared_ptr<int32_t> &Friends::getId() const noexcept
 {
-    return userid_;
+    return id_;
 }
-void Friends::setUserid(const int32_t &pUserid) noexcept
+void Friends::setId(const int32_t &pId) noexcept
 {
-    userid_ = std::make_shared<int32_t>(pUserid);
+    id_ = std::make_shared<int32_t>(pId);
     dirtyFlag_[0] = true;
 }
 
@@ -190,13 +190,13 @@ void Friends::updateId(const uint64_t id)
 }
 typename Friends::PrimaryKeyType Friends::getPrimaryKey() const
 {
-    return std::make_tuple(*userid_,*friendid_);
+    return std::make_tuple(*id_,*friendid_);
 }
 
 const std::vector<std::string> &Friends::insertColumns() noexcept
 {
     static const std::vector<std::string> inCols={
-        "userid",
+        "id",
         "friendid"
     };
     return inCols;
@@ -206,9 +206,9 @@ void Friends::outputArgs(drogon::orm::internal::SqlBinder &binder) const
 {
     if(dirtyFlag_[0])
     {
-        if(getUserid())
+        if(getId())
         {
-            binder << getValueOfUserid();
+            binder << getValueOfId();
         }
         else
         {
@@ -246,9 +246,9 @@ void Friends::updateArgs(drogon::orm::internal::SqlBinder &binder) const
 {
     if(dirtyFlag_[0])
     {
-        if(getUserid())
+        if(getId())
         {
-            binder << getValueOfUserid();
+            binder << getValueOfId();
         }
         else
         {
@@ -270,13 +270,13 @@ void Friends::updateArgs(drogon::orm::internal::SqlBinder &binder) const
 Json::Value Friends::toJson() const
 {
     Json::Value ret;
-    if(getUserid())
+    if(getId())
     {
-        ret["userid"]=getValueOfUserid();
+        ret["id"]=getValueOfId();
     }
     else
     {
-        ret["userid"]=Json::Value();
+        ret["id"]=Json::Value();
     }
     if(getFriendid())
     {
@@ -297,9 +297,9 @@ Json::Value Friends::toMasqueradedJson(
     {
         if(!pMasqueradingVector[0].empty())
         {
-            if(getUserid())
+            if(getId())
             {
-                ret[pMasqueradingVector[0]]=getValueOfUserid();
+                ret[pMasqueradingVector[0]]=getValueOfId();
             }
             else
             {
@@ -320,13 +320,13 @@ Json::Value Friends::toMasqueradedJson(
         return ret;
     }
     LOG_ERROR << "Masquerade failed";
-    if(getUserid())
+    if(getId())
     {
-        ret["userid"]=getValueOfUserid();
+        ret["id"]=getValueOfId();
     }
     else
     {
-        ret["userid"]=Json::Value();
+        ret["id"]=Json::Value();
     }
     if(getFriendid())
     {
@@ -341,14 +341,14 @@ Json::Value Friends::toMasqueradedJson(
 
 bool Friends::validateJsonForCreation(const Json::Value &pJson, std::string &err)
 {
-    if(pJson.isMember("userid"))
+    if(pJson.isMember("id"))
     {
-        if(!validJsonOfField(0, "userid", pJson["userid"], err, true))
+        if(!validJsonOfField(0, "id", pJson["id"], err, true))
             return false;
     }
     else
     {
-        err="The userid column cannot be null";
+        err="The id column cannot be null";
         return false;
     }
     if(pJson.isMember("friendid"))
@@ -409,9 +409,9 @@ bool Friends::validateMasqueradedJsonForCreation(const Json::Value &pJson,
 }
 bool Friends::validateJsonForUpdate(const Json::Value &pJson, std::string &err)
 {
-    if(pJson.isMember("userid"))
+    if(pJson.isMember("id"))
     {
-        if(!validJsonOfField(0, "userid", pJson["userid"], err, false))
+        if(!validJsonOfField(0, "id", pJson["id"], err, false))
             return false;
     }
     else
