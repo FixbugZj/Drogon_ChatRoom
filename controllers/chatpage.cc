@@ -376,7 +376,7 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
 void controllers::chatpage::getGroupUserList(const HttpRequestPtr& req,  
 std::function<void (const HttpResponsePtr &)> &&callback) const
 {
-    
+
     Json::Value data;
     try
     {
@@ -396,7 +396,7 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
         //-----------------------
         Json::Value userList(Json::arrayValue);
 
-        std::vector<int> vec = service::GroupModel().queryGroupUsers(id,groupId);
+        std::vector<int> vec = service::GroupModel().queryGroupUsers(groupId);
         for(auto it :vec)
         {
             auto res = clientPtr->execSqlSync("select users.id,users.nickname,users.phone,users.account from users where id = ?",it);
@@ -412,6 +412,8 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
             }
 
         }
+
+        data["message"] = "ok";
         data["users"] = userList;
 
         //data["message"] = "修改成功";
@@ -471,3 +473,5 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
     }
     
 }
+
+

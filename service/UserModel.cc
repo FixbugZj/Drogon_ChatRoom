@@ -183,7 +183,32 @@ std::vector<int> service::GroupModel::queryGroupUsers(int id, int groupid)
 
     std::vector<int> idVec;
     try{
-        auto res = clientPtr->execSqlSync("select id from groupuser where groupid = ? and id != ?",groupid,id);        
+        auto res = clientPtr->execSqlSync("select id from groupuser where groupid = ? and id != ?",groupid,id);
+        LOG_ERROR<<"查询成功";
+
+        for(auto row:res)
+        {
+            int id = row["id"].as<int>();
+            LOG_ERROR<<id;
+            idVec.push_back(id);
+        }
+
+        return idVec;
+    }
+    catch(const DrogonDbException& e){
+        LOG_ERROR<<"查询失败";
+    }
+}
+
+
+
+std::vector<int> service::GroupModel::queryGroupUsers( int groupid)
+{
+    auto clientPtr = drogon::app().getDbClient();
+
+    std::vector<int> idVec;
+    try{
+        auto res = clientPtr->execSqlSync("select id from groupuser where groupid = ? ",groupid);        //and id = ?  ,id
         LOG_ERROR<<"查询成功";
 
         for(auto row:res)
@@ -215,6 +240,7 @@ void service::offlineMessageModel::insert(int id,std::string msg)
     }
 
 }
+
 
 
 //移除

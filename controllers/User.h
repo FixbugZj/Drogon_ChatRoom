@@ -16,8 +16,8 @@ namespace controllers
 
 class User : public drogon::HttpController<User>
 {
-  public:
-    METHOD_LIST_BEGIN
+public:
+  METHOD_LIST_BEGIN
     // use METHOD_ADD to add your custom processing function here;
     // METHOD_ADD(UserService::get, "/{2}/{1}", Get); // path is /UserService/{arg2}/{arg1}
     // METHOD_ADD(UserService::your_method_name, "/{1}/{2}/list", Get); // path is /UserService/{arg1}/{arg2}/list
@@ -27,7 +27,7 @@ class User : public drogon::HttpController<User>
     ADD_METHOD_TO(User::doLogin,"/login",Post,Options);
     ADD_METHOD_TO(User::doregister,"/register",Post,Options);
   
-    METHOD_LIST_END
+  METHOD_LIST_END
     // your declaration of processing function maybe like this:
     // void get(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback, int p1, std::string p2);
     // void your_method_name(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback, double p1, int p2) const;
@@ -35,11 +35,11 @@ class User : public drogon::HttpController<User>
     std::function<void (const HttpResponsePtr &)> &&callback) const;
 
     void doLogin   (const HttpRequestPtr& req, 
-    std::function<void (const HttpResponsePtr &)> &&callback) const; //drogon_model::db::Users  //User users ,User users
+    std::function<void (const HttpResponsePtr &)> &&callback) const; 
     
     void doregister(const HttpRequestPtr& req, 
-    std::function<void (const HttpResponsePtr &)> &&callback) const; //drogon_model::db::Users
-
+    std::function<void (const HttpResponsePtr &)> &&callback) const;
+    
 };
 
 }

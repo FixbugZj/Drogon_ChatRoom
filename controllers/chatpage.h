@@ -23,8 +23,8 @@ namespace controllers
 
   class chatpage : public drogon::HttpController<chatpage>
 {
-  public:
-    METHOD_LIST_BEGIN
+public:
+  METHOD_LIST_BEGIN
     // use METHOD_ADD to add your custom processing function here;
     // METHOD_ADD(chatpage::get, "/{2}/{1}", Get); // path is /chatpage/{arg2}/{arg1}
     // METHOD_ADD(chatpage::your_method_name, "/{1}/{2}/list", Get); // path is /chatpage/{arg1}/{arg2}/list
@@ -35,11 +35,7 @@ namespace controllers
     ADD_METHOD_TO(chatpage::getchatPage,"/user/chat",Get,Options);
     ADD_METHOD_TO(chatpage::addfriend,"/user/chat/addfriend",Post,Options);
     ADD_METHOD_TO(chatpage::addgroup,"/user/chat/addgroup",Post,Options);
-
-    // ADD_METHOD_TO(chatpage::oneChat,"/user/chat/oneChat",Post,Options);
-
     ADD_METHOD_TO(chatpage::createGroups,"/user/chat/createGroup",Post,Options);
-
     ADD_METHOD_TO(chatpage::getUserInfo,"/user/chat/getUserInfo",Post,Options);
     ADD_METHOD_TO(chatpage::changeUserNickname,"/user/chat/changeUserNickname",Post,Options);
     ADD_METHOD_TO(chatpage::changeUserPassWord,"/user/chat/changeUserPassWord",Post,Options);
@@ -49,8 +45,7 @@ namespace controllers
 
 
     
-
-    METHOD_LIST_END
+  METHOD_LIST_END
     // your declaration of processing function maybe like this:
     // void get(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback, int p1, std::string p2);
     // void your_method_name(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback, double p1, int p2) const;
@@ -64,12 +59,6 @@ namespace controllers
     void addgroup(const HttpRequestPtr& req, 
     std::function<void (const HttpResponsePtr &)> &&callback) const;
 
-    // void oneChat(const HttpRequestPtr& req,  
-    // std::function<void (const HttpResponsePtr &)> &&callback) const;
-
-    // void groupChat(const HttpRequestPtr& req,  
-    // std::function<void (const HttpResponsePtr &)> &&callback) const;
-
     void createGroups(const HttpRequestPtr& req,  
     std::function<void (const HttpResponsePtr &)> &&callback) const;
 
@@ -82,19 +71,19 @@ namespace controllers
     void changeUserPassWord(const HttpRequestPtr& req,  
     std::function<void (const HttpResponsePtr &)> &&callback) const;
 
-
     void getFriendList(const HttpRequestPtr& req,  
     std::function<void (const HttpResponsePtr &)> &&callback) const;
 
-    //根据群组ID查询用户ID列表 除了user自己
     void getGroupUserList(const HttpRequestPtr& req,  
     std::function<void (const HttpResponsePtr &)> &&callback) const;
 
     void changeGroupName(const HttpRequestPtr& req,  
     std::function<void (const HttpResponsePtr &)> &&callback) const;
-    
-  private:
 
+
+    
+
+private:
   service::UserModel _userModel;
   service::FriendModel _friendModel;
   service::GroupModel _groupModel;
