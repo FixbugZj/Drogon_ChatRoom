@@ -499,7 +499,7 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
         }
    
 
-        int id = (*jsonBody)["Id"].asInt();
+        int id = (*jsonBody)["id"].asInt();
 
         auto clientDb=drogon::app().getDbClient();
 
@@ -523,9 +523,9 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
             for(auto row :res)
             {   
                 Json::Value group;
-                group["groupid"] = row["groupid"].as<std::string>();
-                group["groupname"] = row["groupname"].as<std::string>();  
-                group["groupdesc"] = row["groupdesc"].as<std::string>();
+                group["id"] = row["groupid"].as<std::string>();
+                group["nickname"] = row["groupname"].as<std::string>();  
+                //group["groupdesc"] = row["groupdesc"].as<std::string>();
 
                 groupList.append(group);
             }
@@ -547,8 +547,6 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
 
     }
 
-
-
 }
 
 
@@ -558,6 +556,37 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
 {
     Json::Value data;
 
+    try
+    {
+        auto jsonBody = req->getJsonObject();
+        if(jsonBody==nullptr || jsonBody->empty())
+        {
+            data["msg"] = "json is empty";
+            return callback(HttpResponse::newHttpJsonResponse(data));
+        }
+
+        //id , nickname
+        int id = (*jsonBody)["Id"].asInt();
+        int friendId = (*jsonBody)["friendId"].asInt();
+
+        auto clientDb=drogon::app().getDbClient();
+        auto res = clientDb->execSqlSync("delete friendid,id from friends where id=?,friendid=?",id,friendId);
+        
+        data["message"] = "删除成功";
+
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp);
+
+    }
+    catch(const std::exception& e)
+    {
+        data["message"] = "删除失败";
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp);
+
+    }
 
 
 }
@@ -566,7 +595,45 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
 void controllers::chatpage::deleteGroup(const HttpRequestPtr& req,  
 std::function<void (const HttpResponsePtr &)> &&callback) const
 {
+    Json::Value data;
 
+    try
+    {
+        auto jsonBody = req->getJsonObject();
+        if(jsonBody==nullptr || jsonBody->empty())
+        {
+            data["msg"] = "json is empty";
+            return callback(HttpResponse::newHttpJsonResponse(data));
+        }
+
+        //id , nickname
+        int id = (*jsonBody)["Id"].asInt();
+        int groupId = (*jsonBody)["groupId"].asInt();
+
+
+        
+        auto clientDb=drogon::app().getDbClient();
+        //Mapper(clientDb)
+        //auto res = clientDb->execSqlSync();
+        
+
+
+
+        data["message"] = "解散成功";
+
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp);
+
+    }
+    catch(const std::exception& e)
+    {
+        data["message"] = "删除失败";
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp);
+
+    }
 
 
 }

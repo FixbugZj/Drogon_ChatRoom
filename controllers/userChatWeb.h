@@ -39,6 +39,7 @@ namespace controllers
     // WS_PATH_ADD("/path", "filter1", "filter2", ...);
     WS_PATH_ADD("/user/chat",Get,Post,Options);
     
+    
     WS_PATH_LIST_END
 
   private:

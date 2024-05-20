@@ -53,7 +53,6 @@ void controllers::userChatWeb::handleNewMessage(const WebSocketConnectionPtr& ws
     // {
     //     it->second->send(message);
     // }
-    
 
 
 }
