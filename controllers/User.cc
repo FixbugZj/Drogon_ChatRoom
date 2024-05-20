@@ -91,9 +91,10 @@ std::function<void (const HttpResponsePtr &)> &&callback
 
 
          data["message"] = "ok";
-        // data["nickname"] = nickname;
-        // data["token"] = token;
-        // data["id"] = id;
+        data["nickname"] = nickname;
+        //data["token"] = token;
+        data["id"] = id;
+        data["account"] = account;
         
         //-------------------------------
 
@@ -130,15 +131,17 @@ std::function<void (const HttpResponsePtr &)> &&callback
 
     try
     {
-        auto JsonBody = req->getJsonObject();
-        if(!JsonBody)
-        {
-            LOG_INFO<<"接收失败";
+        auto jsonBody = req->getJsonObject();
+        if(!jsonBody){
+
+            data["msg"] = "json is empty";
+            return callback(HttpResponse::newHttpJsonResponse(data));
+        
         }
         
-        std::string account = (*JsonBody)["account"].asString();
-        std::string password = (*JsonBody)["password"].asString();
-        std::string nickname = (*JsonBody)["nickname"].asString();
+        std::string account = (*jsonBody)["account"].asString();
+        std::string password = (*jsonBody)["password"].asString();
+        std::string nickname = (*jsonBody)["nickname"].asString();
 
         // std::string salt = utils::Cryptopp::generateSalt();
         // std::string hashedPassword = utils::Cryptopp::hashPassword(password + salt);

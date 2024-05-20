@@ -63,28 +63,48 @@ void controllers::chatpage::addfriend(const HttpRequestPtr& req,
 std::function<void (const HttpResponsePtr &)> &&callback
 ) const 
 {
-    auto jsonBody = req->getJsonObject();
 
-    if(!jsonBody){
-        LOG_INFO<<"接收失败";
-    }
-
-    int id = (*jsonBody)["id"].asInt();
-    int friendid = (*jsonBody)["friendid"].asInt();
-    LOG_INFO<<id;
-    LOG_INFO<<friendid;
+    Json::Value data;
     try{
-        service::FriendModel().insert(id,friendid);
+        auto jsonBody = req->getJsonObject();
+        if(!jsonBody){
+
+        data["msg"] = "json is empty";
+            return callback(HttpResponse::newHttpJsonResponse(data));
+        
+        }
         
 
-    }catch(const std::exception& e)
-    {
-        throw std::runtime_error("添加失败");
-    }
-    
-    auto resp = HttpResponse::newHttpResponse();
-    resp->setStatusCode(k200OK);
-    callback(resp);  
+        int id = (*jsonBody)["Id"].asInt();
+        int friendid = (*jsonBody)["friendId"].asInt();
+        auto clientDb = app().getDbClient();
+
+        auto res = clientDb->execSqlSync("select friendid from friends where id = ?",id);
+        for(auto row : res)
+        {   
+            int fid = row["friendid"].as<int>();
+            if(fid == friendid)
+            {
+                data["message"] = "用户已经存在";
+                return callback(HttpResponse::newHttpJsonResponse(data));
+            }
+        }
+
+        service::FriendModel().insert(id,friendid);
+        data["message"] = "ok";
+            
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp); 
+
+     }catch(const std::exception& e)
+     {
+         data["message"] = "error";
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp); 
+     }
+
 }
 
 
@@ -93,72 +113,33 @@ void controllers::chatpage::addgroup(const HttpRequestPtr& req,
 std::function<void (const HttpResponsePtr &)> &&callback
 ) const
 {
-    auto jsonBody = req->getJsonObject();
     
-
-    //-----------------
-    if(!jsonBody){
-        LOG_INFO<<"接收失败";
-    }
-
-    int id = (*jsonBody)["id"].asInt();
-    int groupid = (*jsonBody)["groupid"].asInt();
-    std::string role = (*jsonBody)["role"].asString();
-    LOG_INFO<<id;
-    LOG_INFO<<groupid;
-    LOG_INFO<<role;
-
+    Json::Value data;
     try{
+        auto jsonBody = req->getJsonObject();
+        if(!jsonBody){
+        data["msg"] = "json is empty";
+        return callback(HttpResponse::newHttpJsonResponse(data));
+        }
+        int id = (*jsonBody)["id"].asInt();
+        int groupid = (*jsonBody)["groupid"].asInt();
+        std::string role = "normal";
         service::GroupModel().addGroup(id,groupid,role);
-        throw std::runtime_error("加入成功");
 
-    }catch(const std::exception& e)
-    {
-        throw std::runtime_error("加入失败");
+
+        data["message"] = "ok";
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp);
     }
-    //-----------------
-    auto resp = HttpResponse::newHttpResponse();
-    resp->setStatusCode(k200OK);
-    callback(resp);  
+    catch(const std::exception& e){
+        data["message"] = "查询失败";
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp);
+    }
+
 }
-
-
-
-
-// void controllers::chatpage::oneChat(const HttpRequestPtr& req,
-// std::function<void (const HttpResponsePtr &)> &&callback
-// //const WebSocketConnectionPtr& conn
-// ) const
-// {
-
-//     auto jsonBody = req->getJsonObject();
-
-//     if(!jsonBody){
-//         LOG_INFO<<"接收失败";
-//     }
-
-//     int id = (*jsonBody)["id"].asInt();
-//     int toid = (*jsonBody)["toid"].asInt();
-//     std::string message = (*jsonBody)["message"].asString();
-
-
-//         LOG_INFO<<id;
-//         LOG_INFO<<toid;
-//         LOG_INFO<<message;
-
-
-//     Json::Value json;
-//     json["message"] = message;
-//     //------------------
-    
-        
-//     //-------------------
-//     auto resp = HttpResponse::newHttpResponse();
-//     resp->setStatusCode(k200OK);
-//     callback(resp);
-
-
-// }
 
 
 
@@ -174,7 +155,8 @@ std::function<void (const HttpResponsePtr &)> &&callback
     try{
         if(!jsonBody)
         {
-            LOG_INFO<<"接收失败";
+            data["msg"] = "json is empty";
+            return callback(HttpResponse::newHttpJsonResponse(data));
         }
         std::string groupname = (*jsonBody)["groupname"].asString();
         std::string groupdesc = (*jsonBody)["groupdesc"].asString();
@@ -194,7 +176,6 @@ std::function<void (const HttpResponsePtr &)> &&callback
         callback(resp);
 
     }
-
 
 }
 
@@ -327,7 +308,6 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
         callback(resp);
 
     }
-    
 }
 
 
@@ -335,39 +315,67 @@ void controllers::chatpage::getFriendList(const HttpRequestPtr& req,
 std::function<void (const HttpResponsePtr &)> &&callback) const
 {
     Json::Value data;
-
-    auto session = req->getSession();
-
-    auto userinfo = session->get<drogon_model::koi::Users>("userinfo");
-
-    // HttpViewData data;
-    // data.insert("nickname",userinfo.getValueOfNickname());
-    LOG_INFO<<userinfo.getValueOfNickname();
-    LOG_INFO<<userinfo.getValueOfAccount();
-
-    int id = userinfo.getValueOfId();
-    
-    std::vector<service::User> vec;
-
-    vec = service::FriendModel().query(id);
-
-    for(auto row :vec)
+    try
     {
-        int id = row.getId();
-        std::string name = row.getName();
-        //std::string state = row.getState();
+        auto jsonBody = req->getJsonObject();
+        if(jsonBody==nullptr || jsonBody->empty())
+        {
+            data["msg"] = "json is empty";
+            return callback(HttpResponse::newHttpJsonResponse(data));
+        }
 
-        LOG_INFO<<id;
-        LOG_INFO<<name;
-        //LOG_INFO<<state;
+        int id = (*jsonBody)["Id"].asInt();
+
+        auto clientPtr = app().getDbClient();
+        
+        //-----------------------
+        Json::Value friendList(Json::arrayValue);
+
+        std::vector<int> vec;
+
+        {
+            auto res = clientPtr->execSqlSync("select friendid from friends where id = ?",id);
+            for(auto row : res)
+            {
+            int id = row["friendid"].as<int>();
+
+            vec.push_back(id);
+            }
+        }
+        
+
+        for(auto it :vec)
+        {
+            auto res = clientPtr->execSqlSync("select users.id,users.nickname,users.phone from users  where id=?",it);
+            for(auto row :res)
+            {   
+                Json::Value user;
+                user["id"] = row["id"].as<std::string>();
+                user["nickname"] = row["nickname"].as<std::string>();  
+                user["phone"] = row["phone"].as<std::string>();
+
+                friendList.append(user);
+            }
+
+        }
+
+        data["message"] = "ok";
+        data["friends"] = friendList;
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp);
+
     }
+    catch(const std::exception& e)
+    {
+        data["message"] = "查询失败";
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp);
 
-    data["message"] = "ok";
-    
-    auto resp = HttpResponse::newHttpJsonResponse(data);
-    resp->setStatusCode(k200OK);
-    callback(resp);
+    }
 }
+
 
 
 
@@ -388,13 +396,14 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
         }
 
         //id , nickname
-        int id = (*jsonBody)["Id"].asInt();
+        //int id = (*jsonBody)["Id"].asInt();
         int groupId = (*jsonBody)["groupId"].asInt();
 
         auto clientPtr = app().getDbClient();
 
         //-----------------------
         Json::Value userList(Json::arrayValue);
+
 
         std::vector<int> vec = service::GroupModel().queryGroupUsers(groupId);
         for(auto it :vec)
@@ -403,7 +412,7 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
             for(auto row :res)
             {   
                 Json::Value user;
-                user["id"] = row["id"].as<int>();
+                user["id"] = row["id"].as<std::string>();
                 user["account"] = row["account"].as<std::string>();
                 user["nickname"] = row["nickname"].as<std::string>();  
                 user["phone"] = row["phone"].as<std::string>();
@@ -432,9 +441,8 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
 
     }
 
-    
-
 }
+
 
 void controllers::chatpage::changeGroupName(const HttpRequestPtr& req,  
 std::function<void (const HttpResponsePtr &)> &&callback) const
@@ -475,3 +483,90 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
 }
 
 
+//根据用户ID搜索群聊列表 
+void controllers::chatpage::getGroupList(const HttpRequestPtr& req,  
+std::function<void (const HttpResponsePtr &)> &&callback) const
+{
+    Json::Value data;
+
+    try
+    {
+        auto jsonBody = req->getJsonObject();
+        if(jsonBody==nullptr || jsonBody->empty())
+        {
+            data["msg"] = "json is empty";
+            return callback(HttpResponse::newHttpJsonResponse(data));
+        }
+   
+
+        int id = (*jsonBody)["Id"].asInt();
+
+        auto clientDb=drogon::app().getDbClient();
+
+        Json::Value groupList(Json::arrayValue);
+
+        std::vector<int> vec;
+
+        {
+            auto res = clientDb->execSqlSync("select groupid from groupuser where id = ? ",id);
+            for(auto row : res)
+            {   
+            int groupid = row["groupid"].as<int>();
+
+            vec.push_back(groupid);
+            }
+        }
+
+        for(auto it :vec)
+        {
+            auto res = clientDb->execSqlSync("select * from allgroup  where groupid=?",it);
+            for(auto row :res)
+            {   
+                Json::Value group;
+                group["groupid"] = row["groupid"].as<std::string>();
+                group["groupname"] = row["groupname"].as<std::string>();  
+                group["groupdesc"] = row["groupdesc"].as<std::string>();
+
+                groupList.append(group);
+            }
+
+        }
+
+        data["message"] = "查询成功";
+        data["groups"] = groupList;
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp);
+    }
+    catch(const std::exception& e)
+    {
+        data["message"] = "查询失败";
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp);
+
+    }
+
+
+
+}
+
+
+//删除好友
+void controllers::chatpage::deleteFriend(const HttpRequestPtr& req,  
+std::function<void (const HttpResponsePtr &)> &&callback) const
+{
+    Json::Value data;
+
+
+
+}
+
+//解散群聊
+void controllers::chatpage::deleteGroup(const HttpRequestPtr& req,  
+std::function<void (const HttpResponsePtr &)> &&callback) const
+{
+
+
+
+}

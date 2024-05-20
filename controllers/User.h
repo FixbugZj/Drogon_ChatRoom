@@ -34,9 +34,11 @@ public:
     void loginPage (const HttpRequestPtr& req,
     std::function<void (const HttpResponsePtr &)> &&callback) const;
 
+
     void doLogin   (const HttpRequestPtr& req, 
     std::function<void (const HttpResponsePtr &)> &&callback) const; 
     
+
     void doregister(const HttpRequestPtr& req, 
     std::function<void (const HttpResponsePtr &)> &&callback) const;
     

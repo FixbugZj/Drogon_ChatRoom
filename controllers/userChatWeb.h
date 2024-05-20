@@ -23,6 +23,7 @@ struct JsonMessage
 
 namespace controllers
 {
+  
   class userChatWeb : public drogon::WebSocketController<userChatWeb>
 {
   public:

@@ -33,18 +33,31 @@ public:
     
     
     ADD_METHOD_TO(chatpage::getchatPage,"/user/chat",Get,Options);
+
     ADD_METHOD_TO(chatpage::addfriend,"/user/chat/addfriend",Post,Options);
+
     ADD_METHOD_TO(chatpage::addgroup,"/user/chat/addgroup",Post,Options);
+
     ADD_METHOD_TO(chatpage::createGroups,"/user/chat/createGroup",Post,Options);
+
     ADD_METHOD_TO(chatpage::getUserInfo,"/user/chat/getUserInfo",Post,Options);
+
     ADD_METHOD_TO(chatpage::changeUserNickname,"/user/chat/changeUserNickname",Post,Options);
+
     ADD_METHOD_TO(chatpage::changeUserPassWord,"/user/chat/changeUserPassWord",Post,Options);
-    ADD_METHOD_TO(chatpage::getFriendList,"/user/chat/getFriendList",Post,Options);
+
+    ADD_METHOD_TO(chatpage::getFriendList,"/user/chat/getFriendList",Get,Post,Options);
+
     ADD_METHOD_TO(chatpage::getGroupUserList,"/user/chat/getGroupUserList",Post,Options);
+
     ADD_METHOD_TO(chatpage::changeGroupName,"/user/chat/changeGroupName",Post,Options);
 
-
+    ADD_METHOD_TO(chatpage::getGroupList,"/user/chat/getGroupList",Post,Options);
     
+    ADD_METHOD_TO(chatpage::deleteFriend,"/user/chat/deleteFriend",Post,Options);
+
+    ADD_METHOD_TO(chatpage::deleteGroup,"/user/chat/deleteGroup",Post,Options);
+
   METHOD_LIST_END
     // your declaration of processing function maybe like this:
     // void get(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback, int p1, std::string p2);
@@ -81,7 +94,15 @@ public:
     std::function<void (const HttpResponsePtr &)> &&callback) const;
 
 
-    
+    //根据用户名搜索群聊列表 
+    void getGroupList(const HttpRequestPtr& req,  
+    std::function<void (const HttpResponsePtr &)> &&callback) const;
+
+    void deleteFriend(const HttpRequestPtr& req,  
+    std::function<void (const HttpResponsePtr &)> &&callback) const;
+
+    void deleteGroup(const HttpRequestPtr& req,  
+    std::function<void (const HttpResponsePtr &)> &&callback) const;
 
 private:
   service::UserModel _userModel;
