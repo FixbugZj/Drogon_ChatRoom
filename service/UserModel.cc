@@ -22,14 +22,23 @@ void service::UserModel::login(std::string &account,
     
     //--------------------
     //Cryptopp cryptopp;
+    // utils::Cryptopp cryptopp;
+    // std::string pass = password+userInDb.getValueOfSalt();
+
+    /*
+        if(cryptopp.hashPassword(pass)!=userInfo.getValueOfPassWord())
+        {
+            LOG_ERROR<<"密码错误";
+        }
+
+    */
 
     //--------------------
     if(userInDb.getValueOfPassword() != password)
     {
         LOG_ERROR<<"密码错误";
     }
-    
-    
+      
 }
 
 
@@ -46,15 +55,15 @@ void service::UserModel::registdo(std::string account,std::string &password,std:
             clientPtr->execSqlSync("INSERT INTO users(account,password,nickname) VALUES (?,?,?)",
                         account,password,nickname);
     
-            throw std::runtime_error("注册成功");
+            LOG_ERROR<<"注册成功";
         }
         else
         {
-        throw std::runtime_error("用户名冲突");
+            LOG_ERROR<<"注册失败";
         }
     }
     catch(const DrogonDbException& e){
-        throw std::runtime_error("注册失败");
+            LOG_ERROR<<"注册失败";
     }
 
 
@@ -93,40 +102,39 @@ void service::UserModel::resetState()
 }
 
 
-void service::FriendModel::insert(int userid,int friendid)
+void service::FriendModel::insert(int id,int friendid)
 {
     auto clientPtr = drogon::app().getDbClient();
 
     try{
-        auto res = clientPtr->execSqlSync("insert into friends values(?, ?)",userid,friendid);
-        LOG_ERROR<<"添加成功";
+        auto res = clientPtr->execSqlSync("insert into friends values(?, ?)",id,friendid);
+        LOG_INFO<<"添加成功";
     }
     catch(const DrogonDbException& e){
-        LOG_ERROR<<"添加失败";
+        LOG_INFO<<"添加失败";
     }
-
 
 }
 
-std::vector<service::User> service::FriendModel::query(int userid) //返回好友列表
+std::vector<service::User> service::FriendModel::query(int id) //返回好友列表
 {
     auto clientPtr = drogon::app().getDbClient();
     std::vector<service::User> vec;
     try{
-        auto res = clientPtr->execSqlSync("select users.id,users.nickname,users.state from users  inner join friends on friends.friendid = users.id where friends.userid=?",userid);
+        auto res = clientPtr->execSqlSync("select users.id,users.nickname  from users inner join friends on friends.friendid = users.id where friends.id=?",id);
         for(auto row : res)
         {
             int id = row["id"].as<int>();
             std::string nickname = row["nickname"].as<std::string>();
-            std::string state = row["state"].as<std::string>();
+            //std::string state = row["state"].as<std::string>();
             LOG_INFO<<id;
             LOG_INFO<<nickname;
-            LOG_INFO<<state;
+            //LOG_INFO<<state;
 
             User user;
             user.setId(id);
             user.setNickName(nickname);
-            user.setState(state);
+            
             vec.push_back(user);
             
         }
@@ -208,6 +216,7 @@ void service::offlineMessageModel::insert(int id,std::string msg)
 
 }
 
+
 //移除
 void service::offlineMessageModel::remove(int id)
 {
@@ -219,7 +228,6 @@ void service::offlineMessageModel::remove(int id)
     catch(const DrogonDbException& e){
         LOG_ERROR<<"删除失败";
     }
-
 
 }
 

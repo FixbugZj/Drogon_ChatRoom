@@ -16,29 +16,30 @@ namespace service{
 class User
 {
     public:
-    User(int id = -1, std::string nickname = "", std::string account = "", std::string state = "offline")
+    User(int id = -1, std::string nickname = "", std::string account = "",std::string phone = "" )
     {
         this->id = id;
         this->nickname = nickname;
         this->account = account;
-        this->state = state;
+        this->phone = phone;
     }
 
     void setId(int id) { this->id = id; }
     void setNickName(std::string nickname) { this->nickname = nickname; }
     void setAccount(std::string account) { this->account = account; }
-    void setState(std::string state) { this->state = state; }
+    void setPhone(std::string phone) {this->phone = phone;}
 
     int getId() { return this->id; }
     std::string getName() { return this->nickname; }
     std::string getAccount() { return this->account; }
-    std::string getState() { return this->state; }
+    std::string getPhone() {return this->phone;}
 
-protected:
+
+private:
     int id;
     std::string account;
     std::string nickname;
-    std::string state;
+    std::string phone;
 
 };
 
@@ -73,7 +74,7 @@ public:
 class FriendModel
 {
 public:
-    void insert(int userid,int friendid);
+    void insert(int rid,int friendid);
 
     std::vector<User> query(int userid); //返回好友列表
 };

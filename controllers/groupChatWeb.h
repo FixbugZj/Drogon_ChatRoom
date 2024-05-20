@@ -18,6 +18,7 @@ using namespace drogon;
 
 namespace controllers
 {
+  
   class groupChatWeb : public drogon::WebSocketController<groupChatWeb>
 {
   public:

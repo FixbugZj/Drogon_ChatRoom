@@ -7,6 +7,8 @@
 #include <stdexcept>
 #include "../service/UserModel.h"
 #include <drogon/orm/Result.h>
+#include <vector>
+#include <jsoncpp/json/value.h>
 
 
 
@@ -44,11 +46,10 @@ std::function<void (const HttpResponsePtr &)> &&callback
     {
         int id = row.getId();
         std::string name = row.getName();
-        std::string state = row.getState();
 
         LOG_INFO<<id;
         LOG_INFO<<name;
-        LOG_INFO<<state;
+
     }
     data["message"] = "ok";
     auto resp = HttpResponse::newHttpJsonResponse(data);
@@ -74,7 +75,7 @@ std::function<void (const HttpResponsePtr &)> &&callback
     LOG_INFO<<friendid;
     try{
         service::FriendModel().insert(id,friendid);
-        throw std::runtime_error("添加成功");
+        
 
     }catch(const std::exception& e)
     {
@@ -122,52 +123,43 @@ std::function<void (const HttpResponsePtr &)> &&callback
 }
 
 
-void controllers::chatpage::oneChat(const HttpRequestPtr& req,
-std::function<void (const HttpResponsePtr &)> &&callback
-//const WebSocketConnectionPtr& conn
-) const
-{
-
-    auto jsonBody = req->getJsonObject();
-
-    if(!jsonBody){
-        LOG_INFO<<"接收失败";
-    }
-
-    int id = (*jsonBody)["id"].asInt();
-    int toid = (*jsonBody)["toid"].asInt();
-    std::string message = (*jsonBody)["message"].asString();
 
 
-        LOG_INFO<<id;
-        LOG_INFO<<toid;
-        LOG_INFO<<message;
+// void controllers::chatpage::oneChat(const HttpRequestPtr& req,
+// std::function<void (const HttpResponsePtr &)> &&callback
+// //const WebSocketConnectionPtr& conn
+// ) const
+// {
+
+//     auto jsonBody = req->getJsonObject();
+
+//     if(!jsonBody){
+//         LOG_INFO<<"接收失败";
+//     }
+
+//     int id = (*jsonBody)["id"].asInt();
+//     int toid = (*jsonBody)["toid"].asInt();
+//     std::string message = (*jsonBody)["message"].asString();
 
 
-    Json::Value json;
-    json["message"] = message;
-    //------------------
+//         LOG_INFO<<id;
+//         LOG_INFO<<toid;
+//         LOG_INFO<<message;
+
+
+//     Json::Value json;
+//     json["message"] = message;
+//     //------------------
     
         
-    //-------------------
-    auto resp = HttpResponse::newHttpResponse();
-    resp->setStatusCode(k200OK);
-    callback(resp);
+//     //-------------------
+//     auto resp = HttpResponse::newHttpResponse();
+//     resp->setStatusCode(k200OK);
+//     callback(resp);
 
 
-}
+// }
 
-
-void controllers::chatpage::groupChat(const HttpRequestPtr& req,  
-std::function<void (const HttpResponsePtr &)> &&callback
-//const WebSocketConnectionPtr& conn
-) const
-{
-    
-
-
-
-}
 
 
 
@@ -318,7 +310,7 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
         std::string password = (*jsonBody)["password"].asString();
 
         auto clientDb=drogon::app().getDbClient();
-        auto res = clientDb->execSqlSync("update koi.users set passwrod = ? where id = ?",password,id);
+        auto res = clientDb->execSqlSync("update koi.users set password = ? where id = ?",password,id);
         
         data["message"] = "修改成功";
 
@@ -339,4 +331,143 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
 }
 
 
+void controllers::chatpage::getFriendList(const HttpRequestPtr& req,  
+std::function<void (const HttpResponsePtr &)> &&callback) const
+{
+    Json::Value data;
 
+    auto session = req->getSession();
+
+    auto userinfo = session->get<drogon_model::koi::Users>("userinfo");
+
+    // HttpViewData data;
+    // data.insert("nickname",userinfo.getValueOfNickname());
+    LOG_INFO<<userinfo.getValueOfNickname();
+    LOG_INFO<<userinfo.getValueOfAccount();
+
+    int id = userinfo.getValueOfId();
+    
+    std::vector<service::User> vec;
+
+    vec = service::FriendModel().query(id);
+
+    for(auto row :vec)
+    {
+        int id = row.getId();
+        std::string name = row.getName();
+        //std::string state = row.getState();
+
+        LOG_INFO<<id;
+        LOG_INFO<<name;
+        //LOG_INFO<<state;
+    }
+
+    data["message"] = "ok";
+    
+    auto resp = HttpResponse::newHttpJsonResponse(data);
+    resp->setStatusCode(k200OK);
+    callback(resp);
+}
+
+
+
+
+//根据群组ID查询用户ID列表 除了user自己
+void controllers::chatpage::getGroupUserList(const HttpRequestPtr& req,  
+std::function<void (const HttpResponsePtr &)> &&callback) const
+{
+    
+    Json::Value data;
+    try
+    {
+        auto jsonBody = req->getJsonObject();
+        if(jsonBody==nullptr || jsonBody->empty())
+        {
+            data["msg"] = "json is empty";
+            return callback(HttpResponse::newHttpJsonResponse(data));
+        }
+
+        //id , nickname
+        int id = (*jsonBody)["Id"].asInt();
+        int groupId = (*jsonBody)["groupId"].asInt();
+
+        auto clientPtr = app().getDbClient();
+
+        //-----------------------
+        Json::Value userList(Json::arrayValue);
+
+        std::vector<int> vec = service::GroupModel().queryGroupUsers(id,groupId);
+        for(auto it :vec)
+        {
+            auto res = clientPtr->execSqlSync("select users.id,users.nickname,users.phone,users.account from users where id = ?",it);
+            for(auto row :res)
+            {   
+                Json::Value user;
+                user["id"] = row["id"].as<int>();
+                user["account"] = row["account"].as<std::string>();
+                user["nickname"] = row["nickname"].as<std::string>();  
+                user["phone"] = row["phone"].as<std::string>();
+
+                userList.append(user);
+            }
+
+        }
+        data["users"] = userList;
+
+        //data["message"] = "修改成功";
+
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp);
+
+    }
+    catch(const std::exception& e)
+    {
+        data["message"] = "查询失败";
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp);
+
+    }
+
+    
+
+}
+
+void controllers::chatpage::changeGroupName(const HttpRequestPtr& req,  
+std::function<void (const HttpResponsePtr &)> &&callback) const
+{
+    Json::Value data;
+    try
+    {
+        auto jsonBody = req->getJsonObject();
+        if(jsonBody==nullptr || jsonBody->empty())
+        {
+            data["msg"] = "json is empty";
+            return callback(HttpResponse::newHttpJsonResponse(data));
+        }
+
+        //id , nickname
+        int groupId = (*jsonBody)["groupId"].asInt();
+        std::string newName = (*jsonBody)["newName"].asString();
+
+        auto clientDb=drogon::app().getDbClient();
+        auto res = clientDb->execSqlSync("update koi.allgroup set groupname = ? where id = ?",newName,groupId);
+        
+        data["message"] = "修改成功";
+
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp);
+
+    }
+    catch(const std::exception& e)
+    {
+        data["message"] = "修改失败";
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp);
+
+    }
+    
+}

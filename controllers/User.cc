@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include "../service/UserModel.h"
 #include <drogon/orm/Result.h>
-
+#include <../utils/cryptopp.h>
 #include <jwt-cpp/jwt.h>
 
 
@@ -139,6 +139,11 @@ std::function<void (const HttpResponsePtr &)> &&callback
         std::string account = (*JsonBody)["account"].asString();
         std::string password = (*JsonBody)["password"].asString();
         std::string nickname = (*JsonBody)["nickname"].asString();
+
+        // std::string salt = utils::Cryptopp::generateSalt();
+        // std::string hashedPassword = utils::Cryptopp::hashPassword(password + salt);
+
+
         service::UserModel().registdo(account,password,nickname);
         
         data["message"] = "ok";

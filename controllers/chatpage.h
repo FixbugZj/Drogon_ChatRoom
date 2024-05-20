@@ -35,14 +35,20 @@ namespace controllers
     ADD_METHOD_TO(chatpage::getchatPage,"/user/chat",Get,Options);
     ADD_METHOD_TO(chatpage::addfriend,"/user/chat/addfriend",Post,Options);
     ADD_METHOD_TO(chatpage::addgroup,"/user/chat/addgroup",Post,Options);
-    ADD_METHOD_TO(chatpage::oneChat,"/user/chat/oneChat",Post,Options);
+
+    // ADD_METHOD_TO(chatpage::oneChat,"/user/chat/oneChat",Post,Options);
 
     ADD_METHOD_TO(chatpage::createGroups,"/user/chat/createGroup",Post,Options);
 
     ADD_METHOD_TO(chatpage::getUserInfo,"/user/chat/getUserInfo",Post,Options);
     ADD_METHOD_TO(chatpage::changeUserNickname,"/user/chat/changeUserNickname",Post,Options);
     ADD_METHOD_TO(chatpage::changeUserPassWord,"/user/chat/changeUserPassWord",Post,Options);
+    ADD_METHOD_TO(chatpage::getFriendList,"/user/chat/getFriendList",Post,Options);
+    ADD_METHOD_TO(chatpage::getGroupUserList,"/user/chat/getGroupUserList",Post,Options);
+    ADD_METHOD_TO(chatpage::changeGroupName,"/user/chat/changeGroupName",Post,Options);
 
+
+    
 
     METHOD_LIST_END
     // your declaration of processing function maybe like this:
@@ -58,11 +64,11 @@ namespace controllers
     void addgroup(const HttpRequestPtr& req, 
     std::function<void (const HttpResponsePtr &)> &&callback) const;
 
-    void oneChat(const HttpRequestPtr& req,  
-    std::function<void (const HttpResponsePtr &)> &&callback) const;
+    // void oneChat(const HttpRequestPtr& req,  
+    // std::function<void (const HttpResponsePtr &)> &&callback) const;
 
-    void groupChat(const HttpRequestPtr& req,  
-    std::function<void (const HttpResponsePtr &)> &&callback) const;
+    // void groupChat(const HttpRequestPtr& req,  
+    // std::function<void (const HttpResponsePtr &)> &&callback) const;
 
     void createGroups(const HttpRequestPtr& req,  
     std::function<void (const HttpResponsePtr &)> &&callback) const;
@@ -77,6 +83,16 @@ namespace controllers
     std::function<void (const HttpResponsePtr &)> &&callback) const;
 
 
+    void getFriendList(const HttpRequestPtr& req,  
+    std::function<void (const HttpResponsePtr &)> &&callback) const;
+
+    //根据群组ID查询用户ID列表 除了user自己
+    void getGroupUserList(const HttpRequestPtr& req,  
+    std::function<void (const HttpResponsePtr &)> &&callback) const;
+
+    void changeGroupName(const HttpRequestPtr& req,  
+    std::function<void (const HttpResponsePtr &)> &&callback) const;
+    
   private:
 
   service::UserModel _userModel;
