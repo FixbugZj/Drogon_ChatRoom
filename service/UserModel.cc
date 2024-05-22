@@ -107,7 +107,7 @@ void service::FriendModel::insert(int id,int friendid)
     auto clientPtr = drogon::app().getDbClient();
 
     try{
-        auto res = clientPtr->execSqlSync("insert into friends values(?, ?)",id,friendid);
+        auto res = clientPtr->execSqlSync("insert into friends values(?, ?),(?,?)",id,friendid,friendid,id);
         LOG_INFO<<"添加成功";
     }
     catch(const DrogonDbException& e){

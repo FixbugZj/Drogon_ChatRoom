@@ -13,6 +13,7 @@
 #include "../models/Allgroup.h"
 #include "../models/Offlinemessages.h"
 #include "../service/UserModel.h"
+#include "../models/Friendrequests.h"
 
 
 using namespace drogon;
@@ -37,6 +38,8 @@ public:
     ADD_METHOD_TO(chatpage::addfriend,"/user/chat/addfriend",Post,Options);
 
     ADD_METHOD_TO(chatpage::addgroup,"/user/chat/addgroup",Post,Options);
+
+    ADD_METHOD_TO(chatpage::respondToFriendRequest,"/user/chat/respondFriendRequest",Post,Options);
 
     ADD_METHOD_TO(chatpage::createGroups,"/user/chat/createGroup",Post,Options);
 
@@ -74,6 +77,9 @@ public:
     
     void addgroup(const HttpRequestPtr& req, 
     std::function<void (const HttpResponsePtr &)> &&callback) const;
+
+    void respondToFriendRequest(const HttpRequestPtr& req, 
+    std::function<void (const HttpResponsePtr &)> &&callback) const; 
 
     void createGroups(const HttpRequestPtr& req,  
     std::function<void (const HttpResponsePtr &)> &&callback) const;

@@ -108,6 +108,122 @@ std::function<void (const HttpResponsePtr &)> &&callback
 
 }
 
+/*
+
+void controllers::chatpage::addfriend(const HttpRequestPtr& req, 
+    std::function<void (const HttpResponsePtr &)> &&callback) const 
+{
+    Json::Value data;
+    try {
+        auto jsonBody = req->getJsonObject();
+        if (!jsonBody) {
+            data["msg"] = "json is empty";
+            return callback(HttpResponse::newHttpJsonResponse(data));
+        }
+
+        int userId = (*jsonBody)["Id"].asInt();
+        int friendId = (*jsonBody)["friendId"].asInt();
+        auto clientDb = app().getDbClient();
+
+        // Insert a record into friend_requests table
+        clientDb->execSqlAsync("insert into friend_requests (from_user, to_user) values (?, ?)", userId, friendId, [userId, friendId, clientDb, callback, &data](const Result& res) {
+            if (res.affectedRows() > 0) {
+                // Friend request successfully inserted
+                data["message"] = "好友请求已发送";
+                auto resp = HttpResponse::newHttpJsonResponse(data);
+                resp->setStatusCode(k200OK);
+                return callback(resp);
+            } else {
+                // Failed to insert friend request
+                data["message"] = "好友请求发送失败";
+                auto resp = HttpResponse::newHttpJsonResponse(data);
+                resp->setStatusCode(k500InternalServerError);
+                return callback(resp);
+            }
+        });
+    } catch(const std::exception& e) {
+        data["message"] = "操作失败";
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k500InternalServerError);
+        return callback(resp); 
+    }
+}
+
+*/
+
+
+void controllers::chatpage::respondToFriendRequest(const HttpRequestPtr& req, 
+std::function<void (const HttpResponsePtr &)> &&callback) const 
+{
+    Json::Value data;
+
+    try {
+        auto jsonBody = req->getJsonObject();
+        if (!jsonBody) {
+            data["msg"] = "json is empty";
+            return callback(HttpResponse::newHttpJsonResponse(data));
+        }
+
+
+        int requestId = (*jsonBody)["requestId"].asInt();
+        bool acceptRequest = (*jsonBody)["acceptRequest"].asBool();
+        auto clientDb = app().getDbClient();
+
+        if (acceptRequest) {
+            // If the user accepts the request, add the requester as a friend
+
+            auto res = clientDb->execSqlSync("select from_user, to_user from friendRequests where id=?", requestId);            
+            if (!res.empty()){
+                int fromUser;
+                int toUser;
+                for(auto row:res)
+                {
+                    fromUser = row["from_user"].as<int>();
+                    toUser = row["to_user"].as<int>();;
+                }
+
+                // Insert the requester as a friend
+                clientDb->execSqlSync("insert into friends (id, friendid) values (?, ?), (?, ?)", fromUser, toUser, toUser, fromUser);
+                if (res.affectedRows() > 0) 
+                {
+                // Friend successfully added
+                // Delete the friend request
+                    clientDb->execSqlSync("delete from friendRequests where id = ?", requestId);
+                    data["message"] = "好友请求已同意";
+                    auto resp = HttpResponse::newHttpJsonResponse(data);
+                    resp->setStatusCode(k200OK);
+                    callback(resp);
+                }else{
+                // Failed to add friend
+                    data["message"] = "好友请求处理失败";
+                    auto resp = HttpResponse::newHttpJsonResponse(data);
+                    resp->setStatusCode(k500InternalServerError);
+                    callback(resp);
+                }
+            } else{
+                    // Friend request not found
+                    data["message"] = "好友请求不存在";
+                    auto resp = HttpResponse::newHttpJsonResponse(data);
+                    resp->setStatusCode(k404NotFound);
+                    callback(resp);
+                }      
+        } else {
+            // If the user rejects the request, delete the request
+                clientDb->execSqlSync("delete from friendRequests where id = ?", requestId);
+                data["message"] = "好友请求已拒绝";
+                auto resp = HttpResponse::newHttpJsonResponse(data);
+                resp->setStatusCode(k200OK);
+                callback(resp);
+        }
+    } catch(const std::exception& e) {
+        data["message"] = "操作失败";
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k500InternalServerError);
+        callback(resp); 
+    }
+}
+
+
 
 
 void controllers::chatpage::addgroup(const HttpRequestPtr& req, 
