@@ -2,17 +2,24 @@
 #include <string>
 
 #include "../service/global.h"
-
+#include "../service/UserModel.h"
 #include "../models/Users.h"
 #include "../models/Friends.h"
 #include "../models/Groupuser.h"
 #include "../models/Allgroup.h"
 #include "../models/Offlinemessages.h"
+
 #include <jsoncpp/json/json.h>
+#include <drogon/orm/DbClient.h>
+#include <drogon/orm/Result.h>
+#include <drogon/orm/Exception.h>
+#include <drogon/orm/Mapper.h>
+
 
 using namespace drogon;
 using namespace drogon_model::koi;
 using namespace global;
+using namespace orm;
 
 void controllers::userChatWeb::handleNewMessage(const WebSocketConnectionPtr& wsConnPtr, std::string &&message, const WebSocketMessageType &type)
 {
@@ -43,16 +50,10 @@ void controllers::userChatWeb::handleNewMessage(const WebSocketConnectionPtr& ws
 
     LOG_INFO<<id<<" "<<toid<<"  "<<mes;
 
+
     global::UserChatManager::getInstance().broadcastMessageToUser(toid,message);
-    // auto it=userConnMap_.find(toid);
-    // if(it ==userConnMap_.end())
-    // {
-    //     LOG_INFO<<"hello";
-    // }
-    // else
-    // {
-    //     it->second->send(message);
-    // }
+    
+
 
 
 }
@@ -60,19 +61,27 @@ void controllers::userChatWeb::handleNewMessage(const WebSocketConnectionPtr& ws
 void controllers::userChatWeb::handleNewConnection(const HttpRequestPtr &req, const WebSocketConnectionPtr& wsConnPtr)
 {
 
+
     auto id = req->getParameter("id");
     
-    //int id = std::stoi(value);
-    // std::string message = (*jsonBody)["message"].asString();
+    {
+        auto clientDb=drogon::app().getDbClient();
+        auto res = clientDb->execSqlSync("select id,message,time from offlinemessage where id=? order by time",std::stoi(id));
+        for(auto row : res)
+        {   
+            std::string id = row["id"].as<std::string>();
+            std::string message= row["message"].as<std::string>();
+            std::string time = row["time"].as<std::string>();
+            wsConnPtr->send(message);
+            clientDb->execSqlSync("delete id,message,time from offlinemessage where id=?,message =?,time=?",std::stoi(id),message,time);
+        }
 
-    // auto it=userConnMap_.find(id);
-    // if(it ==userConnMap_.end())
-    // {
-    //     global::userConnMap_.insert({id,wsConnPtr});
-    // }
+    }
+        
     if(!id.empty())
     {
         global::UserChatManager::getInstance().addUserToMap(std::stoi(id),wsConnPtr);
+        service::UserModel().updateState("online",std::stoi(id));
     }
     else
     {
@@ -96,9 +105,9 @@ void controllers::userChatWeb::handleConnectionClosed(const WebSocketConnectionP
             if(members.empty())
             {
                 global::UserChatManager::getInstance().removeUserFromMap(user.first,wsConnPtr);
+                service::UserModel().updateState("offline",user.first);
             }
         }
     }
-
 
 }

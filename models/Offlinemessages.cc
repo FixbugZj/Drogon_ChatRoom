@@ -15,13 +15,15 @@ using namespace drogon_model::koi;
 
 const std::string Offlinemessages::Cols::_id = "id";
 const std::string Offlinemessages::Cols::_message = "message";
-const std::string Offlinemessages::primaryKeyName = "id";
-const bool Offlinemessages::hasPrimaryKey = true;
+const std::string Offlinemessages::Cols::_time = "time";
+const std::string Offlinemessages::primaryKeyName = "";
+const bool Offlinemessages::hasPrimaryKey = false;
 const std::string Offlinemessages::tableName = "offlinemessages";
 
 const std::vector<typename Offlinemessages::MetaData> Offlinemessages::metaData_={
-{"id","int32_t","int",4,0,1,1},
-{"message","std::string","varchar(500)",500,0,0,1}
+{"id","int32_t","int",4,0,0,1},
+{"message","std::string","varchar(500)",500,0,0,1},
+{"time","::trantor::Date","timestamp",0,0,0,0}
 };
 const std::string &Offlinemessages::getColumnName(size_t index) noexcept(false)
 {
@@ -40,11 +42,33 @@ Offlinemessages::Offlinemessages(const Row &r, const ssize_t indexOffset) noexce
         {
             message_=std::make_shared<std::string>(r["message"].as<std::string>());
         }
+        if(!r["time"].isNull())
+        {
+            auto timeStr = r["time"].as<std::string>();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                time_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
+        }
     }
     else
     {
         size_t offset = (size_t)indexOffset;
-        if(offset + 2 > r.size())
+        if(offset + 3 > r.size())
         {
             LOG_FATAL << "Invalid SQL result for this model";
             return;
@@ -60,13 +84,36 @@ Offlinemessages::Offlinemessages(const Row &r, const ssize_t indexOffset) noexce
         {
             message_=std::make_shared<std::string>(r[index].as<std::string>());
         }
+        index = offset + 2;
+        if(!r[index].isNull())
+        {
+            auto timeStr = r[index].as<std::string>();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                time_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
+        }
     }
 
 }
 
 Offlinemessages::Offlinemessages(const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 2)
+    if(pMasqueradingVector.size() != 3)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
@@ -85,6 +132,32 @@ Offlinemessages::Offlinemessages(const Json::Value &pJson, const std::vector<std
         if(!pJson[pMasqueradingVector[1]].isNull())
         {
             message_=std::make_shared<std::string>(pJson[pMasqueradingVector[1]].asString());
+        }
+    }
+    if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
+    {
+        dirtyFlag_[2] = true;
+        if(!pJson[pMasqueradingVector[2]].isNull())
+        {
+            auto timeStr = pJson[pMasqueradingVector[2]].asString();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                time_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
         }
     }
 }
@@ -107,18 +180,45 @@ Offlinemessages::Offlinemessages(const Json::Value &pJson) noexcept(false)
             message_=std::make_shared<std::string>(pJson["message"].asString());
         }
     }
+    if(pJson.isMember("time"))
+    {
+        dirtyFlag_[2]=true;
+        if(!pJson["time"].isNull())
+        {
+            auto timeStr = pJson["time"].asString();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                time_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
+        }
+    }
 }
 
 void Offlinemessages::updateByMasqueradedJson(const Json::Value &pJson,
                                             const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 2)
+    if(pMasqueradingVector.size() != 3)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
     }
     if(!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]))
     {
+        dirtyFlag_[0] = true;
         if(!pJson[pMasqueradingVector[0]].isNull())
         {
             id_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
@@ -132,12 +232,39 @@ void Offlinemessages::updateByMasqueradedJson(const Json::Value &pJson,
             message_=std::make_shared<std::string>(pJson[pMasqueradingVector[1]].asString());
         }
     }
+    if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
+    {
+        dirtyFlag_[2] = true;
+        if(!pJson[pMasqueradingVector[2]].isNull())
+        {
+            auto timeStr = pJson[pMasqueradingVector[2]].asString();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                time_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
+        }
+    }
 }
 
 void Offlinemessages::updateByJson(const Json::Value &pJson) noexcept(false)
 {
     if(pJson.isMember("id"))
     {
+        dirtyFlag_[0] = true;
         if(!pJson["id"].isNull())
         {
             id_=std::make_shared<int32_t>((int32_t)pJson["id"].asInt64());
@@ -149,6 +276,32 @@ void Offlinemessages::updateByJson(const Json::Value &pJson) noexcept(false)
         if(!pJson["message"].isNull())
         {
             message_=std::make_shared<std::string>(pJson["message"].asString());
+        }
+    }
+    if(pJson.isMember("time"))
+    {
+        dirtyFlag_[2] = true;
+        if(!pJson["time"].isNull())
+        {
+            auto timeStr = pJson["time"].asString();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                time_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
         }
     }
 }
@@ -168,11 +321,6 @@ void Offlinemessages::setId(const int32_t &pId) noexcept
 {
     id_ = std::make_shared<int32_t>(pId);
     dirtyFlag_[0] = true;
-}
-const typename Offlinemessages::PrimaryKeyType & Offlinemessages::getPrimaryKey() const
-{
-    assert(id_);
-    return *id_;
 }
 
 const std::string &Offlinemessages::getValueOfMessage() const noexcept
@@ -197,6 +345,28 @@ void Offlinemessages::setMessage(std::string &&pMessage) noexcept
     dirtyFlag_[1] = true;
 }
 
+const ::trantor::Date &Offlinemessages::getValueOfTime() const noexcept
+{
+    static const ::trantor::Date defaultValue = ::trantor::Date();
+    if(time_)
+        return *time_;
+    return defaultValue;
+}
+const std::shared_ptr<::trantor::Date> &Offlinemessages::getTime() const noexcept
+{
+    return time_;
+}
+void Offlinemessages::setTime(const ::trantor::Date &pTime) noexcept
+{
+    time_ = std::make_shared<::trantor::Date>(pTime);
+    dirtyFlag_[2] = true;
+}
+void Offlinemessages::setTimeToNull() noexcept
+{
+    time_.reset();
+    dirtyFlag_[2] = true;
+}
+
 void Offlinemessages::updateId(const uint64_t id)
 {
 }
@@ -205,7 +375,8 @@ const std::vector<std::string> &Offlinemessages::insertColumns() noexcept
 {
     static const std::vector<std::string> inCols={
         "id",
-        "message"
+        "message",
+        "time"
     };
     return inCols;
 }
@@ -234,6 +405,17 @@ void Offlinemessages::outputArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
+    if(dirtyFlag_[2])
+    {
+        if(getTime())
+        {
+            binder << getValueOfTime();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
 }
 
 const std::vector<std::string> Offlinemessages::updateColumns() const
@@ -246,6 +428,10 @@ const std::vector<std::string> Offlinemessages::updateColumns() const
     if(dirtyFlag_[1])
     {
         ret.push_back(getColumnName(1));
+    }
+    if(dirtyFlag_[2])
+    {
+        ret.push_back(getColumnName(2));
     }
     return ret;
 }
@@ -274,6 +460,17 @@ void Offlinemessages::updateArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
+    if(dirtyFlag_[2])
+    {
+        if(getTime())
+        {
+            binder << getValueOfTime();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
 }
 Json::Value Offlinemessages::toJson() const
 {
@@ -294,6 +491,14 @@ Json::Value Offlinemessages::toJson() const
     {
         ret["message"]=Json::Value();
     }
+    if(getTime())
+    {
+        ret["time"]=getTime()->toDbStringLocal();
+    }
+    else
+    {
+        ret["time"]=Json::Value();
+    }
     return ret;
 }
 
@@ -301,7 +506,7 @@ Json::Value Offlinemessages::toMasqueradedJson(
     const std::vector<std::string> &pMasqueradingVector) const
 {
     Json::Value ret;
-    if(pMasqueradingVector.size() == 2)
+    if(pMasqueradingVector.size() == 3)
     {
         if(!pMasqueradingVector[0].empty())
         {
@@ -325,6 +530,17 @@ Json::Value Offlinemessages::toMasqueradedJson(
                 ret[pMasqueradingVector[1]]=Json::Value();
             }
         }
+        if(!pMasqueradingVector[2].empty())
+        {
+            if(getTime())
+            {
+                ret[pMasqueradingVector[2]]=getTime()->toDbStringLocal();
+            }
+            else
+            {
+                ret[pMasqueradingVector[2]]=Json::Value();
+            }
+        }
         return ret;
     }
     LOG_ERROR << "Masquerade failed";
@@ -343,6 +559,14 @@ Json::Value Offlinemessages::toMasqueradedJson(
     else
     {
         ret["message"]=Json::Value();
+    }
+    if(getTime())
+    {
+        ret["time"]=getTime()->toDbStringLocal();
+    }
+    else
+    {
+        ret["time"]=Json::Value();
     }
     return ret;
 }
@@ -369,13 +593,18 @@ bool Offlinemessages::validateJsonForCreation(const Json::Value &pJson, std::str
         err="The message column cannot be null";
         return false;
     }
+    if(pJson.isMember("time"))
+    {
+        if(!validJsonOfField(2, "time", pJson["time"], err, true))
+            return false;
+    }
     return true;
 }
 bool Offlinemessages::validateMasqueradedJsonForCreation(const Json::Value &pJson,
                                                          const std::vector<std::string> &pMasqueradingVector,
                                                          std::string &err)
 {
-    if(pMasqueradingVector.size() != 2)
+    if(pMasqueradingVector.size() != 3)
     {
         err = "Bad masquerading vector";
         return false;
@@ -407,6 +636,14 @@ bool Offlinemessages::validateMasqueradedJsonForCreation(const Json::Value &pJso
             return false;
         }
       }
+      if(!pMasqueradingVector[2].empty())
+      {
+          if(pJson.isMember(pMasqueradingVector[2]))
+          {
+              if(!validJsonOfField(2, pMasqueradingVector[2], pJson[pMasqueradingVector[2]], err, true))
+                  return false;
+          }
+      }
     }
     catch(const Json::LogicError &e)
     {
@@ -422,14 +659,14 @@ bool Offlinemessages::validateJsonForUpdate(const Json::Value &pJson, std::strin
         if(!validJsonOfField(0, "id", pJson["id"], err, false))
             return false;
     }
-    else
-    {
-        err = "The value of primary key must be set in the json object for update";
-        return false;
-    }
     if(pJson.isMember("message"))
     {
         if(!validJsonOfField(1, "message", pJson["message"], err, false))
+            return false;
+    }
+    if(pJson.isMember("time"))
+    {
+        if(!validJsonOfField(2, "time", pJson["time"], err, false))
             return false;
     }
     return true;
@@ -438,7 +675,7 @@ bool Offlinemessages::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
                                                        const std::vector<std::string> &pMasqueradingVector,
                                                        std::string &err)
 {
-    if(pMasqueradingVector.size() != 2)
+    if(pMasqueradingVector.size() != 3)
     {
         err = "Bad masquerading vector";
         return false;
@@ -449,14 +686,14 @@ bool Offlinemessages::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
           if(!validJsonOfField(0, pMasqueradingVector[0], pJson[pMasqueradingVector[0]], err, false))
               return false;
       }
-    else
-    {
-        err = "The value of primary key must be set in the json object for update";
-        return false;
-    }
       if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
       {
           if(!validJsonOfField(1, pMasqueradingVector[1], pJson[pMasqueradingVector[1]], err, false))
+              return false;
+      }
+      if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
+      {
+          if(!validJsonOfField(2, pMasqueradingVector[2], pJson[pMasqueradingVector[2]], err, false))
               return false;
       }
     }
@@ -507,6 +744,17 @@ bool Offlinemessages::validJsonOfField(size_t index,
                 return false;
             }
 
+            break;
+        case 2:
+            if(pJson.isNull())
+            {
+                return true;
+            }
+            if(!pJson.isString())
+            {
+                err="Type error in the "+fieldName+" field";
+                return false;
+            }
             break;
         default:
             err="Internal error in the server";

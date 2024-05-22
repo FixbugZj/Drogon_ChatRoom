@@ -3,7 +3,7 @@
 #include <drogon/WebSocketController.h>
 
 #include <unordered_map>
-
+#include <string>
 
 #include "chatpage.h"
 
@@ -18,6 +18,14 @@ struct JsonMessage
   int toid;
   std::string message;
 };
+
+struct ChatMessage
+{
+  std::string sender;
+  std::string receiver;
+  std::string message;
+};
+
 
 
 

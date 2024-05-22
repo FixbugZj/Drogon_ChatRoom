@@ -56,6 +56,7 @@ class Users
         static const std::string _roleId;
         static const std::string _createTime;
         static const std::string _updateTime;
+        static const std::string _state;
     };
 
     static const int primaryKeyNumber;
@@ -214,8 +215,18 @@ class Users
     void setUpdatetime(const ::trantor::Date &pUpdatetime) noexcept;
     void setUpdatetimeToNull() noexcept;
 
+    /**  For column state  */
+    ///Get the value of the column state, returns the default value if the column is null
+    const std::string &getValueOfState() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<std::string> &getState() const noexcept;
+    ///Set the value of the column state
+    void setState(const std::string &pState) noexcept;
+    void setState(std::string &&pState) noexcept;
+    void setStateToNull() noexcept;
 
-    static size_t getColumnNumber() noexcept {  return 12;  }
+
+    static size_t getColumnNumber() noexcept {  return 13;  }
     static const std::string &getColumnName(size_t index) noexcept(false);
 
     Json::Value toJson() const;
@@ -248,6 +259,7 @@ class Users
     std::shared_ptr<std::string> roleid_;
     std::shared_ptr<::trantor::Date> createtime_;
     std::shared_ptr<::trantor::Date> updatetime_;
+    std::shared_ptr<std::string> state_;
     struct MetaData
     {
         const std::string colName_;
@@ -259,7 +271,7 @@ class Users
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[12]={ false };
+    bool dirtyFlag_[13]={ false };
   public:
     static const std::string &sqlForFindingByPrimaryKey()
     {
@@ -337,6 +349,12 @@ class Users
         {
             needSelection=true;
         }
+        sql += "state,";
+        ++parametersCount;
+        if(!dirtyFlag_[12])
+        {
+            needSelection=true;
+        }
         needSelection=true;
         if(parametersCount > 0)
         {
@@ -406,6 +424,15 @@ class Users
             sql +="default,";
         }
         if(dirtyFlag_[11])
+        {
+            sql.append("?,");
+
+        }
+        else
+        {
+            sql +="default,";
+        }
+        if(dirtyFlag_[12])
         {
             sql.append("?,");
 

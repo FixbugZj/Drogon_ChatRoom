@@ -1,7 +1,6 @@
 #include "chatpage.h"
-
+#include <drogon/drogon.h>
 #include "../service/UserModel.h"
-#include <drogon/orm/Mapper.h>
 #include <drogon/orm/Mapper.h>
 #include <drogon/orm/Exception.h>
 #include <stdexcept>
@@ -9,7 +8,9 @@
 #include <drogon/orm/Result.h>
 #include <vector>
 #include <jsoncpp/json/value.h>
-
+#include <fstream>
+#include <sstream>
+#include <iostream>
 
 
 using namespace orm;
@@ -53,7 +54,7 @@ std::function<void (const HttpResponsePtr &)> &&callback
     }
     data["message"] = "ok";
     auto resp = HttpResponse::newHttpJsonResponse(data);
-    resp->setStatusCode(k200OK);
+    resp->setStatusCode(k500InternalServerError);
     callback(resp);
 }
 
@@ -101,7 +102,7 @@ std::function<void (const HttpResponsePtr &)> &&callback
      {
          data["message"] = "error";
         auto resp = HttpResponse::newHttpJsonResponse(data);
-        resp->setStatusCode(k200OK);
+        resp->setStatusCode(k500InternalServerError);
         callback(resp); 
      }
 
@@ -135,7 +136,7 @@ std::function<void (const HttpResponsePtr &)> &&callback
     catch(const std::exception& e){
         data["message"] = "查询失败";
         auto resp = HttpResponse::newHttpJsonResponse(data);
-        resp->setStatusCode(k200OK);
+        resp->setStatusCode(k500InternalServerError);
         callback(resp);
     }
 
@@ -172,7 +173,7 @@ std::function<void (const HttpResponsePtr &)> &&callback
     {
         data["msg"] = "create error";
         auto resp = HttpResponse::newHttpJsonResponse(data);
-        resp->setStatusCode(k200OK);
+        resp->setStatusCode(k500InternalServerError);
         callback(resp);
 
     }
@@ -224,7 +225,7 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
         throw std::runtime_error("查询失败");
         data["message"]= "查询失败";
         auto resp = HttpResponse::newHttpJsonResponse(data);
-        resp->setStatusCode(k200OK);
+        resp->setStatusCode(k500InternalServerError);
         callback(resp);
 
     }
@@ -262,7 +263,7 @@ void controllers::chatpage::changeUserNickname(const HttpRequestPtr& req,
     {
         data["message"] = "修改失败";
         auto resp = HttpResponse::newHttpJsonResponse(data);
-        resp->setStatusCode(k200OK);
+        resp->setStatusCode(k500InternalServerError);
         callback(resp);
 
     }
@@ -304,7 +305,7 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
     {
         data["message"] = "修改失败";
         auto resp = HttpResponse::newHttpJsonResponse(data);
-        resp->setStatusCode(k200OK);
+        resp->setStatusCode(k500InternalServerError);
         callback(resp);
 
     }
@@ -370,7 +371,7 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
     {
         data["message"] = "查询失败";
         auto resp = HttpResponse::newHttpJsonResponse(data);
-        resp->setStatusCode(k200OK);
+        resp->setStatusCode(k500InternalServerError);
         callback(resp);
 
     }
@@ -436,7 +437,7 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
     {
         data["message"] = "查询失败";
         auto resp = HttpResponse::newHttpJsonResponse(data);
-        resp->setStatusCode(k200OK);
+        resp->setStatusCode(k500InternalServerError);
         callback(resp);
 
     }
@@ -475,7 +476,7 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
     {
         data["message"] = "修改失败";
         auto resp = HttpResponse::newHttpJsonResponse(data);
-        resp->setStatusCode(k200OK);
+        resp->setStatusCode(k500InternalServerError);
         callback(resp);
 
     }
@@ -542,7 +543,7 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
     {
         data["message"] = "查询失败";
         auto resp = HttpResponse::newHttpJsonResponse(data);
-        resp->setStatusCode(k200OK);
+        resp->setStatusCode(k500InternalServerError);
         callback(resp);
 
     }
@@ -583,7 +584,7 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
     {
         data["message"] = "删除失败";
         auto resp = HttpResponse::newHttpJsonResponse(data);
-        resp->setStatusCode(k200OK);
+        resp->setStatusCode(k500InternalServerError);
         callback(resp);
 
     }
@@ -630,10 +631,69 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
     {
         data["message"] = "删除失败";
         auto resp = HttpResponse::newHttpJsonResponse(data);
-        resp->setStatusCode(k200OK);
+        resp->setStatusCode(k500InternalServerError);
         callback(resp);
 
     }
 
+}
+
+
+void controllers::chatpage::uploadAvatar(const HttpRequestPtr& req,  
+std::function<void (const HttpResponsePtr &)> &&callback) const
+{
+    Json::Value data;
+    try
+    {
+        auto jsonBody = req->getJsonObject();
+
+        if(jsonBody==nullptr || jsonBody->empty())
+        {
+            data["msg"] = "json is empty";
+            return callback(HttpResponse::newHttpJsonResponse(data));
+        }
+
+        //id , nickname
+        if(jsonBody->isMember("imageData"))
+        {
+            auto userId = (*jsonBody)["Id"].asString();
+            auto imageData = (*jsonBody)["imageData"].asString();
+
+            std::string decodedImageData = drogon::utils::base64Decode(imageData);
+
+            std::string avatatPath = "/root/cpp/project/Drogon_ChatRoom/avatar" + userId + ".jpg";
+
+            std::ofstream file(avatatPath,std::ios::binary);
+            file.write(decodedImageData.c_str(),decodedImageData.length());
+            file.close();
+
+            auto clientDb=drogon::app().getDbClient();
+            
+            auto res = clientDb->execSqlSync("insert into users ");
+            
+            data["message"] = "上传成功";
+
+            auto resp = HttpResponse::newHttpJsonResponse(data);
+            resp->setStatusCode(k200OK);
+            callback(resp);
+
+        }
+        else
+        {
+            data["message"] = "imageData field not found in JSON";
+            auto resp = HttpResponse::newHttpJsonResponse(data);
+            resp->setStatusCode(k400BadRequest);
+            callback(resp);
+        }
+        
+    }
+    catch(const std::exception& e)
+    {
+        data["message"] = "上传失败";
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k500InternalServerError);
+        callback(resp);
+
+    }
 
 }

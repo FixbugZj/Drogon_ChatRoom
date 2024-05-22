@@ -58,6 +58,9 @@ public:
 
     ADD_METHOD_TO(chatpage::deleteGroup,"/user/chat/deleteGroup",Post,Options);
 
+    ADD_METHOD_TO(chatpage::uploadAvatar,"/user/chat/uploadAvatar",Post,Options);
+
+
   METHOD_LIST_END
     // your declaration of processing function maybe like this:
     // void get(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback, int p1, std::string p2);
@@ -103,6 +106,10 @@ public:
 
     void deleteGroup(const HttpRequestPtr& req,  
     std::function<void (const HttpResponsePtr &)> &&callback) const;
+
+    void uploadAvatar(const HttpRequestPtr& req,  
+    std::function<void (const HttpResponsePtr &)> &&callback) const;    
+
 
 private:
   service::UserModel _userModel;

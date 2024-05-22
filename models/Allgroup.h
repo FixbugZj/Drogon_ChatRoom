@@ -44,7 +44,7 @@ class Allgroup
   public:
     struct Cols
     {
-        static const std::string _id;
+        static const std::string _groupid;
         static const std::string _groupname;
         static const std::string _groupdesc;
     };
@@ -98,13 +98,13 @@ class Allgroup
                           std::string &err,
                           bool isForCreation);
 
-    /**  For column id  */
-    ///Get the value of the column id, returns the default value if the column is null
-    const int32_t &getValueOfId() const noexcept;
+    /**  For column groupid  */
+    ///Get the value of the column groupid, returns the default value if the column is null
+    const int32_t &getValueOfGroupid() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<int32_t> &getId() const noexcept;
-    ///Set the value of the column id
-    void setId(const int32_t &pId) noexcept;
+    const std::shared_ptr<int32_t> &getGroupid() const noexcept;
+    ///Set the value of the column groupid
+    void setGroupid(const int32_t &pGroupid) noexcept;
 
     /**  For column groupname  */
     ///Get the value of the column groupname, returns the default value if the column is null
@@ -147,7 +147,7 @@ class Allgroup
     void updateArgs(drogon::orm::internal::SqlBinder &binder) const;
     ///For mysql or sqlite3
     void updateId(const uint64_t id);
-    std::shared_ptr<int32_t> id_;
+    std::shared_ptr<int32_t> groupid_;
     std::shared_ptr<std::string> groupname_;
     std::shared_ptr<std::string> groupdesc_;
     struct MetaData
@@ -165,13 +165,13 @@ class Allgroup
   public:
     static const std::string &sqlForFindingByPrimaryKey()
     {
-        static const std::string sql="select * from " + tableName + " where id = ?";
+        static const std::string sql="select * from " + tableName + " where groupid = ?";
         return sql;
     }
 
     static const std::string &sqlForDeletingByPrimaryKey()
     {
-        static const std::string sql="delete from " + tableName + " where id = ?";
+        static const std::string sql="delete from " + tableName + " where groupid = ?";
         return sql;
     }
     std::string sqlForInserting(bool &needSelection) const
@@ -179,7 +179,7 @@ class Allgroup
         std::string sql="insert into " + tableName + " (";
         size_t parametersCount = 0;
         needSelection = false;
-            sql += "id,";
+            sql += "groupid,";
             ++parametersCount;
         if(dirtyFlag_[1])
         {

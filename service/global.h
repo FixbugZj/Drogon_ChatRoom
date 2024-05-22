@@ -4,7 +4,7 @@
 #include <unordered_map>
 
 #include <drogon/WebSocketConnection.h>
-
+#include <drogon/drogon.h>
 
 //    std::unordered_map<int,std::shared_ptr<drogon::WebSocketConnection>> userConnMap_;
 
@@ -46,7 +46,22 @@ public:
             for (const auto& member : it->second) {
                 member->send(message);
             }
+        }else
+        {
+            try
+            {
+                /* code */
+                auto clientDb=drogon::app().getDbClient();
+                auto res = clientDb->execSqlSync("insert into OfflineMessages(id,message) values(?,?,?)",userId,message);
+            }
+            catch(const std::exception& e)
+            {
+                LOG_ERROR<<"数据库连接失败";
+                return ;
+            }
+            
         }
+
     }
                 
     std::unordered_map<int, std::unordered_set<drogon::WebSocketConnectionPtr>> getUserMembers() const {

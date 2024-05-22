@@ -113,7 +113,7 @@ std::function<void (const HttpResponsePtr &)> &&callback
 
         data["message"] = "loginError";
         auto resp = HttpResponse::newHttpJsonResponse(data);
-        resp->setStatusCode(k200OK);
+        resp->setStatusCode(k500InternalServerError);
         callback(resp);
     }
 
@@ -158,7 +158,7 @@ std::function<void (const HttpResponsePtr &)> &&callback
     {   
         data["message"] = "error";
         auto resp = HttpResponse::newHttpJsonResponse(data);
-        resp->setStatusCode(k200OK);
+        resp->setStatusCode(k500InternalServerError);
         callback(resp); 
 
     }

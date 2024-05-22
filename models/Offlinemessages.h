@@ -46,14 +46,15 @@ class Offlinemessages
     {
         static const std::string _id;
         static const std::string _message;
+        static const std::string _time;
     };
 
     static const int primaryKeyNumber;
     static const std::string tableName;
     static const bool hasPrimaryKey;
     static const std::string primaryKeyName;
-    using PrimaryKeyType = int32_t;
-    const PrimaryKeyType &getPrimaryKey() const;
+    using PrimaryKeyType = void;
+    int getPrimaryKey() const { assert(false); return 0; }
 
     /**
      * @brief constructor
@@ -114,8 +115,17 @@ class Offlinemessages
     void setMessage(const std::string &pMessage) noexcept;
     void setMessage(std::string &&pMessage) noexcept;
 
+    /**  For column time  */
+    ///Get the value of the column time, returns the default value if the column is null
+    const ::trantor::Date &getValueOfTime() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<::trantor::Date> &getTime() const noexcept;
+    ///Set the value of the column time
+    void setTime(const ::trantor::Date &pTime) noexcept;
+    void setTimeToNull() noexcept;
 
-    static size_t getColumnNumber() noexcept {  return 2;  }
+
+    static size_t getColumnNumber() noexcept {  return 3;  }
     static const std::string &getColumnName(size_t index) noexcept(false);
 
     Json::Value toJson() const;
@@ -138,6 +148,7 @@ class Offlinemessages
     void updateId(const uint64_t id);
     std::shared_ptr<int32_t> id_;
     std::shared_ptr<std::string> message_;
+    std::shared_ptr<::trantor::Date> time_;
     struct MetaData
     {
         const std::string colName_;
@@ -149,17 +160,17 @@ class Offlinemessages
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[2]={ false };
+    bool dirtyFlag_[3]={ false };
   public:
     static const std::string &sqlForFindingByPrimaryKey()
     {
-        static const std::string sql="select * from " + tableName + " where id = ?";
+        static const std::string sql="";
         return sql;
     }
 
     static const std::string &sqlForDeletingByPrimaryKey()
     {
-        static const std::string sql="delete from " + tableName + " where id = ?";
+        static const std::string sql="";
         return sql;
     }
     std::string sqlForInserting(bool &needSelection) const
@@ -177,6 +188,8 @@ class Offlinemessages
             sql += "message,";
             ++parametersCount;
         }
+        sql += "time,";
+        ++parametersCount;
         if(parametersCount > 0)
         {
             sql[sql.length()-1]=')';
@@ -194,6 +207,15 @@ class Offlinemessages
         {
             sql.append("?,");
 
+        }
+        if(dirtyFlag_[2])
+        {
+            sql.append("?,");
+
+        }
+        else
+        {
+            sql +="default,";
         }
         if(parametersCount > 0)
         {

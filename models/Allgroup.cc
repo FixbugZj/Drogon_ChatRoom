@@ -13,15 +13,15 @@ using namespace drogon;
 using namespace drogon::orm;
 using namespace drogon_model::koi;
 
-const std::string Allgroup::Cols::_id = "id";
+const std::string Allgroup::Cols::_groupid = "groupid";
 const std::string Allgroup::Cols::_groupname = "groupname";
 const std::string Allgroup::Cols::_groupdesc = "groupdesc";
-const std::string Allgroup::primaryKeyName = "id";
+const std::string Allgroup::primaryKeyName = "groupid";
 const bool Allgroup::hasPrimaryKey = true;
 const std::string Allgroup::tableName = "allgroup";
 
 const std::vector<typename Allgroup::MetaData> Allgroup::metaData_={
-{"id","int32_t","int",4,1,1,1},
+{"groupid","int32_t","int",4,1,1,1},
 {"groupname","std::string","varchar(50)",50,0,0,1},
 {"groupdesc","std::string","varchar(200)",200,0,0,0}
 };
@@ -34,9 +34,9 @@ Allgroup::Allgroup(const Row &r, const ssize_t indexOffset) noexcept
 {
     if(indexOffset < 0)
     {
-        if(!r["id"].isNull())
+        if(!r["groupid"].isNull())
         {
-            id_=std::make_shared<int32_t>(r["id"].as<int32_t>());
+            groupid_=std::make_shared<int32_t>(r["groupid"].as<int32_t>());
         }
         if(!r["groupname"].isNull())
         {
@@ -59,7 +59,7 @@ Allgroup::Allgroup(const Row &r, const ssize_t indexOffset) noexcept
         index = offset + 0;
         if(!r[index].isNull())
         {
-            id_=std::make_shared<int32_t>(r[index].as<int32_t>());
+            groupid_=std::make_shared<int32_t>(r[index].as<int32_t>());
         }
         index = offset + 1;
         if(!r[index].isNull())
@@ -87,7 +87,7 @@ Allgroup::Allgroup(const Json::Value &pJson, const std::vector<std::string> &pMa
         dirtyFlag_[0] = true;
         if(!pJson[pMasqueradingVector[0]].isNull())
         {
-            id_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
+            groupid_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
         }
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
@@ -110,12 +110,12 @@ Allgroup::Allgroup(const Json::Value &pJson, const std::vector<std::string> &pMa
 
 Allgroup::Allgroup(const Json::Value &pJson) noexcept(false)
 {
-    if(pJson.isMember("id"))
+    if(pJson.isMember("groupid"))
     {
         dirtyFlag_[0]=true;
-        if(!pJson["id"].isNull())
+        if(!pJson["groupid"].isNull())
         {
-            id_=std::make_shared<int32_t>((int32_t)pJson["id"].asInt64());
+            groupid_=std::make_shared<int32_t>((int32_t)pJson["groupid"].asInt64());
         }
     }
     if(pJson.isMember("groupname"))
@@ -148,7 +148,7 @@ void Allgroup::updateByMasqueradedJson(const Json::Value &pJson,
     {
         if(!pJson[pMasqueradingVector[0]].isNull())
         {
-            id_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
+            groupid_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
         }
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
@@ -171,11 +171,11 @@ void Allgroup::updateByMasqueradedJson(const Json::Value &pJson,
 
 void Allgroup::updateByJson(const Json::Value &pJson) noexcept(false)
 {
-    if(pJson.isMember("id"))
+    if(pJson.isMember("groupid"))
     {
-        if(!pJson["id"].isNull())
+        if(!pJson["groupid"].isNull())
         {
-            id_=std::make_shared<int32_t>((int32_t)pJson["id"].asInt64());
+            groupid_=std::make_shared<int32_t>((int32_t)pJson["groupid"].asInt64());
         }
     }
     if(pJson.isMember("groupname"))
@@ -196,26 +196,26 @@ void Allgroup::updateByJson(const Json::Value &pJson) noexcept(false)
     }
 }
 
-const int32_t &Allgroup::getValueOfId() const noexcept
+const int32_t &Allgroup::getValueOfGroupid() const noexcept
 {
     static const int32_t defaultValue = int32_t();
-    if(id_)
-        return *id_;
+    if(groupid_)
+        return *groupid_;
     return defaultValue;
 }
-const std::shared_ptr<int32_t> &Allgroup::getId() const noexcept
+const std::shared_ptr<int32_t> &Allgroup::getGroupid() const noexcept
 {
-    return id_;
+    return groupid_;
 }
-void Allgroup::setId(const int32_t &pId) noexcept
+void Allgroup::setGroupid(const int32_t &pGroupid) noexcept
 {
-    id_ = std::make_shared<int32_t>(pId);
+    groupid_ = std::make_shared<int32_t>(pGroupid);
     dirtyFlag_[0] = true;
 }
 const typename Allgroup::PrimaryKeyType & Allgroup::getPrimaryKey() const
 {
-    assert(id_);
-    return *id_;
+    assert(groupid_);
+    return *groupid_;
 }
 
 const std::string &Allgroup::getValueOfGroupname() const noexcept
@@ -269,7 +269,7 @@ void Allgroup::setGroupdescToNull() noexcept
 
 void Allgroup::updateId(const uint64_t id)
 {
-    id_ = std::make_shared<int32_t>(static_cast<int32_t>(id));
+    groupid_ = std::make_shared<int32_t>(static_cast<int32_t>(id));
 }
 
 const std::vector<std::string> &Allgroup::insertColumns() noexcept
@@ -349,13 +349,13 @@ void Allgroup::updateArgs(drogon::orm::internal::SqlBinder &binder) const
 Json::Value Allgroup::toJson() const
 {
     Json::Value ret;
-    if(getId())
+    if(getGroupid())
     {
-        ret["id"]=getValueOfId();
+        ret["groupid"]=getValueOfGroupid();
     }
     else
     {
-        ret["id"]=Json::Value();
+        ret["groupid"]=Json::Value();
     }
     if(getGroupname())
     {
@@ -384,9 +384,9 @@ Json::Value Allgroup::toMasqueradedJson(
     {
         if(!pMasqueradingVector[0].empty())
         {
-            if(getId())
+            if(getGroupid())
             {
-                ret[pMasqueradingVector[0]]=getValueOfId();
+                ret[pMasqueradingVector[0]]=getValueOfGroupid();
             }
             else
             {
@@ -418,13 +418,13 @@ Json::Value Allgroup::toMasqueradedJson(
         return ret;
     }
     LOG_ERROR << "Masquerade failed";
-    if(getId())
+    if(getGroupid())
     {
-        ret["id"]=getValueOfId();
+        ret["groupid"]=getValueOfGroupid();
     }
     else
     {
-        ret["id"]=Json::Value();
+        ret["groupid"]=Json::Value();
     }
     if(getGroupname())
     {
@@ -447,9 +447,9 @@ Json::Value Allgroup::toMasqueradedJson(
 
 bool Allgroup::validateJsonForCreation(const Json::Value &pJson, std::string &err)
 {
-    if(pJson.isMember("id"))
+    if(pJson.isMember("groupid"))
     {
-        if(!validJsonOfField(0, "id", pJson["id"], err, true))
+        if(!validJsonOfField(0, "groupid", pJson["groupid"], err, true))
             return false;
     }
     if(pJson.isMember("groupname"))
@@ -518,9 +518,9 @@ bool Allgroup::validateMasqueradedJsonForCreation(const Json::Value &pJson,
 }
 bool Allgroup::validateJsonForUpdate(const Json::Value &pJson, std::string &err)
 {
-    if(pJson.isMember("id"))
+    if(pJson.isMember("groupid"))
     {
-        if(!validJsonOfField(0, "id", pJson["id"], err, false))
+        if(!validJsonOfField(0, "groupid", pJson["groupid"], err, false))
             return false;
     }
     else
