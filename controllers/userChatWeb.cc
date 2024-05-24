@@ -51,10 +51,8 @@ void controllers::userChatWeb::handleNewMessage(const WebSocketConnectionPtr& ws
     LOG_INFO<<id<<" "<<toid<<"  "<<mes;
 
 
-    global::UserChatManager::getInstance().broadcastMessageToUser(toid,message);
+    global::UserChatManager::getInstance().broadcastMessageToUser(id,toid,message);
     
-
-
 
 }
 
@@ -63,21 +61,24 @@ void controllers::userChatWeb::handleNewConnection(const HttpRequestPtr &req, co
 
 
     auto id = req->getParameter("id");
-    
+    Json::Value data;
+
+    auto clientDb=drogon::app().getDbClient();
+    auto res = clientDb->execSqlSync("select id,message,from_id,time from offlinemessages where id=? order by time",std::stoi(id));
+    if(!res.empty())
     {
-        auto clientDb=drogon::app().getDbClient();
-        auto res = clientDb->execSqlSync("select id,message,time from offlinemessage where id=? order by time",std::stoi(id));
         for(auto row : res)
         {   
             std::string id = row["id"].as<std::string>();
+            std::string from_id = row["from_id"].as<std::string>();
             std::string message= row["message"].as<std::string>();
             std::string time = row["time"].as<std::string>();
             wsConnPtr->send(message);
-            clientDb->execSqlSync("delete id,message,time from offlinemessage where id=?,message =?,time=?",std::stoi(id),message,time);
+            clientDb->execSqlSync("delete from offlinemessages where id=? and from_id=? and message =? and time=?",std::stoi(id),std::stoi(from_id),message,time);
         }
-
     }
-        
+
+    
     if(!id.empty())
     {
         global::UserChatManager::getInstance().addUserToMap(std::stoi(id),wsConnPtr);

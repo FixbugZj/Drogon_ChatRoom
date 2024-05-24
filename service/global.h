@@ -39,9 +39,9 @@ public:
         }
     }
 
-    void broadcastMessageToUser(int userId, const std::string& message) {
+    void broadcastMessageToUser(int id,int toid, const std::string& message) {
         //std::lock_guard<std::mutex> lock(mutex_);
-        auto it = userMembers_.find(userId);
+        auto it = userMembers_.find(toid);
         if (it != userMembers_.end()) {
             for (const auto& member : it->second) {
                 member->send(message);
@@ -52,7 +52,7 @@ public:
             {
                 /* code */
                 auto clientDb=drogon::app().getDbClient();
-                auto res = clientDb->execSqlSync("insert into OfflineMessages(id,message) values(?,?,?)",userId,message);
+                auto res = clientDb->execSqlSync("insert into OfflineMessages(id,from_id,message) values(?,?,?)",toid,id,message);
             }
             catch(const std::exception& e)
             {

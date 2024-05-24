@@ -77,7 +77,7 @@ void service::UserModel::updateState(const std::string state,int id)
     auto clientPtr = drogon::app().getDbClient();
     LOG_ERROR<<"数据库连接成功";
     try{
-        auto res = clientPtr->execSqlSync("update user set state = ? where id=? ",state,id);
+        auto res = clientPtr->execSqlSync("update users set state = ? where id=? ",state,id);
         LOG_ERROR<<"更新状态成功";
     }
     catch(const DrogonDbException& e){

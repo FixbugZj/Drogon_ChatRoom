@@ -51,7 +51,7 @@ public:
 
     ADD_METHOD_TO(chatpage::getFriendList,"/user/chat/getFriendList",Get,Post,Options);
 
-    ADD_METHOD_TO(chatpage::getGroupUserList,"/user/chat/getGroupUserList",Post,Options);
+    ADD_METHOD_TO(chatpage::getGroupUserList,"/user/chat/getGroupUserList",Get,Post,Options);
 
     ADD_METHOD_TO(chatpage::changeGroupName,"/user/chat/changeGroupName",Post,Options);
 

@@ -47,6 +47,7 @@ class Offlinemessages
         static const std::string _id;
         static const std::string _message;
         static const std::string _time;
+        static const std::string _from_id;
     };
 
     static const int primaryKeyNumber;
@@ -124,8 +125,17 @@ class Offlinemessages
     void setTime(const ::trantor::Date &pTime) noexcept;
     void setTimeToNull() noexcept;
 
+    /**  For column from_id  */
+    ///Get the value of the column from_id, returns the default value if the column is null
+    const int32_t &getValueOfFromId() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<int32_t> &getFromId() const noexcept;
+    ///Set the value of the column from_id
+    void setFromId(const int32_t &pFromId) noexcept;
+    void setFromIdToNull() noexcept;
 
-    static size_t getColumnNumber() noexcept {  return 3;  }
+
+    static size_t getColumnNumber() noexcept {  return 4;  }
     static const std::string &getColumnName(size_t index) noexcept(false);
 
     Json::Value toJson() const;
@@ -149,6 +159,7 @@ class Offlinemessages
     std::shared_ptr<int32_t> id_;
     std::shared_ptr<std::string> message_;
     std::shared_ptr<::trantor::Date> time_;
+    std::shared_ptr<int32_t> fromId_;
     struct MetaData
     {
         const std::string colName_;
@@ -160,7 +171,7 @@ class Offlinemessages
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[3]={ false };
+    bool dirtyFlag_[4]={ false };
   public:
     static const std::string &sqlForFindingByPrimaryKey()
     {
@@ -190,6 +201,11 @@ class Offlinemessages
         }
         sql += "time,";
         ++parametersCount;
+        if(dirtyFlag_[3])
+        {
+            sql += "from_id,";
+            ++parametersCount;
+        }
         if(parametersCount > 0)
         {
             sql[sql.length()-1]=')';
@@ -216,6 +232,11 @@ class Offlinemessages
         else
         {
             sql +="default,";
+        }
+        if(dirtyFlag_[3])
+        {
+            sql.append("?,");
+
         }
         if(parametersCount > 0)
         {
