@@ -23,7 +23,7 @@ using namespace orm;
 
 void controllers::userChatWeb::handleNewMessage(const WebSocketConnectionPtr& wsConnPtr, std::string &&message, const WebSocketMessageType &type)
 {
-    // write your application logic here
+    //write your application logic here
     LOG_INFO<<wsConnPtr.get()->connected()<< "  "<<message;
     
     Json::Value json;
@@ -35,24 +35,21 @@ void controllers::userChatWeb::handleNewMessage(const WebSocketConnectionPtr& ws
         return ;
     }// 从 JSON 对象中读取特定键的值
 
+    // Json::Value msg;    
+    // bool fuck = reader.parse(json["content"].asString(), msg);
+    // if (!fuck) {
+    //     LOG_INFO<<message;
+    //     std::cout << "解析 JSON 失败" << std::endl;
+    //     return ;
+    // }// 从 JSON 对象中读取特定键的值
 
-    Json::Value msg;    
-    bool fuck = reader.parse(json["content"].asString(), msg);
-    if (!fuck) {
-        LOG_INFO<<message;
-        std::cout << "解析 JSON 失败" << std::endl;
-        return ;
-    }// 从 JSON 对象中读取特定键的值
-
-    int id = msg["id"].asInt();
-    int toid = msg["toid"].asInt();
-    std::string mes = msg["message"].asString();
+    int id = json["id"].asInt();
+    int toid = json["toid"].asInt();
+    std::string mes = json["message"].asString();
 
     LOG_INFO<<id<<" "<<toid<<"  "<<mes;
+    global::UserChatManager::getInstance().broadcastMessageToUser(id,toid,mes);
 
-
-    global::UserChatManager::getInstance().broadcastMessageToUser(id,toid,message);
-    
 
 }
 
@@ -61,7 +58,12 @@ void controllers::userChatWeb::handleNewConnection(const HttpRequestPtr &req, co
 
 
     auto id = req->getParameter("id");
-    Json::Value data;
+    LOG_INFO<<id<<"       这里61";
+    // Json::Value data;
+    // try
+    // {
+    //     auto jsonBody=req->getJsonObject();
+    //     auto id = (*jsonBody)["id"].asString();
 
     auto clientDb=drogon::app().getDbClient();
     auto res = clientDb->execSqlSync("select id,message,from_id,time from offlinemessages where id=? order by time",std::stoi(id));
@@ -78,7 +80,7 @@ void controllers::userChatWeb::handleNewConnection(const HttpRequestPtr &req, co
         }
     }
 
-    
+        
     if(!id.empty())
     {
         global::UserChatManager::getInstance().addUserToMap(std::stoi(id),wsConnPtr);
@@ -88,6 +90,9 @@ void controllers::userChatWeb::handleNewConnection(const HttpRequestPtr &req, co
     {
         LOG_ERROR << "Missing Id parameter in URL";
     }
+    // }
+
+        
 
 }
 
@@ -115,16 +120,4 @@ void controllers::userChatWeb::handleConnectionClosed(const WebSocketConnectionP
 }
 
 
-// void controllers::userChatWeb::checkUserConn()
-// {
-//     auto loop = drogon::app().getLoop();
-//     loop->runEvery(std::chrono::seconds(1),[=]()
-//     {
-//         auto userMembers = global::UserChatManager::getInstance().getUserMembers();
-//         for(auto user:userMembers)
-//         {
-//             if(user.second)
-//         }
 
-//     })
-// }

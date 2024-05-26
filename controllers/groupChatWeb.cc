@@ -26,19 +26,19 @@ void controllers::groupChatWeb::handleNewMessage(const WebSocketConnectionPtr& w
         return ;
     }
 
-    Json::Value msg;
-    bool fuck = reader.parse(json["content"].asString(), msg);
-    if (!fuck) {
-        LOG_INFO<<message;
-        std::cout << "解析 JSON 失败" << std::endl;
-        return ;
-    }// 从 JSON 对象中读取特定键的值
+    // Json::Value msg;
+    // bool fuck = reader.parse(json["content"].asString(), msg);
+    // if (!fuck) {
+    //     LOG_INFO<<message;
+    //     std::cout << "解析 JSON 失败" << std::endl;
+    //     return ;
+    // }// 从 JSON 对象中读取特定键的值
 
 
-    int groupId = msg["groupId"].asInt();
-    std::string mes = msg["message"].asString();
+    int groupId = json["groupId"].asInt();
+    std::string mes = json["message"].asString();
     
-    global::GroupChatManager::getInstance().broadcastMessageToGroup(groupId, message);
+    global::GroupChatManager::getInstance().broadcastMessageToGroup(groupId, mes);
 
 
 

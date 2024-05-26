@@ -24,12 +24,15 @@ int main() {
   // 设置 CORS 头
     drogon::app().registerHandler("/", [](const drogon::HttpRequestPtr& req, 
                                              std::function<void(const drogon::HttpResponsePtr&)>&& callback) {
-         auto resp = drogon::HttpResponse::newHttpResponse();
+        auto resp = drogon::HttpResponse::newHttpResponse();
         resp->addHeader("Access-Control-Allow-Origin", "*"); // 允许所有来源的请求
         resp->addHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS"); // 允许的 HTTP 方法
         resp->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Content-Length, Host, Connection"); // 允许的请求头
         callback(resp);
     });
+
+
+    
 
 
 

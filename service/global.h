@@ -5,6 +5,13 @@
 
 #include <drogon/WebSocketConnection.h>
 #include <drogon/drogon.h>
+#include "../service/global.h"
+#include "../service/UserModel.h"
+#include "../models/Users.h"
+#include "../models/Friends.h"
+#include "../models/Groupuser.h"
+#include "../models/Allgroup.h"
+#include "../models/Offlinemessages.h"
 
 //    std::unordered_map<int,std::shared_ptr<drogon::WebSocketConnection>> userConnMap_;
 
@@ -52,7 +59,7 @@ public:
             {
                 /* code */
                 auto clientDb=drogon::app().getDbClient();
-                auto res = clientDb->execSqlSync("insert into OfflineMessages(id,from_id,message) values(?,?,?)",toid,id,message);
+                auto res = clientDb->execSqlSync("insert into offlinemessages(id,from_id,message) values(?,?,?)",toid,id,message);
             }
             catch(const std::exception& e)
             {

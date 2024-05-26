@@ -1,7 +1,7 @@
 #pragma once
 
 #include <drogon/WebSocketController.h>
-
+#include <drogon/HttpResponse.h>
 #include <unordered_map>
 #include <string>
 
@@ -50,12 +50,16 @@ namespace controllers
     
     WS_PATH_LIST_END
 
+    void setResponseHeaders(const drogon::HttpResponsePtr& response) 
+    {
+        response->addHeader("Access-Control-Allow-Origin", "*");
+        response->addHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        response->addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    }
+
   private:
 
 };
-
-
-void checkUserConn();
 
 }
 
