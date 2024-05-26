@@ -53,6 +53,10 @@ namespace controllers
   private:
 
 };
+
+
+void checkUserConn();
+
 }
 
 

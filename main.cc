@@ -1,6 +1,17 @@
 #include <drogon/drogon.h>
 #include <drogon/orm/DbClient.h>
+#include <signal.h>
+#include <./service/UserModel.h>
 using namespace drogon;
+
+
+
+void resetHandler(int)
+{
+  service::UserModel().resetState();
+  exit(0);
+}
+
 
 int main() {
   // Set HTTP listener address and port
@@ -32,7 +43,11 @@ int main() {
       });
 
   // Run HTTP framework,the method will block in the internal event loop
+  signal(SIGINT,resetHandler);
   drogon::app().run();
 
   return 0;
 }
+
+
+

@@ -6,7 +6,7 @@
 #include <optional>
 
 
-namespace utils
+namespace utils_m
 {
     class CheckLogin
 {

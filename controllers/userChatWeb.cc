@@ -103,6 +103,7 @@ void controllers::userChatWeb::handleConnectionClosed(const WebSocketConnectionP
         if(it!=members.end())
         {
             members.erase(it);
+            service::UserModel().updateState("offline",user.first);
             if(members.empty())
             {
                 global::UserChatManager::getInstance().removeUserFromMap(user.first,wsConnPtr);
@@ -112,3 +113,18 @@ void controllers::userChatWeb::handleConnectionClosed(const WebSocketConnectionP
     }
 
 }
+
+
+// void controllers::userChatWeb::checkUserConn()
+// {
+//     auto loop = drogon::app().getLoop();
+//     loop->runEvery(std::chrono::seconds(1),[=]()
+//     {
+//         auto userMembers = global::UserChatManager::getInstance().getUserMembers();
+//         for(auto user:userMembers)
+//         {
+//             if(user.second)
+//         }
+
+//     })
+// }

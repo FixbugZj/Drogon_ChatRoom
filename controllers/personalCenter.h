@@ -30,7 +30,7 @@ namespace controllers
 
     ADD_METHOD_TO(personalCenter::getUserInfo,"/user/personal",Get,Options);
 
-    ADD_METHOD_TO(personalCenter::changeUserInfo,"/user/personal",Post,Options);
+    ADD_METHOD_TO(personalCenter::changeUserInfo,"/user/personalChange",Post,Options);
 
     METHOD_LIST_END
     // your declaration of processing function maybe like this:
@@ -42,7 +42,7 @@ namespace controllers
 
     void changeUserInfo(const HttpRequestPtr& req,  
     std::function<void (const HttpResponsePtr &)> &&callback) const;
-
+    
     
 
 };

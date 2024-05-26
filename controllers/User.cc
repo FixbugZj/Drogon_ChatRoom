@@ -9,7 +9,8 @@
 #include <drogon/orm/Result.h>
 #include <../utils/cryptopp.h>
 #include <jwt-cpp/jwt.h>
-
+#include <chrono>
+#include "../utils/JWTUtil.h"
 
 
 using namespace orm;
@@ -77,26 +78,27 @@ std::function<void (const HttpResponsePtr &)> &&callback
 
 
         //-------------------------------
-        // auto token = jwt::create()
-        //                 .set_issuer("auth0")
-        //                 .set_type("JWS")
-        //                 .set_payload_claim("user_id", jwt::claim(std::string("123456")))
-        //                 .set_payload_claim("name", jwt::claim(std::string("xxxxx")))
-        //                 .set_expires_at(std::chrono::system_clock::now() + std::chrono::seconds{drogon::app().getCustomConfig()["jwt-sessionTime"].asInt()})
-        //                 .sign(jwt::algorithm::hs256{drogon::app().getCustomConfig()["jwt-secret"].asString()});
+        auto token = utils_m::JWTUtil().createToken(std::to_string(id));
 
 
         // std::cout << "secret = " << drogon::app().getCustomConfig()["jwt-secret"].asString() << std::endl;
-        // std::cout << "sessionTime = " << drogon::app().getCustomConfig()["jwt-sessionTime"].asInt() << std::endl;
+        // std::cout << "sessionTime = " << drogon::app().getCustomConfig()["session_timeout"].asInt() << std::endl;
 
 
-         data["message"] = "ok";
+        data["message"] = "ok";
         data["nickname"] = nickname;
-        //data["token"] = token;
+        data["token"] = token;
         data["id"] = id;
         data["account"] = account;
         
         //-------------------------------
+        auto user_id = utils_m::JWTUtil().verifyToken(token);
+        //auto user_id = de.get_payload_claim("user_id").as_string();
+        //auto account_token = de.get_payload_claim("account").as_string();
+        LOG_INFO<<user_id<<" ";
+
+
+        //--------------------------------
 
 
         auto resp = HttpResponse::newHttpJsonResponse(data);

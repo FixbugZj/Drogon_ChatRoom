@@ -3,7 +3,7 @@
 
 #include<string>
 
-namespace utils
+namespace utils_m
 {
 
 class Cryptopp

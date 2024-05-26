@@ -6,7 +6,7 @@
 
 
 
-std::string utils::Cryptopp::hashPassword(const std::string& password)
+std::string utils_m::Cryptopp::hashPassword(const std::string& password)
 {
     CryptoPP::SHA256 hash;
 
@@ -25,7 +25,7 @@ std::string utils::Cryptopp::hashPassword(const std::string& password)
 
 
 
-std::string utils::Cryptopp::generateSale()
+std::string utils_m::Cryptopp::generateSale()
 {
     // 生成随机盐值
     CryptoPP::AutoSeededRandomPool rng;

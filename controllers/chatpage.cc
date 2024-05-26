@@ -70,9 +70,8 @@ std::function<void (const HttpResponsePtr &)> &&callback
         auto jsonBody = req->getJsonObject();
         if(!jsonBody){
 
-        data["msg"] = "json is empty";
+            data["msg"] = "json is empty";
             return callback(HttpResponse::newHttpJsonResponse(data));
-        
         }
         
 
@@ -100,7 +99,7 @@ std::function<void (const HttpResponsePtr &)> &&callback
 
      }catch(const std::exception& e)
      {
-         data["message"] = "error";
+        data["message"] = "error";
         auto resp = HttpResponse::newHttpJsonResponse(data);
         resp->setStatusCode(k500InternalServerError);
         callback(resp); 
