@@ -35,14 +35,14 @@ const std::vector<typename Users::MetaData> Users::metaData_={
 {"nickname","std::string","varchar(255)",255,0,0,1},
 {"account","std::string","varchar(255)",255,0,0,1},
 {"password","std::string","varchar(255)",255,0,0,1},
-{"avatarUrl","std::string","varchar(255)",255,0,0,1},
-{"isValid","int8_t","tinyint(1)",1,0,0,1},
-{"sex","std::string","varchar(2)",2,0,0,1},
-{"phone","std::string","varchar(255)",255,0,0,1},
-{"salt","std::string","varchar(255)",255,0,0,1},
+{"avatarUrl","std::string","varchar(255)",255,0,0,0},
+{"isValid","int8_t","tinyint(1)",1,0,0,0},
+{"sex","std::string","varchar(2)",2,0,0,0},
+{"phone","std::string","varchar(255)",255,0,0,0},
+{"salt","std::string","varchar(255)",255,0,0,0},
 {"roleId","std::string","text",0,0,0,0},
 {"createTime","::trantor::Date","datetime",0,0,0,0},
-{"updateTime","::trantor::Date","datetime",0,0,0,0},
+{"updateTime","::trantor::Date","timestamp",0,0,0,0},
 {"state","std::string","enum('online','offline')",0,0,0,0}
 };
 const std::string &Users::getColumnName(size_t index) noexcept(false)
@@ -951,6 +951,11 @@ void Users::setAvatarurl(std::string &&pAvatarurl) noexcept
     avatarurl_ = std::make_shared<std::string>(std::move(pAvatarurl));
     dirtyFlag_[4] = true;
 }
+void Users::setAvatarurlToNull() noexcept
+{
+    avatarurl_.reset();
+    dirtyFlag_[4] = true;
+}
 
 const int8_t &Users::getValueOfIsvalid() const noexcept
 {
@@ -966,6 +971,11 @@ const std::shared_ptr<int8_t> &Users::getIsvalid() const noexcept
 void Users::setIsvalid(const int8_t &pIsvalid) noexcept
 {
     isvalid_ = std::make_shared<int8_t>(pIsvalid);
+    dirtyFlag_[5] = true;
+}
+void Users::setIsvalidToNull() noexcept
+{
+    isvalid_.reset();
     dirtyFlag_[5] = true;
 }
 
@@ -990,6 +1000,11 @@ void Users::setSex(std::string &&pSex) noexcept
     sex_ = std::make_shared<std::string>(std::move(pSex));
     dirtyFlag_[6] = true;
 }
+void Users::setSexToNull() noexcept
+{
+    sex_.reset();
+    dirtyFlag_[6] = true;
+}
 
 const std::string &Users::getValueOfPhone() const noexcept
 {
@@ -1012,6 +1027,11 @@ void Users::setPhone(std::string &&pPhone) noexcept
     phone_ = std::make_shared<std::string>(std::move(pPhone));
     dirtyFlag_[7] = true;
 }
+void Users::setPhoneToNull() noexcept
+{
+    phone_.reset();
+    dirtyFlag_[7] = true;
+}
 
 const std::string &Users::getValueOfSalt() const noexcept
 {
@@ -1032,6 +1052,11 @@ void Users::setSalt(const std::string &pSalt) noexcept
 void Users::setSalt(std::string &&pSalt) noexcept
 {
     salt_ = std::make_shared<std::string>(std::move(pSalt));
+    dirtyFlag_[8] = true;
+}
+void Users::setSaltToNull() noexcept
+{
+    salt_.reset();
     dirtyFlag_[8] = true;
 }
 
@@ -1893,11 +1918,6 @@ bool Users::validateJsonForCreation(const Json::Value &pJson, std::string &err)
         if(!validJsonOfField(4, "avatarUrl", pJson["avatarUrl"], err, true))
             return false;
     }
-    else
-    {
-        err="The avatarUrl column cannot be null";
-        return false;
-    }
     if(pJson.isMember("isValid"))
     {
         if(!validJsonOfField(5, "isValid", pJson["isValid"], err, true))
@@ -1908,30 +1928,15 @@ bool Users::validateJsonForCreation(const Json::Value &pJson, std::string &err)
         if(!validJsonOfField(6, "sex", pJson["sex"], err, true))
             return false;
     }
-    else
-    {
-        err="The sex column cannot be null";
-        return false;
-    }
     if(pJson.isMember("phone"))
     {
         if(!validJsonOfField(7, "phone", pJson["phone"], err, true))
             return false;
     }
-    else
-    {
-        err="The phone column cannot be null";
-        return false;
-    }
     if(pJson.isMember("salt"))
     {
         if(!validJsonOfField(8, "salt", pJson["salt"], err, true))
             return false;
-    }
-    else
-    {
-        err="The salt column cannot be null";
-        return false;
     }
     if(pJson.isMember("roleId"))
     {
@@ -2019,11 +2024,6 @@ bool Users::validateMasqueradedJsonForCreation(const Json::Value &pJson,
               if(!validJsonOfField(4, pMasqueradingVector[4], pJson[pMasqueradingVector[4]], err, true))
                   return false;
           }
-        else
-        {
-            err="The " + pMasqueradingVector[4] + " column cannot be null";
-            return false;
-        }
       }
       if(!pMasqueradingVector[5].empty())
       {
@@ -2040,11 +2040,6 @@ bool Users::validateMasqueradedJsonForCreation(const Json::Value &pJson,
               if(!validJsonOfField(6, pMasqueradingVector[6], pJson[pMasqueradingVector[6]], err, true))
                   return false;
           }
-        else
-        {
-            err="The " + pMasqueradingVector[6] + " column cannot be null";
-            return false;
-        }
       }
       if(!pMasqueradingVector[7].empty())
       {
@@ -2053,11 +2048,6 @@ bool Users::validateMasqueradedJsonForCreation(const Json::Value &pJson,
               if(!validJsonOfField(7, pMasqueradingVector[7], pJson[pMasqueradingVector[7]], err, true))
                   return false;
           }
-        else
-        {
-            err="The " + pMasqueradingVector[7] + " column cannot be null";
-            return false;
-        }
       }
       if(!pMasqueradingVector[8].empty())
       {
@@ -2066,11 +2056,6 @@ bool Users::validateMasqueradedJsonForCreation(const Json::Value &pJson,
               if(!validJsonOfField(8, pMasqueradingVector[8], pJson[pMasqueradingVector[8]], err, true))
                   return false;
           }
-        else
-        {
-            err="The " + pMasqueradingVector[8] + " column cannot be null";
-            return false;
-        }
       }
       if(!pMasqueradingVector[9].empty())
       {
@@ -2365,8 +2350,7 @@ bool Users::validJsonOfField(size_t index,
         case 4:
             if(pJson.isNull())
             {
-                err="The " + fieldName + " column cannot be null";
-                return false;
+                return true;
             }
             if(!pJson.isString())
             {
@@ -2386,8 +2370,7 @@ bool Users::validJsonOfField(size_t index,
         case 5:
             if(pJson.isNull())
             {
-                err="The " + fieldName + " column cannot be null";
-                return false;
+                return true;
             }
             if(!pJson.isInt())
             {
@@ -2398,8 +2381,7 @@ bool Users::validJsonOfField(size_t index,
         case 6:
             if(pJson.isNull())
             {
-                err="The " + fieldName + " column cannot be null";
-                return false;
+                return true;
             }
             if(!pJson.isString())
             {
@@ -2419,8 +2401,7 @@ bool Users::validJsonOfField(size_t index,
         case 7:
             if(pJson.isNull())
             {
-                err="The " + fieldName + " column cannot be null";
-                return false;
+                return true;
             }
             if(!pJson.isString())
             {
@@ -2440,8 +2421,7 @@ bool Users::validJsonOfField(size_t index,
         case 8:
             if(pJson.isNull())
             {
-                err="The " + fieldName + " column cannot be null";
-                return false;
+                return true;
             }
             if(!pJson.isString())
             {

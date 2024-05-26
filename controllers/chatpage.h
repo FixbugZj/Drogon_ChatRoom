@@ -14,6 +14,7 @@
 #include "../models/Offlinemessages.h"
 #include "../service/UserModel.h"
 #include "../models/Friendrequests.h"
+#include "../models/Historymessages.h"
 
 
 using namespace drogon;
@@ -62,6 +63,8 @@ public:
     ADD_METHOD_TO(chatpage::deleteGroup,"/user/chat/deleteGroup",Post,Options);
 
     ADD_METHOD_TO(chatpage::uploadAvatar,"/user/chat/uploadAvatar",Post,Options);
+
+    ADD_METHOD_TO(chatpage::getHistoryMessage,"/user/chat/getHistoryMessage",Get,Post,Options);
 
 
   METHOD_LIST_END
@@ -116,7 +119,8 @@ public:
     void uploadAvatar(const HttpRequestPtr& req,  
     std::function<void (const HttpResponsePtr &)> &&callback) const;    
 
-
+    void getHistoryMessage(const HttpRequestPtr& req,  
+    std::function<void (const HttpResponsePtr &)> &&callback) const;  
 private:
   service::UserModel _userModel;
   service::FriendModel _friendModel;

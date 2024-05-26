@@ -53,9 +53,10 @@ public:
             for (const auto& member : it->second) {
                 member->send(message);
             }
-        }else
+        }
+        else
         {
-            try
+             try
             {
                 /* code */
                 auto clientDb=drogon::app().getDbClient();
@@ -66,10 +67,25 @@ public:
                 LOG_ERROR<<"数据库连接失败";
                 return ;
             }
-            
         }
-
     }
+
+
+    void saveOfflineMessage(int id,int toid, const std::string& message)
+    {
+        try
+        {
+            /* code */
+            auto clientDb=drogon::app().getDbClient();
+            auto res = clientDb->execSqlSync("insert into offlinemessages(id,from_id,message) values(?,?,?)",toid,id,message);
+        }
+        catch(const std::exception& e)
+        {
+            LOG_ERROR<<"数据库连接失败";
+            return ;
+        }
+    }
+
                 
     std::unordered_map<int, std::unordered_set<drogon::WebSocketConnectionPtr>> getUserMembers() const {
         //std::unique_lock<std::mutex> lock(mutex_);
@@ -122,6 +138,7 @@ public:
             }
         }
     }
+
 
     std::unordered_map<int, std::unordered_set<drogon::WebSocketConnectionPtr>> getGroupMembers() const {
         //std::unique_lock<std::mutex> lock(mutex_);

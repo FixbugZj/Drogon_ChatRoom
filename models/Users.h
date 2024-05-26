@@ -151,6 +151,7 @@ class Users
     ///Set the value of the column avatarUrl
     void setAvatarurl(const std::string &pAvatarurl) noexcept;
     void setAvatarurl(std::string &&pAvatarurl) noexcept;
+    void setAvatarurlToNull() noexcept;
 
     /**  For column isValid  */
     ///Get the value of the column isValid, returns the default value if the column is null
@@ -159,6 +160,7 @@ class Users
     const std::shared_ptr<int8_t> &getIsvalid() const noexcept;
     ///Set the value of the column isValid
     void setIsvalid(const int8_t &pIsvalid) noexcept;
+    void setIsvalidToNull() noexcept;
 
     /**  For column sex  */
     ///Get the value of the column sex, returns the default value if the column is null
@@ -168,6 +170,7 @@ class Users
     ///Set the value of the column sex
     void setSex(const std::string &pSex) noexcept;
     void setSex(std::string &&pSex) noexcept;
+    void setSexToNull() noexcept;
 
     /**  For column phone  */
     ///Get the value of the column phone, returns the default value if the column is null
@@ -177,6 +180,7 @@ class Users
     ///Set the value of the column phone
     void setPhone(const std::string &pPhone) noexcept;
     void setPhone(std::string &&pPhone) noexcept;
+    void setPhoneToNull() noexcept;
 
     /**  For column salt  */
     ///Get the value of the column salt, returns the default value if the column is null
@@ -186,6 +190,7 @@ class Users
     ///Set the value of the column salt
     void setSalt(const std::string &pSalt) noexcept;
     void setSalt(std::string &&pSalt) noexcept;
+    void setSaltToNull() noexcept;
 
     /**  For column roleId  */
     ///Get the value of the column roleId, returns the default value if the column is null
