@@ -29,44 +29,47 @@ public:
         return instance;
     }
 
-    void addUserToMap(int userId, const drogon::WebSocketConnectionPtr& conn) {
-        //std::lock_guard<std::mutex> lock(mutex_);
+    void addUserToMap(int id,int toid, const drogon::WebSocketConnectionPtr& conn) {
+        std::lock_guard<std::mutex> lock(mutex_);
        //groupMembers_[groupId].insert(conn);
-        userMembers_[userId].insert(conn);
+        userMembers_[id][toid] = conn;
     }
 
-    void removeUserFromMap(int userId, const drogon::WebSocketConnectionPtr& conn) {
-        //std::lock_guard<std::mutex> lock(mutex_);
+    void removeUserFromMap(int userId,int toid, const drogon::WebSocketConnectionPtr& conn) {
+        std::lock_guard<std::mutex> lock(mutex_);
         auto it = userMembers_.find(userId);
         if (it != userMembers_.end()) {
-            it->second.erase(conn);
-            if (it->second.empty()) {
-                userMembers_.erase(it);
+            auto& userConnections = it->second;
+            auto connIt = userConnections.find(toid);
+            if (connIt != userConnections.end()) {
+                userConnections.erase(connIt);
+                if (userConnections.empty()) {
+                    userMembers_.erase(it);
+                }
             }
         }
     }
 
     void broadcastMessageToUser(int id,int toid, const std::string& message) {
-        //std::lock_guard<std::mutex> lock(mutex_);
-        auto it = userMembers_.find(toid);
-        if (it != userMembers_.end()) {
-            for (const auto& member : it->second) {
-                member->send(message);
-            }
+        std::lock_guard<std::mutex> lock(mutex_);
+
+        auto it_to = userMembers_.find(toid);
+
+        if (it_to != userMembers_.end() ) {
+            for(auto &conn : it_to->second){
+                if(conn.first == id)
+                {
+                    conn.second->send(message);
+                }
+                else
+                {
+                    LOG_INFO<<"用户不存在";
+                }
+            }  
         }
         else
         {
-             try
-            {
-                /* code */
-                auto clientDb=drogon::app().getDbClient();
-                auto res = clientDb->execSqlSync("insert into offlinemessages(id,from_id,message) values(?,?,?)",toid,id,message);
-            }
-            catch(const std::exception& e)
-            {
-                LOG_ERROR<<"数据库连接失败";
-                return ;
-            }
+            saveOfflineMessage(id, toid, message);
         }
     }
 
@@ -87,14 +90,14 @@ public:
     }
 
                 
-    std::unordered_map<int, std::unordered_set<drogon::WebSocketConnectionPtr>> getUserMembers() const {
+    std::unordered_map<int, std::unordered_map<int,drogon::WebSocketConnectionPtr>> getUserMembers() const {
         //std::unique_lock<std::mutex> lock(mutex_);
         return userMembers_;
     }
 
 
 private:
-    std::unordered_map<int,std::unordered_set<drogon::WebSocketConnectionPtr>> userMembers_;
+    std::unordered_map<int,std::unordered_map<int,drogon::WebSocketConnectionPtr>> userMembers_;
     std::mutex mutex_;
 
     UserChatManager() = default;

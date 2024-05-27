@@ -60,6 +60,7 @@ public:
 
     void login(std::string &account, std::string &password);
 
+    void registdo(std::string account,std::string &password);
     void registdo(std::string account,std::string &password,std::string &nickname);
 
 

@@ -56,60 +56,38 @@ std::function<void (const HttpResponsePtr &)> &&callback
         LOG_INFO<<account;
         LOG_INFO<<password;
 
-        Mapper<Users> mapper(app().getDbClient());
-        auto userIndb = mapper.findOne({Users::Cols::_account,account});
-
-
-
-        service::UserModel().login(account,password);
-
         auto clientDb=drogon::app().getDbClient();
-        
-
-        int id;
-        std::string nickname;
-        auto res = clientDb->execSqlSync("select id,nickname from users where account = ?",account);
-        for(auto row:res)
+        auto res = clientDb->execSqlSync("select id,nickname from users where account=? and password = ?",account,password);
+        if(res.empty())
         {
-            id = row["id"].as<int>();
-            nickname = row["nickname"].as<std::string>();
-            LOG_INFO<<id;
+            auto resp = HttpResponse::newHttpJsonResponse(data);
+            resp->setStatusCode(k400BadRequest);
+            callback(resp);
         }
+        else
+        {
+            int id;
+            std::string nickname;
+            for(auto row:res)
+            {
+                id = row["id"].as<int>();
+                nickname = row["nickname"].as<std::string>();
+                LOG_INFO<<id;
+            }
+                data["message"] = "ok";
+                data["nickname"] = nickname;
+                //data["token"] = token;
+                data["id"] = id;
 
-
+                auto resp = HttpResponse::newHttpJsonResponse(data);
+                resp->setStatusCode(k200OK);
+                callback(resp);
+        }
         //-------------------------------
-        auto token = utils_m::JWTUtil().createToken(std::to_string(id));
-
-
-        // std::cout << "secret = " << drogon::app().getCustomConfig()["jwt-secret"].asString() << std::endl;
-        // std::cout << "sessionTime = " << drogon::app().getCustomConfig()["session_timeout"].asInt() << std::endl;
-
-
-        data["message"] = "ok";
-        data["nickname"] = nickname;
-        data["token"] = token;
-        data["id"] = id;
-        data["account"] = account;
-        
-        //-------------------------------
-        auto user_id = utils_m::JWTUtil().verifyToken(token);
         //auto user_id = de.get_payload_claim("user_id").as_string();
         //auto account_token = de.get_payload_claim("account").as_string();
-        LOG_INFO<<user_id<<" ";
-
-
         //--------------------------------
 
-
-        auto resp = HttpResponse::newHttpJsonResponse(data);
-        resp->setStatusCode(k200OK);
-    
-        callback(resp);
-
-        auto session=req->session();
-        session->insert("userinfo",userIndb);
-        
-        
     }catch(const std::exception& e)
     {
 
@@ -143,13 +121,13 @@ std::function<void (const HttpResponsePtr &)> &&callback
         
         std::string account = (*jsonBody)["account"].asString();
         std::string password = (*jsonBody)["password"].asString();
-        std::string nickname = (*jsonBody)["nickname"].asString();
+        //std::string nickname = (*jsonBody)["nickname"].asString();
 
         // std::string salt = utils::Cryptopp::generateSalt();
         // std::string hashedPassword = utils::Cryptopp::hashPassword(password + salt);
 
 
-        service::UserModel().registdo(account,password,nickname);
+        service::UserModel().registdo(account,password);
         
         data["message"] = "ok";
         auto resp = HttpResponse::newHttpJsonResponse(data);

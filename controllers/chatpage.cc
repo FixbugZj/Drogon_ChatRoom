@@ -720,7 +720,7 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
         int friendId = (*jsonBody)["friendId"].asInt();
 
         auto clientDb=drogon::app().getDbClient();
-        auto res = clientDb->execSqlSync("delete friendid,id from friends where id=?,friendid=?",id,friendId);
+        auto res = clientDb->execSqlSync("DELETE FROM friends WHERE (id = ? AND friendid = ?) OR (id = ? AND friendid = ?)",id,friendId,friendId,id);
         
         data["message"] = "删除成功";
 
@@ -895,3 +895,5 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
         callback(resp);
     }
 }
+
+

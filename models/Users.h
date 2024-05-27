@@ -57,6 +57,7 @@ class Users
         static const std::string _createTime;
         static const std::string _updateTime;
         static const std::string _state;
+        static const std::string _location;
     };
 
     static const int primaryKeyNumber;
@@ -230,8 +231,18 @@ class Users
     void setState(std::string &&pState) noexcept;
     void setStateToNull() noexcept;
 
+    /**  For column location  */
+    ///Get the value of the column location, returns the default value if the column is null
+    const std::string &getValueOfLocation() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<std::string> &getLocation() const noexcept;
+    ///Set the value of the column location
+    void setLocation(const std::string &pLocation) noexcept;
+    void setLocation(std::string &&pLocation) noexcept;
+    void setLocationToNull() noexcept;
 
-    static size_t getColumnNumber() noexcept {  return 13;  }
+
+    static size_t getColumnNumber() noexcept {  return 14;  }
     static const std::string &getColumnName(size_t index) noexcept(false);
 
     Json::Value toJson() const;
@@ -265,6 +276,7 @@ class Users
     std::shared_ptr<::trantor::Date> createtime_;
     std::shared_ptr<::trantor::Date> updatetime_;
     std::shared_ptr<std::string> state_;
+    std::shared_ptr<std::string> location_;
     struct MetaData
     {
         const std::string colName_;
@@ -276,7 +288,7 @@ class Users
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[13]={ false };
+    bool dirtyFlag_[14]={ false };
   public:
     static const std::string &sqlForFindingByPrimaryKey()
     {
@@ -359,6 +371,11 @@ class Users
         if(!dirtyFlag_[12])
         {
             needSelection=true;
+        }
+        if(dirtyFlag_[13])
+        {
+            sql += "location,";
+            ++parametersCount;
         }
         needSelection=true;
         if(parametersCount > 0)
@@ -445,6 +462,11 @@ class Users
         else
         {
             sql +="default,";
+        }
+        if(dirtyFlag_[13])
+        {
+            sql.append("?,");
+
         }
         if(parametersCount > 0)
         {

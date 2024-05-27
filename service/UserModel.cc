@@ -43,6 +43,28 @@ void service::UserModel::login(std::string &account,
 
 
 
+void service::UserModel::registdo(std::string account,std::string &password)
+{
+    auto clientPtr = drogon::app().getDbClient();
+    auto res = clientPtr->execSqlSync("select account from users where account = ?",account);
+    
+    try{
+        if(res.empty())
+        {   
+            clientPtr->execSqlSync("INSERT INTO users(account,password) VALUES (?,?)",account,password);
+            LOG_ERROR<<"注册成功";
+        }
+        else
+        {
+            LOG_ERROR<<"用户已存在";
+        }
+    }
+    catch(const DrogonDbException& e){
+            LOG_ERROR<<"注册失败";
+    }
+
+}
+
 void service::UserModel::registdo(std::string account,std::string &password,std::string &nickname)
 {
     auto clientPtr = drogon::app().getDbClient();
@@ -78,7 +100,7 @@ void service::UserModel::updateState(const std::string state,int id)
     LOG_ERROR<<"数据库连接成功";
     try{
         auto res = clientPtr->execSqlSync("update users set state = ? where id=? ",state,id);
-        LOG_ERROR<<"更新状态成功";
+        LOG_ERROR<<id<<"  "<<"更新状态成功";
     }
     catch(const DrogonDbException& e){
         LOG_ERROR<<"状态更新失败";

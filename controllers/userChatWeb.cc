@@ -31,29 +31,20 @@ void controllers::userChatWeb::handleNewMessage(const WebSocketConnectionPtr& ws
     
     if (!reader.parse(message, json)) {
         LOG_ERROR << "Failed to parse JSON: " << message;
-        //wsConnPtr->send("解析失败");
         return;
     }
 
     if (!json.isMember("id") || !json["id"].isInt()) {
         LOG_ERROR << "Invalid 'id' field in JSON: " << message;
-        //wsConnPtr->send("Invalid 'id' field in JSON");
         return;
     }
 
     if (!json.isMember("toid") || !json["toid"].isInt()) {
         LOG_ERROR << "Invalid 'toid' field in JSON: " << message;
-        //wsConnPtr->send("Invalid 'toid' field in JSON");
         return;
     }
 
-    // Json::Value msg;    
-    // bool fuck = reader.parse(json["content"].asString(), msg);
-    // if (!fuck) {
-    //     LOG_INFO<<message;
-    //     std::cout << "解析 JSON 失败" << std::endl;
-    //     return ;
-    // }// 从 JSON 对象中读取特定键的值
+
 
     int id = json["id"].asInt();
     int toid = json["toid"].asInt();
@@ -73,12 +64,7 @@ void controllers::userChatWeb::handleNewMessage(const WebSocketConnectionPtr& ws
         return ;
     }
 
-    Json::Value data;
-    data["message"] = "ok";
-    data["id"] = id;
-    data["toid"] = toid;
-    data["message"] = mes;
-    wsConnPtr->sendJson(data);
+
 
 }
 
@@ -86,63 +72,53 @@ void controllers::userChatWeb::handleNewConnection(const HttpRequestPtr &req, co
 {
 
 
-    // auto id = req->getParameter("id");
-    // LOG_INFO<<id<<"  这里61";
-    // // Json::Value data;
-    // // try
-    // // {
-    // //     auto jsonBody=req->getJsonObject();
-    // //     auto id = (*jsonBody)["id"].asString();
+    auto id = req->getParameter("id");
+    auto toid = req->getParameter("toid");
+    global::UserChatManager::getInstance().addUserToMap(std::stoi(id),std::stoi(toid),wsConnPtr);
+    service::UserModel().updateState("online",std::stoi(id));
+    //std::unordered_map<int, std::unordered_set<drogon::WebSocketConnectionPtr>> map =  global::UserChatManager::getInstance().getUserMembers();
 
-    // auto clientDb=drogon::app().getDbClient();
-    // auto res = clientDb->execSqlSync("select id,message,from_id,time from offlinemessages where id=? order by time",std::stoi(id));
-    // if(!res.empty())
-    // {
-    //     for(auto row : res)
-    //     {   
-    //         std::string id = row["id"].as<std::string>();
-    //         std::string from_id = row["from_id"].as<std::string>();
-    //         std::string message= row["message"].as<std::string>();
-    //         std::string time = row["time"].as<std::string>();
-    //         wsConnPtr->send(message);
-    //         clientDb->execSqlSync("delete from offlinemessages where id=? and from_id=? and message =? and time=?",std::stoi(id),std::stoi(from_id),message,time);
-    //     }
-    // }
+
+
+    auto clientDb=drogon::app().getDbClient();
+    auto res = clientDb->execSqlSync("select id,message,from_id,time from offlinemessages where id=? order by time",std::stoi(id));
+    if(!res.empty())
+    {
+        for(auto row : res)
+        {   
+            std::string id = row["id"].as<std::string>();
+            std::string from_id = row["from_id"].as<std::string>();
+            std::string message= row["message"].as<std::string>();
+            std::string time = row["time"].as<std::string>();
+            //wsConnPtr->send(message);
+            //clientDb->execSqlSync("delete from offlinemessages where id=? and from_id=? and message =? and time=?",std::stoi(id),std::stoi(from_id),message,time);
+        }
+    }
 
         
-    // if(!id.empty())
-    // {
-    //     global::UserChatManager::getInstance().addUserToMap(std::stoi(id),wsConnPtr);
-    //     service::UserModel().updateState("online",std::stoi(id));
-    // }
-    // else
-    // {
-    //     LOG_ERROR << "Missing Id parameter in URL";
-    // }
-    // }
 
 }
 
 void controllers::userChatWeb::handleConnectionClosed(const WebSocketConnectionPtr& wsConnPtr)
 {
     // write your application logic here
-    auto userMembers = global::UserChatManager::getInstance().getUserMembers();
-    for(auto &user : userMembers)
-    {
-        auto& members = user.second;
-        auto it = members.find(wsConnPtr);
-        if(it!=members.end())
-        {
-            members.erase(it);
-            service::UserModel().updateState("offline",user.first);
-            if(members.empty())
-            {
-                global::UserChatManager::getInstance().removeUserFromMap(user.first,wsConnPtr);
-                service::UserModel().updateState("offline",user.first);
-            }
-        }
-    }
 
+    // auto userMembers = global::UserChatManager::getInstance().getUserMembers();
+
+    // for(auto &user : userMembers)
+    // {
+    //     auto& members = user.second;
+    //     auto it = members.find(wsConnPtr);
+    //     if(it!=members.end())
+    //     {
+    //         members.erase(it);
+    //         if(members.empty())
+    //         {
+    //             global::UserChatManager::getInstance().removeUserFromMap(user.first,wsConnPtr);
+    //             service::UserModel().updateState("offline",user.first);
+    //         }
+    //     }
+    // }
 }
 
 

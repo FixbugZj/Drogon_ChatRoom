@@ -25,33 +25,35 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
     try
     {
         
-        auto jsonBody = req->getJsonObject();
-        if(!jsonBody)
-        {
-            data["msg"] = "json is empty";
-            return callback(HttpResponse::newHttpJsonResponse(data));
-        }
+        // auto jsonBody = req->getJsonObject();
+        // if(!jsonBody)
+        // {
+        //     data["msg"] = "json is empty";
+        //     return callback(HttpResponse::newHttpJsonResponse(data));
+        // }
 
-        std::string id = (*jsonBody)["id"].asString();
+        std::string id = req->getParameter("id");
         auto clientDb = app().getDbClient();
         auto res = clientDb->execSqlSync("select * from users where id = ?",std::stoi(id));
         if(!res.empty())
         {
             for(auto row:res)
             {
-                std::string id = row["id"].as<std::string>();
+                //std::string id = row["id"].as<std::string>();
                 std::string nickname =  row["nickname"].as<std::string>();
                 std::string account = row["account"].as<std::string>();
                 std::string sex = row["sex"].as<std::string>();
                 std::string phone = row["phone"].as<std::string>();
-                std::string createtime = row["createTime"].as<std::string>();
+                std::string location = row["location"].as<std::string>();
+                //std::string createtime = row["createTime"].as<std::string>();
 
-                data["id"] = id;
+                //data["id"] = id;
                 data["nickname"] = nickname;
                 data["account"] = account;
                 data["sex"] = sex;
                 data["phone"] = phone;
-                data["createtime"] = createtime;
+                data["location"] = location;
+                //data["createtime"] = createtime;
 
 
                 auto resp = HttpResponse::newHttpJsonResponse(data);
@@ -91,44 +93,41 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
             return callback(HttpResponse::newHttpJsonResponse(data));
         }
 
+
         std::string id = (*jsonBody)["Id"].asString();
         std::string nickname =(*jsonBody)["nickname"].asString();
         std::string phone = (*jsonBody)["phone"].asString();
         std::string sex = (*jsonBody)["sex"].asString();
+        std::string location = (*jsonBody)["location"].asString();
+        
 
-
-        auto clientDb = app().getDbClient();
-        auto res = clientDb->execSqlSync("update users set nickname = ?,phone = ?,sex=? where id = ?",nickname,phone,sex,std::stoi(id));
-        if(!res.empty())
+        std::string sexx;
+        if(sex=="0")
         {
-            for(auto row:res)
-            {
-                std::string id = row["id"].as<std::string>();
-                std::string nickname =  row["nickname"].as<std::string>();
-                std::string account = row["account"].as<std::string>();
-                std::string sex = row["sex"].as<std::string>();
-                std::string phone = row["phone"].as<std::string>();
-                std::string createtime = row["createTime"].as<std::string>();
-
-                data["id"] = id;
-                data["nickname"] = nickname;
-                data["account"] = account;
-                data["sex"] = sex;
-                data["phone"] = phone;
-                data["createtime"] = createtime;
-
-
-                auto resp = HttpResponse::newHttpJsonResponse(data);
-                resp->setStatusCode(k200OK);
-                callback(resp);
-            }
-        }else{
-                    data["message"] = "修改失败";
-                    auto resp = HttpResponse::newHttpJsonResponse(data);
-                    resp->setStatusCode(k200OK);
-                    callback(resp);
+            sexx ="男";
+        }
+        else
+        {
+            sexx="女";
         }
 
+        try
+        {
+            auto clientDb = app().getDbClient();
+            auto res = clientDb->execSqlSync("update users set nickname = ?,phone = ?,sex=?,location=? where id = ?",nickname,phone,sexx,location,std::stoi(id));
+
+            data["message"] = "修改成功";
+            auto resp = HttpResponse::newHttpJsonResponse(data);
+            resp->setStatusCode(k200OK);
+            callback(resp);
+        }
+        catch(const std::exception& e)
+        {
+            data["message"] = "修改失败";
+            auto resp = HttpResponse::newHttpJsonResponse(data);
+            resp->setStatusCode(k200OK);
+            callback(resp);
+        }
     }
     catch(const std::exception& e)
     {
