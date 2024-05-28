@@ -29,43 +29,32 @@ public:
         return instance;
     }
 
-    void addUserToMap(int id,int toid, const drogon::WebSocketConnectionPtr& conn) {
+    void addUserToMap(int id, const drogon::WebSocketConnectionPtr& conn) {
         std::lock_guard<std::mutex> lock(mutex_);
        //groupMembers_[groupId].insert(conn);
-        userMembers_[id][toid] = conn;
+        userMembers_.insert(std::make_pair(id,conn));
     }
 
-    void removeUserFromMap(int userId,int toid, const drogon::WebSocketConnectionPtr& conn) {
+    void removeUserFromMap(int userId, const drogon::WebSocketConnectionPtr& conn) {
         std::lock_guard<std::mutex> lock(mutex_);
         auto it = userMembers_.find(userId);
         if (it != userMembers_.end()) {
-            auto& userConnections = it->second;
-            auto connIt = userConnections.find(toid);
-            if (connIt != userConnections.end()) {
-                userConnections.erase(connIt);
-                if (userConnections.empty()) {
-                    userMembers_.erase(it);
-                }
-            }
+            userMembers_.erase(it);
         }
+        else
+        {
+            LOG_INFO<<"该用户已断开连接";
+        }
+        
     }
 
     void broadcastMessageToUser(int id,int toid, const std::string& message) {
         std::lock_guard<std::mutex> lock(mutex_);
 
-        auto it_to = userMembers_.find(toid);
+        auto userConn = userMembers_.find(toid);
 
-        if (it_to != userMembers_.end() ) {
-            for(auto &conn : it_to->second){
-                if(conn.first == id)
-                {
-                    conn.second->send(message);
-                }
-                else
-                {
-                    LOG_INFO<<"用户不存在";
-                }
-            }  
+        if (userConn != userMembers_.end() ) {
+            userConn->second->send(message);
         }
         else
         {
@@ -90,14 +79,14 @@ public:
     }
 
                 
-    std::unordered_map<int, std::unordered_map<int,drogon::WebSocketConnectionPtr>> getUserMembers() const {
+    std::unordered_map<int,drogon::WebSocketConnectionPtr> getUserMembers() const {
         //std::unique_lock<std::mutex> lock(mutex_);
         return userMembers_;
     }
 
 
 private:
-    std::unordered_map<int,std::unordered_map<int,drogon::WebSocketConnectionPtr>> userMembers_;
+    std::unordered_map<int,drogon::WebSocketConnectionPtr> userMembers_;
     std::mutex mutex_;
 
     UserChatManager() = default;

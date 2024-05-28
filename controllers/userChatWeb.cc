@@ -30,17 +30,17 @@ void controllers::userChatWeb::handleNewMessage(const WebSocketConnectionPtr& ws
     Json::Reader reader;
     
     if (!reader.parse(message, json)) {
-        LOG_ERROR << "Failed to parse JSON: " << message;
+        //LOG_ERROR << "Failed to parse JSON: " << message;
         return;
     }
 
     if (!json.isMember("id") || !json["id"].isInt()) {
-        LOG_ERROR << "Invalid 'id' field in JSON: " << message;
+        //LOG_ERROR << "Invalid 'id' field in JSON: " << message;
         return;
     }
 
     if (!json.isMember("toid") || !json["toid"].isInt()) {
-        LOG_ERROR << "Invalid 'toid' field in JSON: " << message;
+        //LOG_ERROR << "Invalid 'toid' field in JSON: " << message;
         return;
     }
 
@@ -73,8 +73,7 @@ void controllers::userChatWeb::handleNewConnection(const HttpRequestPtr &req, co
 
 
     auto id = req->getParameter("id");
-    auto toid = req->getParameter("toid");
-    global::UserChatManager::getInstance().addUserToMap(std::stoi(id),std::stoi(toid),wsConnPtr);
+    global::UserChatManager::getInstance().addUserToMap(std::stoi(id),wsConnPtr);
     service::UserModel().updateState("online",std::stoi(id));
     //std::unordered_map<int, std::unordered_set<drogon::WebSocketConnectionPtr>> map =  global::UserChatManager::getInstance().getUserMembers();
 
@@ -94,8 +93,6 @@ void controllers::userChatWeb::handleNewConnection(const HttpRequestPtr &req, co
             //clientDb->execSqlSync("delete from offlinemessages where id=? and from_id=? and message =? and time=?",std::stoi(id),std::stoi(from_id),message,time);
         }
     }
-
-        
 
 }
 
@@ -119,6 +116,18 @@ void controllers::userChatWeb::handleConnectionClosed(const WebSocketConnectionP
     //         }
     //     }
     // }
+
+    auto userMembers = global::UserChatManager::getInstance().getUserMembers();
+    for(auto it:userMembers)
+    {
+        if(it.second==wsConnPtr)
+        {
+            service::UserModel().updateState("offline",it.first);
+            userMembers.erase(it.first);
+            
+        }
+    }
+
 }
 
 
