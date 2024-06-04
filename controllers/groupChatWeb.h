@@ -2,6 +2,8 @@
 
 #include <drogon/WebSocketController.h>
 #include <string>
+#include <drogon/PubSubService.h>
+
 
 #include "../service/global.h"
 #include "../models/Users.h"
@@ -14,6 +16,12 @@
 using namespace drogon;
 
 
+struct chatRoom{
+
+  int id;
+  std::string chatRoomName;
+
+};
 
 
 namespace controllers
@@ -34,6 +42,10 @@ namespace controllers
     WS_PATH_ADD("/group/chat",Get,Post,Options);
 
     WS_PATH_LIST_END
+    private:
+
+    PubSubService<std::string> chatRooms_;
+
 };
 
 }

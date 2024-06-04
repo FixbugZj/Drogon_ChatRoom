@@ -438,16 +438,33 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
 
         //id , nickname
         int id = (*jsonBody)["id"].asInt();
-        std::string password = (*jsonBody)["password"].asString();
+        std::string oldPassword = (*jsonBody)["oldPassword"].asString();
+        std::string newPassword = (*jsonBody)["newPassword"].asString();
 
         auto clientDb=drogon::app().getDbClient();
-        auto res = clientDb->execSqlSync("update koi.users set password = ? where id = ?",password,id);
+        auto res = clientDb->execSqlSync("select password from users where id = ?",id);
+        for(auto row : res)
+        {
+            std::string passwrod = row["password"].as<std::string>();
+            if(oldPassword == passwrod)
+            {
+                auto res = clientDb->execSqlSync("update koi.users set password = ? where id = ?",newPassword,id);
         
-        data["message"] = "修改成功";
+                data["message"] = "修改成功";
 
-        auto resp = HttpResponse::newHttpJsonResponse(data);
-        resp->setStatusCode(k200OK);
-        callback(resp);
+                auto resp = HttpResponse::newHttpJsonResponse(data);
+                resp->setStatusCode(k200OK);
+                callback(resp);
+            }
+            else
+            {
+                data["message"] = "修改失败旧密码错误";
+
+                auto resp = HttpResponse::newHttpJsonResponse(data);
+                resp->setStatusCode(k200OK);
+                callback(resp);
+            }
+        }
 
     }
     catch(const std::exception& e)
@@ -467,14 +484,15 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
     Json::Value data;
     try
     {
-        auto jsonBody = req->getJsonObject();
-        if(jsonBody==nullptr || jsonBody->empty())
-        {
-            data["msg"] = "json is empty";
-            return callback(HttpResponse::newHttpJsonResponse(data));
-        }
+        // auto jsonBody = req->getJsonObject();
+        // if(jsonBody==nullptr || jsonBody->empty())
+        // {
+        //     data["msg"] = "json is empty";
+        //     return callback(HttpResponse::newHttpJsonResponse(data));
+        // }
 
-        int id = (*jsonBody)["Id"].asInt();
+        
+        auto id = req->getParameter("id");
 
         auto clientPtr = app().getDbClient();
         
@@ -641,15 +659,15 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
 
     try
     {
-        auto jsonBody = req->getJsonObject();
-        if(jsonBody==nullptr || jsonBody->empty())
-        {
-            data["msg"] = "json is empty";
-            return callback(HttpResponse::newHttpJsonResponse(data));
-        }
+        // auto jsonBody = req->getJsonObject();
+        // if(jsonBody==nullptr || jsonBody->empty())
+        // {
+        //     data["msg"] = "json is empty";
+        //     return callback(HttpResponse::newHttpJsonResponse(data));
+        // }
    
 
-        int id = (*jsonBody)["id"].asInt();
+        auto id = req->getParameter("id");
 
         auto clientDb=drogon::app().getDbClient();
 
@@ -766,9 +784,6 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
         //Mapper(clientDb)
         //auto res = clientDb->execSqlSync();
         
-
-
-
         data["message"] = "解散成功";
 
         auto resp = HttpResponse::newHttpJsonResponse(data);
@@ -791,63 +806,37 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
 void controllers::chatpage::uploadAvatar(const HttpRequestPtr& req,  
 std::function<void (const HttpResponsePtr &)> &&callback) const
 {
+
     Json::Value data;
-    try
+    FileUpload fileUpload;
+    
+    if (fileUpload.parse(req) != 0 || fileUpload.getFiles().size() != 1)
     {
-        auto jsonBody = req->getJsonObject();
-
-        if(jsonBody==nullptr || jsonBody->empty())
-        {
-            data["msg"] = "json is empty";
-            return callback(HttpResponse::newHttpJsonResponse(data));
-        }
-
-        //id , nickname
-        if(jsonBody->isMember("imageData"))
-        {
-            auto userId = (*jsonBody)["Id"].asString();
-            auto imageData = (*jsonBody)["imageData"].asString();
-
-            std::string decodedImageData = drogon::utils::base64Decode(imageData);
-
-            std::string avatatPath = "/root/cpp/project/Drogon_ChatRoom/avatar" + userId + ".jpg";
-
-            std::ofstream file(avatatPath,std::ios::binary);
-            file.write(decodedImageData.c_str(),decodedImageData.length());
-            file.close();
-
-            auto clientDb=drogon::app().getDbClient();
-            
-            auto res = clientDb->execSqlSync("insert into users ");
-            
-            data["message"] = "上传成功";
-
-            auto resp = HttpResponse::newHttpJsonResponse(data);
-            resp->setStatusCode(k200OK);
-            callback(resp);
-
-        }
-        else
-        {
-            data["message"] = "imageData field not found in JSON";
-            auto resp = HttpResponse::newHttpJsonResponse(data);
-            resp->setStatusCode(k400BadRequest);
-            callback(resp);
-        }
-        
-    }
-    catch(const std::exception& e)
-    {
-        data["message"] = "上传失败";
-        auto resp = HttpResponse::newHttpJsonResponse(data);
-        resp->setStatusCode(k500InternalServerError);
+        auto resp = HttpResponse::newHttpResponse();
+        resp->setBody("Must only be one file");
+        resp->setStatusCode(k403Forbidden);
         callback(resp);
-
+        return;
     }
+
+    auto &file = fileUpload.getFiles()[0];
+    auto md5 = file.getMd5();
+    auto resp = HttpResponse::newHttpResponse();
+    resp->setBody(
+        "The server has calculated the file's MD5 hash to be " + md5);
+    file.save();
+    LOG_INFO << "The uploaded file has been saved to the ./uploads "
+                "directory";
+    callback(resp);
+    
 
 }
 
 
+
+
+
+//-------通过------
 void controllers::chatpage::getHistoryMessage(const HttpRequestPtr& req,  
 std::function<void (const HttpResponsePtr &)> &&callback) const
 {
@@ -869,7 +858,7 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
         auto clientDb=drogon::app().getDbClient();
 
         Json::Value messageList(Json::arrayValue);
-        auto res = clientDb->execSqlSync("select * from historymessages where id = ? and from_id = ?",std::stoi(toId),std::stoi(userId));
+        auto res = clientDb->execSqlSync("select * from historymessages where (from_id = ? and id = ?) or (from_id = ? and id = ?) ORDER BY time ASC",std::stoi(toId),std::stoi(userId),std::stoi(userId),std::stoi(toId));
         for(auto row : res)
         {
             Json::Value message;

@@ -50,13 +50,13 @@ public:
 
     ADD_METHOD_TO(chatpage::changeUserPassWord,"/user/chat/changeUserPassWord",Post,Options);
 
-    ADD_METHOD_TO(chatpage::getFriendList,"/user/chat/getFriendList",Get,Post,Options);
+    ADD_METHOD_TO(chatpage::getFriendList,"/user/chat/getFriendList",Get,Options);
 
     ADD_METHOD_TO(chatpage::getGroupUserList,"/user/chat/getGroupUserList",Get,Post,Options);
 
     ADD_METHOD_TO(chatpage::changeGroupName,"/user/chat/changeGroupName",Post,Options);
 
-    ADD_METHOD_TO(chatpage::getGroupList,"/user/chat/getGroupList",Get,Post,Options);
+    ADD_METHOD_TO(chatpage::getGroupList,"/user/chat/getGroupList",Get,Options);
     
     ADD_METHOD_TO(chatpage::deleteFriend,"/user/chat/deleteFriend",Post,Options);
 

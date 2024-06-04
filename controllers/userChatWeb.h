@@ -4,6 +4,7 @@
 #include <drogon/HttpResponse.h>
 #include <unordered_map>
 #include <string>
+#include <drogon/PubSubService.h>
 
 #include "chatpage.h"
 
@@ -12,18 +13,11 @@ using namespace drogon;
 
 
 
-struct JsonMessage
-{
-  int id;
-  int toid;
-  std::string message;
-};
-
-struct ChatMessage
-{
-  std::string sender;
-  std::string receiver;
-  std::string message;
+struct UserContext{
+  //std::string friendId;
+  std::string Id;
+  std::string friendId;
+  
 };
 
 
@@ -41,6 +35,7 @@ namespace controllers
     void handleNewConnection(const HttpRequestPtr &,
                                     const WebSocketConnectionPtr&) override;
     void handleConnectionClosed(const WebSocketConnectionPtr&) override;
+                                
     
     WS_PATH_LIST_BEGIN
     // list path definitions here;
@@ -57,7 +52,6 @@ namespace controllers
         response->addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     }
 
-  private:
 
 };
 

@@ -25,52 +25,52 @@ void controllers::groupChatWeb::handleNewMessage(const WebSocketConnectionPtr& w
         std::cout << "解析 JSON 失败" << std::endl;
         return ;
     }
+    std::string chatRoomName = json["chatRoomName"].asString();
+    std::string  mes  = json["message"].asString();
 
-    // Json::Value msg;
-    // bool fuck = reader.parse(json["content"].asString(), msg);
-    // if (!fuck) {
-    //     LOG_INFO<<message;
-    //     std::cout << "解析 JSON 失败" << std::endl;
-    //     return ;
-    // }// 从 JSON 对象中读取特定键的值
+    auto &s = wsConnPtr->getContextRef<chatRoom>();
+    chatRooms_.publish(chatRoomName, mes);
 
 
-    int groupId = json["groupId"].asInt();
-    std::string mes = json["message"].asString();
+
+}
+
+void controllers::groupChatWeb::handleNewConnection(const HttpRequestPtr &req, const WebSocketConnectionPtr& conn)
+{
+    // write your application logic here
+    LOG_DEBUG << "new websocket connection!";
+
+    chatRoom chatroom;
+    chatroom.chatRoomName = req->getParameter("room_name");
+    chatroom.id = chatRooms_.subscribe(chatroom.chatRoomName,
+                                 [conn](const std::string &topic,
+                                        const std::string &message) {
+                                     // Suppress unused variable warning
+                                     (void)topic;
+                                     conn->send(message);
+                                 });
+    conn->setContext(std::make_shared<chatRoom>(std::move(chatroom)));
+
+}
+
+
+void controllers::groupChatWeb::handleConnectionClosed(const WebSocketConnectionPtr& conn)
+{
+    // write your application logic here
+    // auto groupMembers = GroupChatManager::getInstance().getGroupMembers();
+    // for (auto& group : groupMembers) {
+    //     auto& members = group.second;
+    //     auto it = members.find(wsConnPtr);
+    //     if (it != members.end()) {
+    //         members.erase(it);
+    //         if (members.empty()) {
+    //             GroupChatManager::getInstance().removeUserFromGroup(group.first, wsConnPtr);
+    //         }
+    //     }
+    // }
     
-    global::GroupChatManager::getInstance().broadcastMessageToGroup(groupId, mes);
-
-
-
-}
-
-void controllers::groupChatWeb::handleNewConnection(const HttpRequestPtr &req, const WebSocketConnectionPtr& wsConnPtr)
-{
-    // write your application logic here
-    auto groupId = req->getParameter("groupId");
-
-    if (!groupId.empty()) {
-        global::GroupChatManager::getInstance().addUserToGroup(std::stoi(groupId), wsConnPtr);
-    } else {
-        LOG_ERROR << "Missing groupId parameter in URL";
-    }
-
-}
-
-
-void controllers::groupChatWeb::handleConnectionClosed(const WebSocketConnectionPtr& wsConnPtr)
-{
-    // write your application logic here
-    auto groupMembers = GroupChatManager::getInstance().getGroupMembers();
-    for (auto& group : groupMembers) {
-        auto& members = group.second;
-        auto it = members.find(wsConnPtr);
-        if (it != members.end()) {
-            members.erase(it);
-            if (members.empty()) {
-                GroupChatManager::getInstance().removeUserFromGroup(group.first, wsConnPtr);
-            }
-        }
-    }
+    LOG_DEBUG << "websocket closed!";
+    auto &s = conn->getContextRef<chatRoom>();
+    chatRooms_.unsubscribe(s.chatRoomName, s.id);
 
 }

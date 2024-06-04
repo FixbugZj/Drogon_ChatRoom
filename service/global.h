@@ -32,7 +32,14 @@ public:
     void addUserToMap(int id, const drogon::WebSocketConnectionPtr& conn) {
         std::lock_guard<std::mutex> lock(mutex_);
        //groupMembers_[groupId].insert(conn);
+       if(userMembers_.find(id) != userMembers_.end()) 
+       {
+            userMembers_[id]=conn;
+       }
+      else
+      {
         userMembers_.insert(std::make_pair(id,conn));
+      }
     }
 
     void removeUserFromMap(int userId, const drogon::WebSocketConnectionPtr& conn) {
@@ -48,6 +55,25 @@ public:
         
     }
 
+    drogon::WebSocketConnectionPtr getUserConnection(int userId) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if(userMembers_.find(userId) != userMembers_.end()) {
+            return userMembers_[userId];
+        }
+        return nullptr;
+    }
+    
+    int getUserIdFromWebSocket(const drogon::WebSocketConnectionPtr& conn)
+    {
+        auto userMembers = global::UserChatManager::getInstance().getUserMembers();
+        for (const auto& pair : userMembers) {
+        if (pair.second == conn) {
+            return pair.first;
+        }
+        }
+        return -1; // 或者其他表示未找到的值
+    }
+
     void broadcastMessageToUser(int id,int toid, const std::string& message) {
         std::lock_guard<std::mutex> lock(mutex_);
 
@@ -55,6 +81,7 @@ public:
 
         if (userConn != userMembers_.end() ) {
             userConn->second->send(message);
+            LOG_INFO<<"send message success";
         }
         else
         {
