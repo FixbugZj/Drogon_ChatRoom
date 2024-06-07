@@ -39,11 +39,11 @@ namespace controllers
     WS_PATH_LIST_BEGIN
     // list path definitions here;
     // WS_PATH_ADD("/path", "filter1", "filter2", ...);
-    WS_PATH_ADD("/group/chat",Get,Post,Options);
+    WS_PATH_ADD("/user/chat/969",Get,Post,Options);
 
     WS_PATH_LIST_END
     private:
-
+    std::vector<int> useridVec ;
     PubSubService<std::string> chatRooms_;
 
 };

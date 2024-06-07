@@ -112,7 +112,7 @@ class GroupModel
 {
 public:
 
-    void createGroup(std::string groupname,std::string groupdesc);
+    int createGroup(std::string groupname,std::string groupdesc,int id);
     void addGroup(int userid,int groupid,std::string role);
     // 查询用户所在群组信息
     std::vector<Group> queryGroups(int userid);

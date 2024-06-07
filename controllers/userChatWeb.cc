@@ -34,45 +34,90 @@ void controllers::userChatWeb::handleNewMessage(const WebSocketConnectionPtr& ws
     Json::Value json;
     Json::Reader reader;
     
-    
-    if (!reader.parse(message, json)) {
-    LOG_ERROR << "Failed to parse JSON: " << message;
-    }
-
-    if (!json.isMember("id") ) {
-    LOG_ERROR << "Invalid 'id' field in JSON: " << message;
-    return ;
-    }
-
-    if (!json.isMember("toid") ) {
-        LOG_ERROR << "Invalid 'toid' field in JSON: " << message;
-        return ;
-    }
-
-    try
+    if(reader.parse(message, json))
     {
-        int  id = json["id"].asInt();
-        int  toid  = json["toid"].asInt();
-        std::string  mes = json["message"].asString();
-        
-        try{
-            global::UserChatManager::getInstance().broadcastMessageToUser(id,toid,mes);
-            auto clientDb=drogon::app().getDbClient();
-            auto res = clientDb->execSqlSync("insert into historymessages(id,from_id,message) values(?,?,?)",toid,id,mes);
-  
-        }catch(const std::exception& e)
+
+        if(json.isMember("id") && json.isMember("toid"))
         {
-            LOG_INFO<<"error";
+            try
+            {
+                int  id = json["id"].asInt();
+                int  toid  = json["toid"].asInt();
+                std::string  mes = json["message"].asString();
+                                            
+
+                try{
+                    global::UserChatManager::getInstance().broadcastMessageToUser(id,toid,mes);
+                    LOG_INFO<<mes;
+                    auto clientDb=drogon::app().getDbClient();
+                    auto res = clientDb->execSqlSync("insert into historymessages(id,from_id,message) values(?,?,?)",toid,id,mes);
+        
+                }catch(const std::exception& e)
+                {
+                    LOG_INFO<<"error";
+                }
+                
+            
+                
+            }
+            catch(const std::exception& e)
+            {
+                LOG_INFO<<e.what();
+            }
+            
         }
-        
-       
-        
-    }
-    catch(const std::exception& e)
+        else if(json.isMember("id") && json.isMember("groupid"))
+        {
+            try
+            {
+                int  id = json["id"].asInt();
+                int  groupid  = json["groupid"].asInt();
+                std::string  mes = json["message"].asString();
+                useridVec.clear();
+
+                try{
+                    auto dbClient = app().getDbClient();
+                    auto res = dbClient->execSqlSync("select id from groupuser where groupid = ? and id != ?",groupid,id);
+                    for(auto row : res)
+                    {
+                        int id = row["id"].as<int>();
+                        LOG_INFO<<id;
+                        useridVec.push_back(id);
+                    }
+
+
+                    for(int id: useridVec)
+                    {
+                        auto userMap = global::UserChatManager::getInstance().getUserMembers();
+                        auto it = userMap.find(id);
+                        if(it!=userMap.end())
+                        {
+                            it->second->send(mes);
+                            LOG_INFO<<mes;
+                        }
+                    }
+                    
+                    
+                }catch(const std::exception& e)
+                {
+                    LOG_INFO<<"error";
+                }
+            }
+            catch(const std::exception& e)
+            {
+                LOG_INFO<<e.what();
+            }
+        }
+        else
+        {
+            LOG_INFO<<"----------";
+        }
+    }else
     {
-        LOG_INFO<<e.what();
+        LOG_INFO<<"-----------";
+
+
     }
-    
 
 }
 

@@ -52,6 +52,9 @@ namespace controllers
         response->addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     }
 
+private:
+    std::vector<int> useridVec ;
+
 
 };
 

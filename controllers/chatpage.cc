@@ -307,17 +307,26 @@ std::function<void (const HttpResponsePtr &)> &&callback
             data["msg"] = "json is empty";
             return callback(HttpResponse::newHttpJsonResponse(data));
         }
-        
+
+        std::string id = (*jsonBody)["id"].asString();
         std::string groupname = (*jsonBody)["groupname"].asString();
         std::string groupdesc = (*jsonBody)["groupdesc"].asString();
-        service::GroupModel().createGroup(groupname,groupdesc);
-
-        data["msg"] = "create success";
-
-        auto resp = HttpResponse::newHttpJsonResponse(data);
-        resp->setStatusCode(k200OK);
-        callback(resp);
-
+        
+        int groupid = service::GroupModel().createGroup(groupname,groupdesc,std::stoi(id));
+        if(groupid == 0)
+        {
+            data["msg"] = "该群组已存在";
+            auto resp = HttpResponse::newHttpJsonResponse(data);
+            resp->setStatusCode(k404NotFound);
+            callback(resp);
+        }
+        else{
+            data["groupid"] = groupid;
+            data["msg"] = "create success";
+            auto resp = HttpResponse::newHttpJsonResponse(data);
+            resp->setStatusCode(k200OK);
+            callback(resp);
+        }
     }catch(const std::exception& e)
     {
         data["msg"] = "create error";
@@ -556,17 +565,17 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
     Json::Value data;
     try
     {
-        auto jsonBody = req->getJsonObject();
-        if(jsonBody==nullptr || jsonBody->empty())
-        {
-            data["msg"] = "json is empty";
-            return callback(HttpResponse::newHttpJsonResponse(data));
-        }
+        // auto jsonBody = req->getJsonObject();
+        // if(jsonBody==nullptr || jsonBody->empty())
+        // {
+        //     data["msg"] = "json is empty";
+        //     return callback(HttpResponse::newHttpJsonResponse(data));
+        // }
 
         //id , nickname
         //int id = (*jsonBody)["Id"].asInt();
-        int groupId = (*jsonBody)["groupId"].asInt();
-
+        auto groupid = req->getParameter("groupid");
+        int groupId = std::stoi(groupid);
         auto clientPtr = app().getDbClient();
 
         //-----------------------
@@ -577,27 +586,40 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
         for(auto it :vec)
         {
             auto res = clientPtr->execSqlSync("select users.id,users.nickname,users.phone,users.account from users where id = ?",it);
-            for(auto row :res)
-            {   
-                Json::Value user;
-                user["id"] = row["id"].as<std::string>();
-                user["account"] = row["account"].as<std::string>();
-                user["nickname"] = row["nickname"].as<std::string>();  
-                user["phone"] = row["phone"].as<std::string>();
+            if(!res.empty())
+            {
+                for(auto row :res)
+                {   
+                    Json::Value user;
+                    user["id"] = row["id"].as<std::string>();
+                    user["account"] = row["account"].as<std::string>();
+                    user["nickname"] = row["nickname"].as<std::string>();  
+                    user["phone"] = row["phone"].as<std::string>();
 
-                userList.append(user);
+                    userList.append(user);
+                }
+                data["message"] = "ok";
+                data["users"] = userList;
+                auto resp = HttpResponse::newHttpJsonResponse(data);
+                resp->setStatusCode(k200OK);
+                callback(resp);
             }
+            else
+            {
+                data["message"] = "该群组不存在";
+                auto resp = HttpResponse::newHttpJsonResponse(data);
+                resp->setStatusCode(k400BadRequest);
+                callback(resp);
+            }
+            
 
         }
 
-        data["message"] = "ok";
-        data["users"] = userList;
+       
 
         //data["message"] = "修改成功";
 
-        auto resp = HttpResponse::newHttpJsonResponse(data);
-        resp->setStatusCode(k200OK);
-        callback(resp);
+        
 
     }
     catch(const std::exception& e)
@@ -693,7 +715,7 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
                 Json::Value group;
                 group["id"] = row["groupid"].as<std::string>();
                 group["nickname"] = row["groupname"].as<std::string>();  
-                //group["groupdesc"] = row["groupdesc"].as<std::string>();
+                group["groupdesc"] = row["groupdesc"].as<std::string>();
 
                 groupList.append(group);
             }

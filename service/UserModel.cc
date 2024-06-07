@@ -168,21 +168,6 @@ std::vector<service::User> service::FriendModel::query(int id) //返回好友列
 
 }
 
-
-void service::GroupModel::createGroup(std::string groupname,std::string groupdesc)
-{
-    auto clientPtr = drogon::app().getDbClient();
-    try{
-        auto res = clientPtr->execSqlSync("insert into allgroup(groupname, groupdesc) values(?, ?)",groupname,groupdesc);
-        LOG_ERROR<<"创建成功";
-    }
-    catch(const DrogonDbException& e){
-        LOG_ERROR<<"创建失败";
-    }
-
-
-}
-
 void service::GroupModel::addGroup(int id,int groupid,std::string role)
 {
     auto clientPtr = drogon::app().getDbClient();
@@ -193,10 +178,37 @@ void service::GroupModel::addGroup(int id,int groupid,std::string role)
     catch(const DrogonDbException& e){
         LOG_ERROR<<"加入失败";
     }
-
-
 }
 
+int service::GroupModel::createGroup(std::string groupname,std::string groupdesc,int id)
+{
+    auto clientPtr = drogon::app().getDbClient();
+    //auto transPtr=clientPtr->newTransaction();
+    int groupid;
+    try{
+        clientPtr->execSqlSync("insert into allgroup(groupname, groupdesc) values(?, ?)",groupname,groupdesc);
+        auto res = clientPtr->execSqlSync("SELECT LAST_INSERT_ID()");      
+        if(!res.empty())
+        {        
+            for(auto it:res)
+            {     
+                groupid = it["LAST_INSERT_ID()"].as<int>();  
+                try
+                {
+                clientPtr->execSqlSync("insert into groupuser(groupid,id,grouprole) values(?, ?, ?)",groupid,id,"creator");   
+                }
+                catch(const std::exception& e)
+                {
+                    std::cerr << e.what() << '\n';
+                } 
+            }
+        }
+    return groupid;
+    }
+    catch(const DrogonDbException& e){
+        LOG_ERROR<<"创建失败,该群组已存在";
+    }
+}
 
 //根据指定groupid 查询群组用户id列表 ，除userid自己，主要用户群聊业务给群组其它成员群发消息
 std::vector<int> service::GroupModel::queryGroupUsers(int id, int groupid)
@@ -230,13 +242,11 @@ std::vector<int> service::GroupModel::queryGroupUsers( int groupid)
 
     std::vector<int> idVec;
     try{
-        auto res = clientPtr->execSqlSync("select id from groupuser where groupid = ? ",groupid);        //and id = ?  ,id
-        LOG_ERROR<<"查询成功";
+        auto res = clientPtr->execSqlSync("select id from groupuser where groupid = ? ",groupid);
 
         for(auto row:res)
         {
             int id = row["id"].as<int>();
-            LOG_ERROR<<id;
             idVec.push_back(id);
         }
 

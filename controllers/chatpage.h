@@ -66,7 +66,7 @@ public:
 
     ADD_METHOD_TO(chatpage::getHistoryMessage,"/user/chat/getHistoryMessage",Get,Post,Options);
 
-
+    
   METHOD_LIST_END
     // your declaration of processing function maybe like this:
     // void get(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback, int p1, std::string p2);
