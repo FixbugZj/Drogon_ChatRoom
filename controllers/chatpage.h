@@ -62,9 +62,11 @@ public:
 
     ADD_METHOD_TO(chatpage::deleteGroup,"/user/chat/deleteGroup",Post,Options);
 
-    ADD_METHOD_TO(chatpage::uploadAvatar,"/user/chat/uploadAvatar",Post,Options);
+    ADD_METHOD_TO(chatpage::uploadFile,"/user/chat/uploadFile",Post,Options);
 
     ADD_METHOD_TO(chatpage::getHistoryMessage,"/user/chat/getHistoryMessage",Get,Post,Options);
+
+    ADD_METHOD_TO(chatpage::getGroupHistoryMessage,"/user/chat/getGroupHistoryMessage",Get,Options);
 
     
   METHOD_LIST_END
@@ -116,16 +118,19 @@ public:
     void deleteGroup(const HttpRequestPtr& req,  
     std::function<void (const HttpResponsePtr &)> &&callback) const;
 
-    void uploadAvatar(const HttpRequestPtr& req,  
+    void uploadFile(const HttpRequestPtr& req,  
     std::function<void (const HttpResponsePtr &)> &&callback) const;    
 
     void getHistoryMessage(const HttpRequestPtr& req,  
     std::function<void (const HttpResponsePtr &)> &&callback) const;  
+
+    void getGroupHistoryMessage(const HttpRequestPtr& req,  
+    std::function<void (const HttpResponsePtr &)> &&callback) const;
+
 private:
   service::UserModel _userModel;
   service::FriendModel _friendModel;
   service::GroupModel _groupModel;
-
 
 };
 }

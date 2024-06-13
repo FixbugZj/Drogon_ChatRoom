@@ -142,6 +142,4 @@ std::function<void (const HttpResponsePtr &)> &&callback
         callback(resp); 
 
     }
-    
-    
 }

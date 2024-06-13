@@ -74,7 +74,7 @@ std::function<void (const HttpResponsePtr &)> &&callback
             return callback(HttpResponse::newHttpJsonResponse(data));
         }
 
-        int id = (*jsonBody)["Id"].asInt();
+        int id = (*jsonBody)["id"].asInt();
         int friendid = (*jsonBody)["friendId"].asInt();
         auto clientDb = app().getDbClient();
 
@@ -250,7 +250,7 @@ std::function<void (const HttpResponsePtr &)> &&callback
         }
 
         int id = (*jsonBody)["id"].asInt();
-        int groupid = (*jsonBody)["groupid"].asInt();
+        int groupid = (*jsonBody)["groupId"].asInt();
         std::string role = "normal";
 
         auto clientDb = app().getDbClient();
@@ -309,8 +309,8 @@ std::function<void (const HttpResponsePtr &)> &&callback
         }
 
         std::string id = (*jsonBody)["id"].asString();
-        std::string groupname = (*jsonBody)["groupname"].asString();
-        std::string groupdesc = (*jsonBody)["groupdesc"].asString();
+        std::string groupname = (*jsonBody)["groupName"].asString();
+        std::string groupdesc = (*jsonBody)["groupDesc"].asString();
         
         int groupid = service::GroupModel().createGroup(groupname,groupdesc,std::stoi(id));
         if(groupid == 0)
@@ -614,13 +614,7 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
             
 
         }
-
-       
-
         //data["message"] = "修改成功";
-
-        
-
     }
     catch(const std::exception& e)
     {
@@ -681,55 +675,75 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
 
     try
     {
-        // auto jsonBody = req->getJsonObject();
-        // if(jsonBody==nullptr || jsonBody->empty())
-        // {
-        //     data["msg"] = "json is empty";
-        //     return callback(HttpResponse::newHttpJsonResponse(data));
-        // }
-   
-
         auto id = req->getParameter("id");
-
         auto clientDb=drogon::app().getDbClient();
 
+
         Json::Value groupList(Json::arrayValue);
+        Json::Value userList(Json::arrayValue);
 
-        std::vector<int> vec;
-
+        std::vector<int> userVec;
+        std::vector<int> groupVec;
         {
             auto res = clientDb->execSqlSync("select groupid from groupuser where id = ? ",id);
             for(auto row : res)
             {   
-            int groupid = row["groupid"].as<int>();
+                int groupid = row["groupid"].as<int>();
 
-            vec.push_back(groupid);
+                groupVec.push_back(groupid);
             }
         }
 
-        for(auto it :vec)
+
+        for(auto it :groupVec)
         {
+            userList.clear();
+            userVec.clear();
+            userVec = service::GroupModel().queryGroupUsers(it);
+            for(auto userId : userVec)
+            {
+                auto res = clientDb->execSqlSync("select users.id,users.nickname,users.phone,users.account from users where id = ?",userId);
+                if(!res.empty())
+                {
+                    for(auto row :res)
+                    {   
+                        Json::Value user;
+                        user["groupid"] = it;
+                        user["id"] = row["id"].as<std::string>();
+                        user["account"] = row["account"].as<std::string>();
+                        user["nickname"] = row["nickname"].as<std::string>();  
+                        user["phone"] = row["phone"].as<std::string>();
+                        userList.append(user);
+                    }
+                }
+            }
+
+
             auto res = clientDb->execSqlSync("select * from allgroup  where groupid=?",it);
             for(auto row :res)
-            {   
+            {
+                userVec = service::GroupModel().queryGroupUsers(it);
                 Json::Value group;
                 group["id"] = row["groupid"].as<std::string>();
                 group["nickname"] = row["groupname"].as<std::string>();  
                 group["groupdesc"] = row["groupdesc"].as<std::string>();
-
+                group["userList"] = userList;
                 groupList.append(group);
             }
 
         }
 
-        data["message"] = "查询成功";
+
+        
         data["groups"] = groupList;
+        data["message"] = "查询成功";
         auto resp = HttpResponse::newHttpJsonResponse(data);
         resp->setStatusCode(k200OK);
         callback(resp);
     }
     catch(const std::exception& e)
     {
+        LOG_INFO<<e.what();
         data["message"] = "查询失败";
         auto resp = HttpResponse::newHttpJsonResponse(data);
         resp->setStatusCode(k500InternalServerError);
@@ -825,13 +839,13 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
 }
 
 
-void controllers::chatpage::uploadAvatar(const HttpRequestPtr& req,  
+void controllers::chatpage::uploadFile(const HttpRequestPtr& req,  
 std::function<void (const HttpResponsePtr &)> &&callback) const
 {
 
     Json::Value data;
     FileUpload fileUpload;
-    
+
     if (fileUpload.parse(req) != 0 || fileUpload.getFiles().size() != 1)
     {
         auto resp = HttpResponse::newHttpResponse();
@@ -865,15 +879,7 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
     Json::Value data;
     try
     {
-        // auto jsonBody = req->getJsonObject();
-
-        // if(jsonBody==nullptr || jsonBody->empty())
-        // {
-        //     data["msg"] = "json is empty";
-        //     return callback(HttpResponse::newHttpJsonResponse(data));
-        // }
-
-        //id , nickname
+        
       
         auto userId = req->getParameter("Id");
         auto toId = req->getParameter("toId");
@@ -908,3 +914,46 @@ std::function<void (const HttpResponsePtr &)> &&callback) const
 }
 
 
+void controllers::chatpage::getGroupHistoryMessage(const HttpRequestPtr& req,  
+std::function<void (const HttpResponsePtr &)> &&callback) const
+{
+    Json::Value data;
+    try
+    { 
+        auto userId = req->getParameter("Id");
+        auto groupId = req->getParameter("groupId");
+        auto clientDb=drogon::app().getDbClient();
+
+        Json::Value messageList(Json::arrayValue);
+
+        auto res = clientDb->execSqlSync("SELECT * FROM grouphistorymessages  WHERE groupId = ? ORDER BY time ASC",std::stoi(groupId));
+        for(auto row : res)
+        {
+
+            Json::Value message;
+            //message["id"] = row["id"].as<std::string>();
+            message["groupId"] = row["groupId"].as<std::string>();
+            message["id"] = row["id"].as<std::string>();
+            message["from_id"] = row["from_id"].as<std::string>();
+            message["message"] = row["message"].as<std::string>();
+            message["time"] = row["time"].as<std::string>();
+
+            messageList.append(message);
+        }
+             
+        data["message"] = "ok";
+        data["messageList"] = messageList;
+
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k200OK);
+        callback(resp);
+    }
+    catch(const std::exception& e)
+    {
+        data["message"] = "查询失败";
+        auto resp = HttpResponse::newHttpJsonResponse(data);
+        resp->setStatusCode(k500InternalServerError);
+        callback(resp);
+    }
+
+}

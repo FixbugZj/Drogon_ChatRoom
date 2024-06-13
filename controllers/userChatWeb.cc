@@ -68,6 +68,7 @@ void controllers::userChatWeb::handleNewMessage(const WebSocketConnectionPtr& ws
         }
         else if(json.isMember("id") && json.isMember("groupid"))
         {
+            LOG_INFO<<"groupchat";
             try
             {
                 int  id = json["id"].asInt();
@@ -80,9 +81,10 @@ void controllers::userChatWeb::handleNewMessage(const WebSocketConnectionPtr& ws
                     auto res = dbClient->execSqlSync("select id from groupuser where groupid = ? and id != ?",groupid,id);
                     for(auto row : res)
                     {
-                        int id = row["id"].as<int>();
+                        
+                        int userid = row["id"].as<int>();
                         LOG_INFO<<id;
-                        useridVec.push_back(id);
+                        useridVec.push_back(userid);
                     }
 
 
@@ -93,10 +95,10 @@ void controllers::userChatWeb::handleNewMessage(const WebSocketConnectionPtr& ws
                         if(it!=userMap.end())
                         {
                             it->second->send(mes);
-                            LOG_INFO<<mes;
                         }
                     }
-                    
+                dbClient->execSqlSync("insert into grouphistorymessages(id,from_id,message,groupid) values(?,?,?,?)",id,json["id"].asInt(),mes,groupid);
+
                     
                 }catch(const std::exception& e)
                 {
@@ -115,8 +117,7 @@ void controllers::userChatWeb::handleNewMessage(const WebSocketConnectionPtr& ws
     }else
     {
         LOG_INFO<<"-----------";
-
-
+        return;
     }
 
 }

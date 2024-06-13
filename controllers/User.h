@@ -26,6 +26,8 @@ public:
     ADD_METHOD_TO(User::loginPage, "/login", Get,Options); 
     ADD_METHOD_TO(User::doLogin,"/login",Post,Options);
     ADD_METHOD_TO(User::doregister,"/register",Post,Options);
+
+
   
   METHOD_LIST_END
     // your declaration of processing function maybe like this:
@@ -41,6 +43,8 @@ public:
 
     void doregister(const HttpRequestPtr& req, 
     std::function<void (const HttpResponsePtr &)> &&callback) const;
+
+
     
 };
 
